@@ -204,6 +204,11 @@ namespace RockWeb.Blocks.Fundraising
 
                     groupMember.LoadAttributes( rockContext );
                     groupMember.Group.LoadAttributes( rockContext );
+                    var financialAccount = new FinancialAccountService( rockContext ).Get( groupMember.Group.GetAttributeValue( "FinancialAccount" ).AsGuid() );
+                    if ( financialAccount != null )
+                    {
+                        queryParams.Add( "AccountIds", financialAccount.Id.ToString() );
+                    }
 
                     if ( groupMember.Group.GetAttributeValue( "CapFundraisingAmount" ).AsBoolean() )
                     {
@@ -225,7 +230,7 @@ namespace RockWeb.Blocks.Fundraising
                         var amountLeft = individualFundraisingGoal - contributionTotal;
                         queryParams.Add( "AmountLimit", amountLeft.ToString() );
                     }
-                    
+
                     NavigateToLinkedPage( "TransactionEntryPage", queryParams );
                 }
             }

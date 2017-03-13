@@ -263,15 +263,6 @@ namespace RockWeb.Blocks.Fundraising
             notesCommentsTimeline.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             btnCommentsTab.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             btnCommentsTab.Text = string.Format( "Comments ({0})", notesCommentsTimeline.NoteCount );
-
-            if ( this.GetAttributeValue( "EnableDebug" ).AsBoolean() )
-            {
-                lLavaHelp.Text = mergeFields.lavaDebugInfo( rockContext );
-            }
-            else
-            {
-                lLavaHelp.Text = string.Empty;
-            }
         }
 
         /// <summary>
