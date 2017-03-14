@@ -40,10 +40,10 @@ namespace RockWeb.Blocks.Finance
     [Category( "Finance" )]
     [Description( "Used to assign an Entity to a Transaction Detail record" )]
 
-    [EntityTypeField( "EntityTypeId", category: "CustomSetting" )]
+    [EntityTypeField( "EntityTypeGuid", category: "CustomSetting" )]
     [TextField( "EntityTypeQualifierColumn", category: "CustomSetting" )]
     [TextField( "EntityTypeQualifierValue", category: "CustomSetting" )]
-    [DefinedValueField( Rock.SystemGuid.DefinedType.FINANCIAL_TRANSACTION_TYPE, "TransactionTypeId", category: "CustomSetting" )]
+    [DefinedValueField( Rock.SystemGuid.DefinedType.FINANCIAL_TRANSACTION_TYPE, "TransactionTypeGuid", category: "CustomSetting" )]
     public partial class TransactionEntityMatching : RockBlockCustomSettings
     {
         /// <summary>
@@ -56,10 +56,10 @@ namespace RockWeb.Blocks.Finance
         {
             get
             {
-                int? entityTypeId = this.GetAttributeValue( "EntityTypeId" ).AsIntegerOrNull();
-                if ( entityTypeId.HasValue )
+                Guid? entityTypeGuid = this.GetAttributeValue( "EntityTypeGuid" ).AsGuidOrNull();
+                if ( entityTypeGuid.HasValue )
                 {
-                    return EntityTypeCache.Read( entityTypeId.Value );
+                    return EntityTypeCache.Read( entityTypeGuid.Value );
                 }
                 else
                 {
@@ -401,10 +401,16 @@ namespace RockWeb.Blocks.Finance
                 financialTransactionDetail.EntityTypeId = _transactionEntityType.Id;
                 financialTransactionDetail.EntityId = entityId;
 
-                int? blockTransactionTypeId = this.GetAttributeValue( "TransactionTypeId" ).AsIntegerOrNull();
-                if ( blockTransactionTypeId.HasValue && blockTransactionTypeId != financialTransactionDetail.Transaction.TransactionTypeValueId )
+                DefinedValueCache blockTransactionType = null;
+                Guid? blockTransactionTypeGuid = this.GetAttributeValue( "TransactionTypeGuid" ).AsGuidOrNull();
+                if ( blockTransactionTypeGuid.HasValue )
                 {
-                    financialTransactionDetail.Transaction.TransactionTypeValueId = blockTransactionTypeId.Value;
+                    blockTransactionType = DefinedValueCache.Read( blockTransactionTypeGuid.Value );
+                }
+                
+                if ( blockTransactionType != null && blockTransactionType.Id != financialTransactionDetail.Transaction.TransactionTypeValueId )
+                {
+                    financialTransactionDetail.Transaction.TransactionTypeValueId = blockTransactionType.Id;
                     var lTransactionType = phTableRows.ControlsOfTypeRecursive<LiteralControl>().Where( a => a.ID == "lTransactionType_" + financialTransactionDetail.Id.ToString() ).FirstOrDefault();
                     if ( lTransactionType != null )
                     {
@@ -492,7 +498,15 @@ namespace RockWeb.Blocks.Finance
 
             ddlTransactionType.DefinedTypeId = DefinedTypeCache.Read( Rock.SystemGuid.DefinedType.FINANCIAL_TRANSACTION_TYPE.AsGuid() ).Id;
 
-            ddlTransactionType.SetValue( this.GetAttributeValue( "TransactionTypeId" ).AsIntegerOrNull() );
+            DefinedValueCache blockTransactionType = null;
+            Guid? blockTransactionTypeGuid = this.GetAttributeValue( "TransactionTypeGuid" ).AsGuidOrNull();
+            if ( blockTransactionTypeGuid.HasValue )
+            {
+                blockTransactionType = DefinedValueCache.Read( blockTransactionTypeGuid.Value );
+            }
+
+            ddlTransactionType.SetValue( blockTransactionType != null ? blockTransactionType.Id : (int?)null );
+
             var rockContext = new RockContext();
 
             gtpGroupType.GroupTypes = new GroupTypeService( rockContext ).Queryable().OrderBy( a => a.Order ).ThenBy( a => a.Name ).AsNoTracking().ToList();
@@ -510,10 +524,16 @@ namespace RockWeb.Blocks.Finance
                 ddlDefinedTypePicker.Items.Add( new ListItem( definedType.Name, definedType.Id.ToString() ) );
             }
 
-            var entityTypeId = this.GetAttributeValue( "EntityTypeId" ).AsIntegerOrNull();
+            var entityTypeGuid = this.GetAttributeValue( "EntityTypeGuid" ).AsGuidOrNull();
             var entityTypeIdGroupMember = EntityTypeCache.GetId<GroupMember>();
             etpEntityType.EntityTypes = new EntityTypeService( rockContext ).Queryable().Where( a => ( a.IsEntity && a.SingleValueFieldTypeId.HasValue ) || ( a.Id == entityTypeIdGroupMember ) ).OrderBy( t => t.FriendlyName ).AsNoTracking().ToList();
-            etpEntityType.SetValue( entityTypeId );
+
+            if ( entityTypeGuid.HasValue )
+            {
+                var entityType = EntityTypeCache.Read( entityTypeGuid.Value );
+                etpEntityType.SetValue( entityType != null ? entityType.Id : (int?)null );
+            }
+
             UpdateControlsForEntityType();
 
             tbEntityTypeQualifierColumn.Text = this.GetAttributeValue( "EntityTypeQualifierColumn" );
@@ -532,8 +552,27 @@ namespace RockWeb.Blocks.Finance
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void mdSettings_SaveClick( object sender, EventArgs e )
         {
-            this.SetAttributeValue( "EntityTypeId", etpEntityType.SelectedEntityTypeId.ToString() );
-            this.SetAttributeValue( "TransactionTypeId", ddlTransactionType.SelectedValue );
+            Guid? entityTypeGuid = null;
+            if ( etpEntityType.SelectedEntityTypeId.HasValue )
+            {
+                var entityType = EntityTypeCache.Read( etpEntityType.SelectedEntityTypeId.Value );
+                if (entityType != null)
+                {
+                    entityTypeGuid = entityType.Guid;
+                }
+            }
+
+            this.SetAttributeValue( "EntityTypeGuid", entityTypeGuid.ToString() );
+
+            DefinedValueCache blockTransactionType = null;
+            int? selectedTransactionTypeId = ddlTransactionType.SelectedValue.AsIntegerOrNull();
+            if ( selectedTransactionTypeId.HasValue )
+            {
+                blockTransactionType = DefinedValueCache.Read( selectedTransactionTypeId.Value );
+            }
+
+
+            this.SetAttributeValue( "TransactionTypeGuid", blockTransactionType != null ? blockTransactionType.Guid.ToString() : null );
             this.SetAttributeValue( "EntityTypeQualifierColumn", tbEntityTypeQualifierColumn.Text );
 
             if ( ddlDefinedTypePicker.Visible )
