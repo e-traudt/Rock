@@ -308,36 +308,6 @@ TransactionAcountDetails: [
                 BindSavedAccounts( rockContext, true );
             }
 
-            // Resolve the text field merge fields
-            var mergeFields = LavaHelper.GetCommonMergeFields( this.RockPage );
-
-            using ( var rockContext = new RockContext() )
-            {
-                IEntity transactionEntity = GetTransactionEntity();
-                if ( transactionEntity != null )
-                {
-                    mergeFields.Add( "TransactionEntity", transactionEntity );
-                    var transactionEntityTypeId = transactionEntity.TypeId;
-
-                    // include any Transactions that are associated with the TransactionEntity for Lava
-                    var transactionEntityTransactions = new FinancialTransactionService( rockContext ).Queryable()
-                        .Include( a => a.TransactionDetails )
-                        .Where( a => a.TransactionDetails.Any( d => d.EntityTypeId.HasValue && d.EntityTypeId == transactionEntityTypeId && d.EntityId == transactionEntity.Id ) )
-                        .AsNoTracking().ToList();
-
-                    var transactionEntityTransactionsTotal = transactionEntityTransactions.SelectMany( d => d.TransactionDetails ).Sum( d => (decimal?)d.Amount );
-                    mergeFields.Add( "TransactionEntityTransactions", transactionEntityTransactions );
-                    mergeFields.Add( "TransactionEntityTransactionsTotal", transactionEntityTransactionsTotal );
-                    mergeFields.Add( "AmountLimit", this.PageParameter("AmountLimit").AsDecimalOrNull() );
-                }
-
-                lTransactionHeader.Text = GetAttributeValue( "TransactionHeader" ).ResolveMergeFields( mergeFields );
-                lConfirmationHeader.Text = GetAttributeValue( "ConfirmationHeader" ).ResolveMergeFields( mergeFields );
-                lConfirmationFooter.Text = GetAttributeValue( "ConfirmationFooter" ).ResolveMergeFields( mergeFields );
-                lSuccessHeader.Text = GetAttributeValue( "SuccessHeader" ).ResolveMergeFields( mergeFields );
-                lSuccessFooter.Text = GetAttributeValue( "SuccessFooter" ).ResolveMergeFields( mergeFields );
-            }
-
             // Determine account campus context mode
             _accountCampusContextFilter = GetAttributeValue( "AccountCampusContext" ).AsType<int>();
             if ( _accountCampusContextFilter > -1 )
@@ -544,6 +514,7 @@ TransactionAcountDetails: [
             // Show save account info based on if checkbox is checked
             divSaveAccount.Style[HtmlTextWriterStyle.Display] = cbSaveAccount.Checked ? "block" : "none";
 
+            ResolveHeaderFooterTemplates();
         }
 
         #endregion
@@ -970,7 +941,8 @@ TransactionAcountDetails: [
                     var entityId = this.PageParameter( this.GetAttributeValue( "EntityIdParam" ) ).AsIntegerOrNull();
                     if ( entityId.HasValue )
                     {
-                        IService serviceInstance = Reflection.GetServiceForEntityType( transactionEntityType.GetEntityType(), new RockContext() );
+                        var dbContext = Reflection.GetDbContextForEntityType( transactionEntityType.GetEntityType() );
+                        IService serviceInstance = Reflection.GetServiceForEntityType( transactionEntityType.GetEntityType(), dbContext );
                         if ( serviceInstance != null )
                         {
                             System.Reflection.MethodInfo getMethod = serviceInstance.GetType().GetMethod( "Get", new Type[] { typeof( int ) } );
@@ -1183,6 +1155,51 @@ TransactionAcountDetails: [
             }
         }
 
+        /// <summary>
+        /// Resolves the lava merge fields for the various header and footer templates.
+        /// </summary>
+        private void ResolveHeaderFooterTemplates()
+        {
+            // Resolve the text field merge fields
+            var mergeFields = LavaHelper.GetCommonMergeFields( this.RockPage );
+
+            using ( var rockContext = new RockContext() )
+            {
+                IEntity transactionEntity = GetTransactionEntity();
+                if ( transactionEntity != null )
+                {
+                    mergeFields.Add( "TransactionEntity", transactionEntity );
+                    var transactionEntityTypeId = transactionEntity.TypeId;
+
+                    // include any Transactions that are associated with the TransactionEntity for Lava
+                    var transactionEntityTransactions = new FinancialTransactionService( rockContext ).Queryable()
+                        .Include( a => a.TransactionDetails )
+                        .Where( a => a.TransactionDetails.Any( d => d.EntityTypeId.HasValue && d.EntityTypeId == transactionEntityTypeId && d.EntityId == transactionEntity.Id ) )
+                        .ToList();
+
+                    var transactionEntityTransactionsTotal = transactionEntityTransactions.SelectMany( d => d.TransactionDetails ).Sum( d => (decimal?)d.Amount );
+                    mergeFields.Add( "TransactionEntityTransactions", transactionEntityTransactions );
+                    mergeFields.Add( "TransactionEntityTransactionsTotal", transactionEntityTransactionsTotal );
+                    mergeFields.Add( "AmountLimit", this.PageParameter( "AmountLimit" ).AsDecimalOrNull() );
+                }
+
+                if ( hfTransactionGuid.Value.AsGuidOrNull().HasValue )
+                {
+                    var financialTransaction = new FinancialTransactionService( rockContext ).Get( hfTransactionGuid.Value.AsGuid() );
+                    mergeFields.Add( "FinancialTransaction", financialTransaction );
+                }
+
+                lTransactionHeader.Text = GetAttributeValue( "TransactionHeader" ).ResolveMergeFields( mergeFields );
+                lConfirmationHeader.Text = GetAttributeValue( "ConfirmationHeader" ).ResolveMergeFields( mergeFields );
+                lConfirmationFooter.Text = GetAttributeValue( "ConfirmationFooter" ).ResolveMergeFields( mergeFields );
+                lSuccessHeader.Text = GetAttributeValue( "SuccessHeader" ).ResolveMergeFields( mergeFields );
+                lSuccessFooter.Text = GetAttributeValue( "SuccessFooter" ).ResolveMergeFields( mergeFields );
+            }
+        }
+
+        /// <summary>
+        /// Sets the control options.
+        /// </summary>
         private void SetControlOptions()
         {
             FluidLayout = GetAttributeValue( "LayoutStyle" ) == "Fluid";
@@ -2937,6 +2954,9 @@ TransactionAcountDetails: [
             {
                 pnlSaveAccount.Visible = false;
             }
+
+            // the merge fields for the header/footer includes the financialTransaction, so update them now that we have saved the transaction to the database
+            ResolveHeaderFooterTemplates();
         }
 
 
