@@ -1028,7 +1028,7 @@ namespace Rock.Data
                     blockTypeGuid,
                     fieldTypeGuid,
                     key ?? name.Replace( " ", string.Empty ),
-                    name,
+                    name.Replace( "'", "''" ),
                     description.Replace( "'", "''" ),
                     order,
                     defaultValue.Replace( "'", "''" ),
@@ -1090,7 +1090,7 @@ namespace Rock.Data
                     blockTypeGuid,
                     fieldTypeGuid,
                     key ?? name.Replace( " ", string.Empty ),
-                    name,
+                    name.Replace( "'", "''" ),
                     description.Replace( "'", "''" ),
                     order,
                     defaultValue.Replace( "'", "''" ),
@@ -1165,7 +1165,7 @@ namespace Rock.Data
                     entityTypeName,
                     fieldTypeGuid,
                     key,
-                    name,
+                    name.Replace( "'", "''" ),
                     description.Replace( "'", "''" ),
                     order,
                     defaultValue,
@@ -2231,9 +2231,10 @@ namespace Rock.Data
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="entityTypeName">Name of the entity type.</param>
+        /// <param name="userSelectable">if set to <c>true</c> [user selectable].</param>
         /// <param name="guid">The unique identifier.</param>
         /// <param name="IsSystem">if set to <c>true</c> [is system].</param>
-        public void UpdateNoteType( string name, string entityTypeName, string guid, bool IsSystem = true )
+        public void UpdateNoteType( string name, string entityTypeName, bool userSelectable,  string guid, bool IsSystem = true )
         {
             EnsureEntityTypeExists( entityTypeName );
 
@@ -2246,15 +2247,16 @@ namespace Rock.Data
                 IF @Id IS NULL
                 BEGIN
                     INSERT INTO [NoteType] (
-                        [Name],[EntityTypeId],[Guid],[IsSystem])
+                        [Name],[EntityTypeId],[UserSelectable],[Guid],[IsSystem])
                     VALUES(
-                        '{name}',@EntityTypeId,'{guid}',{IsSystem.Bit()})
+                        '{name}',@EntityTypeId,{userSelectable.Bit()},'{guid}',{IsSystem.Bit()})
                 END
                 ELSE
                 BEGIN
                     UPDATE [NoteType] SET
                         [Name] = '{name}',
                         [EntityTypeId] = @EntityTypeId,
+                        [UserSelectable] = {userSelectable.Bit()},
                         [Guid] = '{guid}',
                         [IsSystem] = {IsSystem.Bit()}
                     WHERE Id = @Id;
@@ -3568,16 +3570,17 @@ END
         /// <summary>
         /// Adds (or Updates) a new GroupType "Group Attribute" for the given GroupType using the given values.
         /// </summary>
-        /// <param name="groupTypeGuid"></param>
-        /// <param name="fieldTypeGuid"></param>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
-        /// <param name="order"></param>
+        /// <param name="groupTypeGuid">The group type unique identifier.</param>
+        /// <param name="fieldTypeGuid">The field type unique identifier.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="order">The order.</param>
         /// <param name="defaultValue">a string, empty string, or NULL</param>
-        /// <param name="guid"></param>
-        public void AddGroupTypeGroupAttribute( string groupTypeGuid, string fieldTypeGuid, string name, string description, int order, string defaultValue, string guid )
+        /// <param name="guid">The unique identifier.</param>
+        /// <param name="isRequired">if set to <c>true</c> [is required].</param>
+        public void AddGroupTypeGroupAttribute( string groupTypeGuid, string fieldTypeGuid, string name, string description, int order, string defaultValue, string guid, bool isRequired = false )
         {
-            AddGroupTypeAttribute( "Rock.Model.Group", groupTypeGuid, fieldTypeGuid, name, description, order, defaultValue, guid );
+            AddGroupTypeAttribute( "Rock.Model.Group", groupTypeGuid, fieldTypeGuid, name, description, order, defaultValue, isRequired, guid );
         }
 
         /// <summary>
@@ -3590,9 +3593,10 @@ END
         /// <param name="order">The order.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <param name="guid">The unique identifier.</param>
-        public void AddGroupTypeGroupMemberAttribute( string groupTypeGuid, string fieldTypeGuid, string name, string description, int order, string defaultValue, string guid )
+        /// <param name="isRequired">if set to <c>true</c> [is required].</param>
+        public void AddGroupTypeGroupMemberAttribute( string groupTypeGuid, string fieldTypeGuid, string name, string description, int order, string defaultValue, string guid, bool isRequired = false )
         {
-            AddGroupTypeAttribute( "Rock.Model.GroupMember", groupTypeGuid, fieldTypeGuid, name, description, order, defaultValue, guid );
+            AddGroupTypeAttribute( "Rock.Model.GroupMember", groupTypeGuid, fieldTypeGuid, name, description, order, defaultValue, isRequired, guid );
         }
 
         /// <summary>
@@ -3605,8 +3609,9 @@ END
         /// <param name="description">The description.</param>
         /// <param name="order">The order.</param>
         /// <param name="defaultValue">The default value.</param>
+        /// <param name="isRequired">if set to <c>true</c> [is required].</param>
         /// <param name="guid">The unique identifier.</param>
-        private void AddGroupTypeAttribute( string entityTypeName, string groupTypeGuid, string fieldTypeGuid, string name, string description, int order, string defaultValue, string guid )
+        private void AddGroupTypeAttribute( string entityTypeName, string groupTypeGuid, string fieldTypeGuid, string name, string description, int order, string defaultValue, bool isRequired, string guid )
         {
             string defaultValueDbParam = ( defaultValue == null ) ? "NULL" : "'" + defaultValue + "'";
             string attributeKey = name.RemoveSpaces();
@@ -3636,6 +3641,7 @@ END
                         [Description] = '{description.Replace( "'", "''" )}',
                         [Order] = {order},
                         [DefaultValue] = {defaultValueDbParam},
+                        [IsRequired]= {isRequired.Bit()},
                         [Guid] = '{guid}'
                     WHERE [EntityTypeId] = @EntityTypeId
                     AND [EntityTypeQualifierColumn] = 'GroupTypeId'
@@ -3672,7 +3678,7 @@ END
                         ,0
                         ,{defaultValueDbParam}
                         ,0
-                        ,0
+                        ,{isRequired.Bit()}
                         ,'{guid}')
                 END
                 ");
