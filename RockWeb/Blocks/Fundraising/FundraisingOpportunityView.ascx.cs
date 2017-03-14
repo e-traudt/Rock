@@ -77,7 +77,6 @@ namespace RockWeb.Blocks.Fundraising
     [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
     [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 6 )]
     [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
-    [BooleanField( "Enable Debug", "Show Lava Debug Help", false, order: 8 )]
     public partial class FundraisingOpportunityView : RockBlock
     {
         #region Base Control Methods

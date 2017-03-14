@@ -70,10 +70,6 @@ namespace RockWeb.Blocks.Fundraising
     [NoteTypeField( "Note Type", "Note Type to use for participant comments", false, "Rock.Model.GroupMember", defaultValue: "FFFC3644-60CD-4D14-A714-E8DCC202A0E1", order: 4 )]
     [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
     [LinkedPage( "Main Page", "The main page for the fundraising opportunity", required: false, order: 6 )]
-
-    [AttributeField( Rock.SystemGuid.EntityType.PERSON, "PersonAttributes", "The Person Attributes that the participant can edit", false, true, order: 7 )]
-
-    [BooleanField( "Enable Debug", "Show Lava Debug Help", false, order: 8 )]
     public partial class FundraisingParticipant : RockBlock
     {
         #region Base Control Methods
@@ -543,12 +539,6 @@ namespace RockWeb.Blocks.Fundraising
 
             notesCommentsTimeline.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             pnlComments.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
-
-            // Lava Debug
-            if ( this.GetAttributeValue( "EnableDebug" ).AsBoolean() )
-            {
-                lLavaHelp.Text = mergeFields.lavaDebugInfo( rockContext );
-            }
         }
 
         /// <summary>

@@ -4,7 +4,6 @@
     <ContentTemplate>
         <asp:Panel ID="pnlView" runat="server">
             <asp:HiddenField ID="hfGroupId" runat="server" />
-            <asp:Literal ID="lLavaHelp" runat="server" />
 
             <div class="row">
 
