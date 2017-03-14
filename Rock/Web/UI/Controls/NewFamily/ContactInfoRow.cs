@@ -195,21 +195,18 @@ namespace Rock.Web.UI.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is messaging visible.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is messaging visible; otherwise, <c>false</c>.
+        /// </value>
         public bool IsMessagingVisible
         {
-            get
-            {
-                if ( ViewState["IsMessagingVisible"] != null )
-                {
-                    return ViewState["IsMessagingVisible"].ToString().AsBooleanOrNull() ?? true;
-                }
-                else
-                {
-                    return true;
-                }
-            }
+            get { return ViewState["IsMessagingVisible"] as bool? ?? true; }
             set { ViewState["IsMessagingVisible"] = value; }
         }
+
         /// <summary>
         /// Gets or sets the Is Messaging Enabled bool.
         /// </summary>
@@ -312,11 +309,13 @@ namespace Rock.Web.UI.Controls
             var homePhone = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_HOME );
             _pnbHomePhone.Placeholder = homePhone != null ? homePhone.Value.EndsWith("Phone") ? homePhone.Value : homePhone.Value + " Phone" : "Home Phone";
             _pnbHomePhone.Required = false;
+            _pnbHomePhone.Attributes.Add( "autocomplete", "off" );
 
             var cellPhone = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_MOBILE );
             _pnbCellPhone.Placeholder = cellPhone != null ? cellPhone.Value.EndsWith( "Phone" ) ? cellPhone.Value : cellPhone.Value + " Phone" : "Cell Phone";
             _pnbCellPhone.Required = false;
-           
+            _pnbCellPhone.Attributes.Add( "autocomplete", "off" );
+
             _ebEmail.Placeholder = "Email";
             _ebEmail.Required = false;
         }
@@ -379,12 +378,12 @@ namespace Rock.Web.UI.Controls
 
             if ( IsMessagingVisible )
             {
-            writer.RenderBeginTag( HtmlTextWriterTag.Td );
-            writer.AddAttribute( "class", "text-center" );
-            writer.RenderBeginTag( HtmlTextWriterTag.Div );
-            _cbIsMessagingEnabled.RenderControl( writer );
-            writer.RenderEndTag();
-            writer.RenderEndTag();
+                writer.RenderBeginTag( HtmlTextWriterTag.Td );
+                writer.AddAttribute( "class", "text-center" );
+                writer.RenderBeginTag( HtmlTextWriterTag.Div );
+                _cbIsMessagingEnabled.RenderControl( writer );
+                writer.RenderEndTag();
+                writer.RenderEndTag();
             }
         }
     }
