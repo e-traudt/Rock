@@ -107,6 +107,7 @@ namespace RockWeb.Blocks.Utility
             var qryAllPersons = new PersonService( rockContext ).Queryable( true, true );
             var groupService = new GroupService( rockContext );
             var groupMemberService = new GroupMemberService( rockContext );
+            var locationService = new LocationService( rockContext );
 
             var familyGroupType = GroupTypeCache.GetFamilyGroupType();
             int familyGroupTypeId = familyGroupType.Id;
@@ -210,6 +211,7 @@ namespace RockWeb.Blocks.Utility
             double buildImportListsMS = stopwatch.Elapsed.TotalMilliseconds;
             stopwatch.Restart();
             bool useSqlBulkCopy = true;
+            List<int> insertedPersonForeignIds = new List<int>();
 
             using ( var ts = new System.Transactions.TransactionScope() )
             {
@@ -239,12 +241,12 @@ namespace RockWeb.Blocks.Utility
                         // do it the EF AddRange which is slower, but it will help us determine which record fails
                         rockContext.BulkInsert( personsToInsert, false );
                     }
-                    catch (System.Data.Entity.Infrastructure.DbUpdateException dex)
+                    catch ( System.Data.Entity.Infrastructure.DbUpdateException dex )
                     {
                         nbResults.Text = string.Empty;
                         foreach ( var entry in dex.Entries )
                         {
-                            var errorRecord = (entry.Entity as IEntity );
+                            var errorRecord = ( entry.Entity as IEntity );
                             nbResults.NotificationBoxType = NotificationBoxType.Danger;
                             nbResults.Text += string.Format( "Error on record with ForeignId: {0}, value: {1}, Error:{2}\n", errorRecord.ForeignId, errorRecord.ToString(), dex.GetBaseException().Message );
                         }
@@ -252,6 +254,8 @@ namespace RockWeb.Blocks.Utility
                         return;
                     }
                 }
+
+                insertedPersonForeignIds = personsToInsert.Select( a => a.ForeignId.Value ).ToList();
 
                 stopwatch.Stop();
                 sbStats.AppendFormat( "[{1}ms] BulkInsert {0} Person records\n", personsToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
@@ -292,22 +296,22 @@ namespace RockWeb.Blocks.Utility
                                             };
 
             // Make the GroupMember records for all the imported person (unless they are already have a groupmember record for the family)
-            var groupMemberRecordsToInsert = from ppi in personsIdsForPersonImport
-                                             where !ppi.HasGroupMemberRecord
-                                             select new GroupMember
-                                             {
-                                                 PersonId = ppi.PersonId,
-                                                 GroupRoleId = ppi.PersonImport.GroupRoleId,
-                                                 GroupId = ppi.FamilyId,
-                                                 GroupMemberStatus = GroupMemberStatus.Active
-                                             };
+            var groupMemberRecordsToInsertQry = from ppi in personsIdsForPersonImport
+                                                where !ppi.HasGroupMemberRecord
+                                                select new GroupMember
+                                                {
+                                                    PersonId = ppi.PersonId,
+                                                    GroupRoleId = ppi.PersonImport.GroupRoleId,
+                                                    GroupId = ppi.FamilyId,
+                                                    GroupMemberStatus = GroupMemberStatus.Active
+                                                };
 
-            var groupMemberRecordsToInsertList = groupMemberRecordsToInsert.ToList();
+            var groupMemberRecordsToInsertList = groupMemberRecordsToInsertQry.ToList();
             stopwatch.Stop();
             sbStats.AppendFormat( "[{1}ms] Get groupMemberRecordsToInsertList {0}\n", groupMemberRecordsToInsertList.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
-            rockContext.BulkInsert( groupMemberRecordsToInsert, useSqlBulkCopy );
+            rockContext.BulkInsert( groupMemberRecordsToInsertList, useSqlBulkCopy );
             stopwatch.Stop();
             sbStats.AppendFormat( "[{1}ms] BulkInsert groupMemberRecordsToInsertList {0}\n", groupMemberRecordsToInsertList.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
@@ -317,11 +321,13 @@ namespace RockWeb.Blocks.Utility
             List<GroupLocation> groupLocationsToImport = new List<GroupLocation>();
 
             var locationCreatedDateTimeStart = RockDateTime.Now;
-            foreach (var familyRecord in personsIdsForPersonImport.GroupBy(a => a.FamilyId))
-            {
 
+
+            //NOTE: TODO To test the "Foriegn Key Issue" , do the foreach this way: foreach ( var familyRecord in personsIdsForPersonImport.GroupBy( a => a.FamilyId ) )
+            foreach ( var familyRecord in personsIdsForPersonImport.Where(a => insertedPersonForeignIds.Contains(a.PersonImport.PersonForeignId)).GroupBy( a => a.FamilyId ) )
+            {
                 // get the distinct addresses for each family in our import
-                var familyAddresses = familyRecord.SelectMany(a => a.PersonImport.Addresses).DistinctBy(a => new { a.Street1, a.Street2, a.City, a.County, a.State, a.Country, a.PostalCode });
+                var familyAddresses = familyRecord.SelectMany( a => a.PersonImport.Addresses ).DistinctBy( a => new { a.Street1, a.Street2, a.City, a.County, a.State, a.Country, a.PostalCode } );
 
                 foreach ( var address in familyAddresses )
                 {
@@ -361,8 +367,8 @@ namespace RockWeb.Blocks.Utility
             sbStats.AppendFormat( "[{1}ms] BulkInsert {0} Location records\n", locationsToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
-            var locationIdLookup = new LocationService( rockContext ).Queryable().Select( a => new { a.Id, a.Guid } ).ToList().ToDictionary( k => k.Guid, v => v.Id );
-            foreach( var groupLocation in groupLocationsToImport)
+            var locationIdLookup = locationService.Queryable().Select( a => new { a.Id, a.Guid } ).ToList().ToDictionary( k => k.Guid, v => v.Id );
+            foreach ( var groupLocation in groupLocationsToImport )
             {
                 groupLocation.LocationId = locationIdLookup[groupLocation.Location.Guid];
             }
@@ -386,6 +392,9 @@ namespace RockWeb.Blocks.Utility
 
             nbResults.NotificationBoxType = NotificationBoxType.Success;
             nbResults.Text = sbStats.ToString().ConvertCrLfToHtmlBr();
+
+
+            // TODO: Rebuild all indexes on the effected tables to fix bogus "Foriegn Key violation" issue
         }
 
         /// <summary>
