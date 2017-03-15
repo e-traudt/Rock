@@ -41,7 +41,7 @@ namespace Rock.Migrations
             RockMigrationHelper.AddDefinedValue( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Project", "", "DFF45DA6-6077-4651-A804-BCBE9CD68375", false );
 
             // GroupType: Fundraising Opportunity 4BE7FC44-332D-40A8-978E-47B7035D7A0C
-            RockMigrationHelper.AddGroupType( "Fundraising Opportunity", "A group that can be used to manage a fundraising opportunity such as a mission trip or internship", "Group", "Member", false, true, true, "fa fa-money", 0, null, 0, null, "4BE7FC44-332D-40A8-978E-47B7035D7A0C" );
+            RockMigrationHelper.AddGroupType( "Fundraising Opportunity", "A group that can be used to manage a fundraising opportunity such as a mission trip or internship.", "Group", "Member", false, true, true, "fa fa-money", 0, null, 0, null, "4BE7FC44-332D-40A8-978E-47B7035D7A0C" );
 
             // Let GroupType: Fundraising Opportunity have child group types of GroupType: Fundraising Opportunity
             this.Sql( @"INSERT INTO GroupTypeAssociation (
@@ -195,7 +195,7 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             RockMigrationHelper.AddPage( "142627AE-6590-48E3-BFCA-3669260B8CF2", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Fundraising Transaction Matching", "", "A3EF32AC-B0FE-4140-A6F4-134FDD247CBD", "" ); // Site:Rock RMS
             RockMigrationHelper.AddPage( "5A8FBB92-85E5-4FD3-AF88-F3897C6CBC35", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Opportunity View", "", "BA673ABE-A45A-4835-A3A0-94A60341B96F", "" ); // Site:External Website
             RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Leader Toolbox", "", "9DADC93F-C9E7-4567-B73E-AD264A93E37D", "" ); // Site:External Website
-            RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Donation Entry", "", "E40BEA3D-0304-4AD2-A45D-9BAD9852E3BA", "" ); // Site:External Website
+            RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Donation", "", "E40BEA3D-0304-4AD2-A45D-9BAD9852E3BA", "" ); // Site:External Website
             RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Participant", "", "9F76591C-CEE4-4824-8478-E3BDA48D66ED", "" ); // Site:External Website
             RockMigrationHelper.AddPage( "E40BEA3D-0304-4AD2-A45D-9BAD9852E3BA", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Transaction Entry", "", "F04D69C1-786A-4204-8A67-5669BDFEB533", "" ); // Site:External Website
             RockMigrationHelper.UpdateBlockType( "Transaction Entity Matching", "Used to assign an Entity to a Transaction Detail record", "~/Blocks/Finance/TransactionEntityMatching.ascx", "Finance", "A58BCB1E-01D9-4F60-B925-D831A9537051" );

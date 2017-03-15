@@ -298,7 +298,7 @@ namespace RockWeb.Blocks.Fundraising
             {
                 hfGroupMemberId.Value = groupMember.Id.ToString();
                 pnlParticipantActions.Visible = true;
-                imgParticipant.ImageUrl = Person.GetPersonPhotoUrl( groupMember.Person, 100, 100 );
+                imgParticipant.ImageUrl = Person.GetPersonPhotoUrl( groupMember.Person, 75, 75 );
             }
             else
             {
