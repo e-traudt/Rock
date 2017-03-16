@@ -162,7 +162,6 @@ namespace RockWeb.Blocks.Fundraising
 
             groupMembersQuery = groupMembersQuery.Sort( gGroupMembers.SortProperty ?? new SortProperty { Property = "Person.LastName, Person.NickName" } );
 
-            var transactionTypeFundraisingValueId = DefinedValueCache.Read( "142EA7C8-04E5-4708-9E29-9C89127061C7" ).Id;
             var entityTypeIdGroupMember = EntityTypeCache.GetId<Rock.Model.GroupMember>();
 
             var groupMemberList = groupMembersQuery.ToList().Select( a =>
@@ -171,8 +170,7 @@ namespace RockWeb.Blocks.Fundraising
                 groupMember.LoadAttributes( rockContext );
 
                 var contributionTotal = new FinancialTransactionDetailService( rockContext ).Queryable()
-                            .Where( d => d.Transaction.TransactionTypeValueId == transactionTypeFundraisingValueId
-                                    && d.EntityTypeId == entityTypeIdGroupMember
+                            .Where( d => d.EntityTypeId == entityTypeIdGroupMember
                                     && d.EntityId == groupMember.Id )
                             .Sum( d => (decimal?)d.Amount ) ?? 0.00M;
 
@@ -183,14 +181,14 @@ namespace RockWeb.Blocks.Fundraising
                     individualFundraisingGoal = group.GetAttributeValue( "IndividualFundraisingGoal" ).AsDecimalOrNull();
                 }
 
-                var fundingRequired = individualFundraisingGoal - contributionTotal;
+                var fundingRemaining = individualFundraisingGoal - contributionTotal;
                 if ( disablePublicContributionRequests )
                 {
-                    fundingRequired = null;
+                    fundingRemaining = null;
                 }
-                else if ( fundingRequired < 0 )
+                else if ( fundingRemaining < 0 )
                 {
-                    fundingRequired = 0.00M;
+                    fundingRemaining = 0.00M;
                 }
 
                 return new
@@ -200,7 +198,7 @@ namespace RockWeb.Blocks.Fundraising
                     DateTimeAdded = groupMember.DateTimeAdded,
                     groupMember.Person.FullName,
                     groupMember.Person.Gender,
-                    FundingRequired = fundingRequired,
+                    FundingRemaining = fundingRemaining,
                     GroupRoleName = a.GroupRole.Name
                 };
             } ).ToList();

@@ -2,12 +2,14 @@
 
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
+
         <asp:Panel ID="pnlView" runat="server">
             <%-- Main Panel --%>
             <asp:Panel ID="pnlMain" runat="server">
                 <asp:HiddenField ID="hfGroupId" runat="server" />
                 <asp:HiddenField ID="hfGroupMemberId" runat="server" />
                 <asp:HiddenField ID="hfActiveTab" runat="server" />
+                <asp:HiddenField ID="hfShareUrl" runat="server" />
 
                 <div class="row">
                     <div class="col-md-4 margin-t-md">
@@ -17,6 +19,15 @@
                     </div>
                     <div class="col-md-8">
                         <Rock:NotificationBox ID="nbProfileWarning" runat="server" Text="A Profile Photo and Summary is recommended. Click Edit Preferences to set these." NotificationBoxType="Warning" Visible="false" />
+                        <div class="pull-right">
+                            <button id="btnCopyToClipboard" runat="server"
+                                data-toggle="tooltip" data-placement="top" data-original-title="Copy Link to Clipboard"
+                                class="btn btn-link btn-copy-to-clipboard padding-all-none"
+                                onmouseover="$(this).tooltip('hide').attr('data-original-title','Copy Link to Clipboard').tooltip('fixTitle').tooltip('show');"
+                                onclick="$(this).tooltip('hide').attr('data-original-title','Copied').tooltip('fixTitle').tooltip('show');return false;">
+                                <i class='fa fa-clipboard'></i>
+                            </button>
+                        </div>
                         <asp:Literal ID="lMainTopContentHtml" runat="server" />
                     </div>
                 </div>
@@ -48,7 +59,7 @@
 
 
                 <div class="row margin-t-md">
-                    <div class="col-md-8">
+                    <asp:Panel ID="pnlUpdatesContributions" CssClass="col-md-8" runat="server">
                         <div class="btn-group">
                             <asp:LinkButton ID="btnUpdatesTab" runat="server" Text="Updates" CssClass="btn btn-default" OnClick="btnUpdatesTab_Click" />
                             <asp:LinkButton ID="btnContributionsTab" runat="server" Text="Contributions" CssClass="btn btn-default" OnClick="btnContributionsTab_Click" />
@@ -66,13 +77,11 @@
                                 </Columns>
                             </Rock:Grid>
                         </asp:Panel>
-                    </div>
-                    <div class="col-md-4">
-                        <asp:Panel ID="pnlComments" runat="server">
-                            <label>Comments</label>
-                            <Rock:NoteContainer ID="notesCommentsTimeline" runat="server" UsePersonIcon="true" AddAllowed="true" DisplayType="Full" />
-                        </asp:Panel>
-                    </div>
+                    </asp:Panel>
+                    <asp:Panel ID="pnlComments" CssClass="col-md-4" runat="server">
+                        <label>Comments</label>
+                        <Rock:NoteContainer ID="notesCommentsTimeline" runat="server" UsePersonIcon="true" AddAllowed="true" DisplayType="Full" />
+                    </asp:Panel>
                 </div>
             </asp:Panel>
 

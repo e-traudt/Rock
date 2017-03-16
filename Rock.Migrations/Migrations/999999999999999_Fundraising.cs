@@ -34,8 +34,8 @@ namespace Rock.Migrations
             // Fundraising Public | Group
             RockMigrationHelper.UpdateGroupAttributeCategory ( "Fundraising Public", "fa fa-money", "", "91B43FBD-F924-4934-9CCE-7990513275CF" );
 
-            // 'Fundraising Opportunity Term' Defined Values
-            RockMigrationHelper.AddDefinedType( "Group", "Fundraising Opportunity Term", "This is what a fundraising opportunity is described as, such as Trip, Internship, Project, etc", "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D" );
+            // 'Fundraising Opportunity Type' Defined Values
+            RockMigrationHelper.AddDefinedType( "Group", "Fundraising Opportunity Type", "This is what a fundraising opportunity is described as, such as Trip, Internship, Project, etc", "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D" );
             RockMigrationHelper.AddDefinedValue( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Trip", "", "3BB5607B-8A77-434D-8AEF-F10D513BE963", false );
             RockMigrationHelper.AddDefinedValue( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Internship", "", "DB378B20-525E-40E6-B7E3-80ACBD2AE8A0", false );
             RockMigrationHelper.AddDefinedValue( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Project", "", "DFF45DA6-6077-4651-A804-BCBE9CD68375", false );
@@ -68,11 +68,11 @@ use.", 0, "", "F3338652-D1A2-4778-82A7-D56B9F4CFD7F" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "Opportunity Photo", @"", 4, "", "125F7AAC-F01D-4527-AA5E-5C8345AC3F66" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "DD7ED4C0-A9E0-434F-ACFE-BD4F56B043DF", "Opportunity Details", @"", 5, "", "1E2F1416-2C4C-44DF-BE19-7D8FA9523115" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "3EE69CBC-35CE-4496-88CC-8327A447603F", "Individual Fundraising Goal", @"The default individual fundraising goal.", 6, "", "7CD834F8-43F2-400E-A352-898030124102" );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "59D5A94C-94A0-4630-B80A-BB25697D74C7", "Opportunity Term", @"What the opportunity is described as, such as Trip, Internship, Project,Etc", 7, "", "F0846135-1A61-4AFA-8F9B-76D9821084DE", true );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "59D5A94C-94A0-4630-B80A-BB25697D74C7", "Opportunity Type", @"What the opportunity is described as, such as Trip, Internship, Project,Etc", 7, "", "F0846135-1A61-4AFA-8F9B-76D9821084DE", true );
 
-            // update Attribute Qualifier for Opportunity Term to use 'Fundraising Opportunity Term' DefinedType
+            // update Attribute Qualifier for Opportunity Type to use 'Fundraising Opportunity Type' DefinedType
             Sql( @"
-DECLARE @DefinedTypeFundraisingTerm INT = (
+DECLARE @DefinedTypeFundraisingType INT = (
 		SELECT TOP 1 Id
 		FROM DefinedType
 		WHERE [Guid] = '53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D'
@@ -98,7 +98,7 @@ BEGIN
 		)
 	SELECT @AttributeId
 		,'definedtype'
-		,@DefinedTypeFundraisingTerm
+		,@DefinedTypeFundraisingType
 		,'C8FE5DF2-E174-4DEC-8B50-D478592E938F'
 		,0
 END
@@ -109,8 +109,8 @@ END
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Registration Instance", @"The Id of the registration instance (if any) that is associated with this fundraising opportunity", 10, "", "E06EBFAD-E0B1-4AE2-B9B1-4C988EFFA844" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Allow Individual Disabling of Contribution Requests", @"Determines if individuals should be allowed to disable their contribution requests.", 11, "True", "9BEA4F1C-E2FD-4669-B2CD-1269D4DCB97A" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Cap Fundraising Amount", @"If this is set to 'Yes', the individual won't be able to fundraise for more than the Individual Fundraising Goal amount", 12, "False", "49012757-0ADE-419A-981C-384417D2E543" );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "434D7B6F-F8DD-45B7-8C3E-C76EF10BE56A", "Financial Account", @"The financial account that the donations should be tied to.", 13, "", "7C6FF01B-F68E-4A83-A96D-85071A92AAF1" );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Show Public", @"Determines if this Fundraising Opportunity should be included in lists that are displayed on the public web site.", 14, "", "BBD6C818-765C-43FB-AA72-5AF66F91B499", true );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "434D7B6F-F8DD-45B7-8C3E-C76EF10BE56A", "Financial Account", @"The financial account that the donations should be tied to.", 13, "", "7C6FF01B-F68E-4A83-A96D-85071A92AAF1", true );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Show Public", @"Determines if this Fundraising Opportunity should be included in lists that are displayed on the public web site.", 14, true.ToString(), "BBD6C818-765C-43FB-AA72-5AF66F91B499", true );
             RockMigrationHelper.AddGroupTypeGroupMemberAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "3EE69CBC-35CE-4496-88CC-8327A447603F", "Individual Fundraising Goal", @"Optional override of the default individual fund raising goal.  This is configurable only in internal group member editor. An individual could not adjust this themselves.", 0, "", "EABAE672-0886-450B-9296-2BADC56A0137" );
             RockMigrationHelper.AddGroupTypeGroupMemberAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "C28C7BF3-A552-4D77-9408-DEDCF760CED0", "Personal Trip Introduction", @"A personal note to display on the individual's fundraising participant page.", 1, "", "018B201C-D9C2-4EDE-9FC9-B52E2F799325" );
             RockMigrationHelper.AddGroupTypeGroupMemberAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Disable Public Contribution Requests", @"Set this to Yes to hide both the fundraising progress and request for donations on the profile page.", 2, "False", "2805298E-E21A-4679-B5CA-69D6FF4EAD31" );
@@ -162,10 +162,7 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
 
             RockMigrationHelper.AddGroupTypeRole( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "Participant", string.Empty, 1, null, null, "F82DF077-9664-4DA8-A3D9-7379B690124D", true, false, true );
             RockMigrationHelper.AddGroupTypeRole( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "Leader", string.Empty, 0, null, null, "253973A5-18F2-49B6-B2F1-F8F84294AAB2", true, true, false );
-
-
-            // Add TransactionType of Fundraising 142EA7C8-04E5-4708-9E29-9C89127061C7
-            RockMigrationHelper.UpdateDefinedValue( Rock.SystemGuid.DefinedType.FINANCIAL_TRANSACTION_TYPE, "Fundraising", "A Fundraising Donation Transaction", "142EA7C8-04E5-4708-9E29-9C89127061C7", true );
+            
 
             // Add NoteType 'Fundraising Opportunity Comment' Guid:9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95
             // make sure AllUsers have EDIT auth (the block will control when Edit/Add is allowed)
@@ -356,7 +353,7 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Profile Lava Template", "ProfileLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", 1, @"
 <div class='row'>
     <img src='{{ GroupMember.Person.PhotoUrl }}' CssClass='img-responsive' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityTerm' }}</h2>
+    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityType' }}</h2>
     {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
     {% assign dateRangePartsSize = dateRangeParts | Size %}
     {% if dateRangePartsSize == 2 %}
@@ -454,7 +451,7 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             // Attrib Value for Block:Fundraising Opportunity Participant, Attribute:Profile Lava Template Page: Fundraising Participant, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "BAF6AD44-BFBB-46AE-B1F2-89511C273FAE", "84C3DD64-436E-40BC-ADC3-7F86BBB890C0", @"<div class='row'>
     <img src='{{ GroupMember.Person.PhotoUrl }}' CssClass='img-responsive' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityTerm' }}</h2>
+    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityType' }}</h2>
     {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
     {% assign dateRangePartsSize = dateRangeParts | Size %}
     {% if dateRangePartsSize == 2 %}
@@ -532,7 +529,7 @@ WHERE AttributeId = (
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Allowed Transaction Attributes From URL Page: Fundraising Transaction Entry, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "1BAD904E-2F79-4488-B8BE-EECD67AE2925", "B4C8AA1A-E43E-48F1-9221-C83F9E750352", @"" );
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Transaction Type Page: Fundraising Transaction Entry, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "1BAD904E-2F79-4488-B8BE-EECD67AE2925", "ADB22E3F-1DC0-4BA6-AC77-09FE8580CD21", @"142ea7c8-04e5-4708-9e29-9c89127061c7" );
+            RockMigrationHelper.AddBlockAttributeValue( "1BAD904E-2F79-4488-B8BE-EECD67AE2925", "ADB22E3F-1DC0-4BA6-AC77-09FE8580CD21", @"" );
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Entity Id Param Page: Fundraising Transaction Entry, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "1BAD904E-2F79-4488-B8BE-EECD67AE2925", "8E45ABBB-43A8-46B1-A32C-DB9474A65BE0", @"GroupMemberId" );
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Transaction Header Page: Fundraising Transaction Entry, Site: External Website
@@ -603,10 +600,10 @@ WHERE AttributeId = (
 " );
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Confirmation Footer Page: Fundraising Transaction Entry, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "1BAD904E-2F79-4488-B8BE-EECD67AE2925", "B1F9196D-B51D-4ECD-A7BE-89F34431D736", @"<div class='alert alert-info'>
-    {% assign opportunityTerm = TransactionEntity.Group | Attribute:'OpportunityTerm' | Downcase  %}
+    {% assign opportunityType = TransactionEntity.Group | Attribute:'OpportunityType' | Downcase  %}
     
     In accordance of tax laws that prohibit donations designated to an individual, funds raised to support individuals 
-    for {{ opportunityTerm | Pluralize }} will go into a pool to support the entire {{ opportunityTerm }} and its participants. Individual support will be tracked
+    for {{ opportunityType | Pluralize }} will go into a pool to support the entire {{ opportunityType }} and its participants. Individual support will be tracked
     internally to determine the effectiveness of the individual's ability to raise support. {{ 'Global' | Attribute:'OrganizationName' }} must have 
     full control of the donated funds and discretion as to their use in order for your donation to be tax deductible.
     
@@ -642,7 +639,7 @@ WHERE AttributeId = (
         </dl>
     </div>
 </div>    
-<p>Thank you for your contribution for this {{ groupMember.Group | Attribute:'OpportunityTerm' }}. We are grateful for your commitment.</p>" );
+<p>Thank you for your contribution for this {{ groupMember.Group | Attribute:'OpportunityType' }}. We are grateful for your commitment.</p>" );
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Success Footer Page: Fundraising Transaction Entry, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "1BAD904E-2F79-4488-B8BE-EECD67AE2925", "188C6D55-CC08-4019-AA5F-706251509696", @"" );
             // Attrib Value for Block:Fundraising Transaction Entry, Attribute:Impersonation Page: Fundraising Transaction Entry, Site: External Website
@@ -713,7 +710,6 @@ WHERE AttributeId = (
         public override void Down()
         {
             RockMigrationHelper.DeleteByGuid( "9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95", "NoteType" );
-            RockMigrationHelper.DeleteDefinedValue( "142EA7C8-04E5-4708-9E29-9C89127061C7" );
 
             RockMigrationHelper.DeleteAttribute( "F3338652-D1A2-4778-82A7-D56B9F4CFD7F" );    // GroupType - Group Attribute, Fundraising Opportunity: Opportunity Title
             RockMigrationHelper.DeleteAttribute( "237463F7-A206-4B43-AFDD-84E422527E87" );    // GroupType - Group Attribute, Fundraising Opportunity: Opportunity Date Range
@@ -722,7 +718,7 @@ WHERE AttributeId = (
             RockMigrationHelper.DeleteAttribute( "125F7AAC-F01D-4527-AA5E-5C8345AC3F66" );    // GroupType - Group Attribute, Fundraising Opportunity: Opportunity Photo
             RockMigrationHelper.DeleteAttribute( "1E2F1416-2C4C-44DF-BE19-7D8FA9523115" );    // GroupType - Group Attribute, Fundraising Opportunity: Opportunity Details
             RockMigrationHelper.DeleteAttribute( "7CD834F8-43F2-400E-A352-898030124102" );    // GroupType - Group Attribute, Fundraising Opportunity: Individual Fundraising Goal
-            RockMigrationHelper.DeleteAttribute( "F0846135-1A61-4AFA-8F9B-76D9821084DE" );    // GroupType - Group Attribute, Fundraising Opportunity: Opportunity Term
+            RockMigrationHelper.DeleteAttribute( "F0846135-1A61-4AFA-8F9B-76D9821084DE" );    // GroupType - Group Attribute, Fundraising Opportunity: Opportunity Type
             RockMigrationHelper.DeleteAttribute( "6756D396-97F8-48A0-B69C-279E561F9D48" );    // GroupType - Group Attribute, Fundraising Opportunity: Update Content Channel
             RockMigrationHelper.DeleteAttribute( "38E1065D-4F6A-428E-B781-48F6BDACA614" );    // GroupType - Group Attribute, Fundraising Opportunity: Enable Commenting
             RockMigrationHelper.DeleteAttribute( "E06EBFAD-E0B1-4AE2-B9B1-4C988EFFA844" );    // GroupType - Group Attribute, Fundraising Opportunity: Registration Instance

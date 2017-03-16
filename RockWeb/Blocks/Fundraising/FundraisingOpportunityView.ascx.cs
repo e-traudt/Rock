@@ -39,8 +39,26 @@ namespace RockWeb.Blocks.Fundraising
 
     [CodeEditorField( "Summary Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
         @"
+{% assign setPageTitleToOpportunityTitle = Block | Attribute:'SetPageTitletoOpportunityTitle','RawValue' %}
+{% if setPageTitleToOpportunityTitle != true %}
 <h1>{{ Group | Attribute:'OpportunityTitle' }}</h1>
+{% endif %}
+
+{% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
+{% assign dateRangePartsSize = dateRangeParts | Size %}
+{% if dateRangePartsSize == 2 %}
+    {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
+{% elsif dateRangePartsSize == 1  %}      
+    {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
+{% endif %}
+{{ Group | Attribute:'OpportunityLocation' }}
+
+<br />
+<br />
+<p>
 {{ Group | Attribute:'OpportunitySummary' }}
+</p>
+
 ", order: 1 )]
 
     [CodeEditorField( "Sidebar Lava Template", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
@@ -77,6 +95,7 @@ namespace RockWeb.Blocks.Fundraising
     [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
     [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 6 )]
     [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
+    [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 8 )]
     public partial class FundraisingOpportunityView : RockBlock
     {
         #region Base Control Methods
@@ -139,12 +158,31 @@ namespace RockWeb.Blocks.Fundraising
             }
 
             group.LoadAttributes( rockContext );
+
+            if ( this.GetAttributeValue( "SetPageTitletoOpportunityTitle" ).AsBoolean() )
+            {
+                RockPage.Title = group.GetAttributeValue( "OpportunityTitle" );
+                RockPage.BrowserTitle = group.GetAttributeValue( "OpportunityTitle" );
+                RockPage.Header.Title = group.GetAttributeValue( "OpportunityTitle" );
+            }
+
             var mergeFields = LavaHelper.GetCommonMergeFields( this.RockPage, this.CurrentPerson, new CommonMergeFieldsOptions { GetLegacyGlobalMergeFields = false } );
+            mergeFields.Add( "Block", this.BlockCache );
             mergeFields.Add( "Group", group );
 
             // Left Sidebar
-            var photoGuid = group.GetAttributeValue( "OpportunityPhoto" );
+            var photoGuid = group.GetAttributeValue( "OpportunityPhoto" ).AsGuidOrNull();
+            imgOpportunityPhoto.Visible = photoGuid.HasValue;
             imgOpportunityPhoto.ImageUrl = string.Format( "~/GetImage.ashx?Guid={0}", photoGuid );
+
+            var groupMembers = group.Members.ToList();
+            foreach ( var gm in groupMembers )
+            {
+                gm.LoadAttributes( rockContext );
+            }
+
+            // only show the 'Donate to a Partipant' button if there are participants that are taking contribution requests
+            btnDonateToParticipant.Visible = groupMembers.Where( a => !a.GetAttributeValue( "DisablePublicContributionRequests" ).AsBoolean() ).Any();
 
             var registrationInstanceId = group.GetAttributeValue( "RegistrationInstance" ).AsIntegerOrNull();
             if ( registrationInstanceId.HasValue )
@@ -184,12 +222,10 @@ namespace RockWeb.Blocks.Fundraising
             // Progress
             if ( groupMember != null && pnlParticipantActions.Visible )
             {
-                var transactionTypeFundraisingValueId = DefinedValueCache.Read( "142EA7C8-04E5-4708-9E29-9C89127061C7" ).Id;
                 var entityTypeIdGroupMember = EntityTypeCache.GetId<Rock.Model.GroupMember>();
 
                 var contributionTotal = new FinancialTransactionDetailService( rockContext ).Queryable()
-                            .Where( d => d.Transaction.TransactionTypeValueId == transactionTypeFundraisingValueId
-                                    && d.EntityTypeId == entityTypeIdGroupMember
+                            .Where( d => d.EntityTypeId == entityTypeIdGroupMember
                                     && d.EntityId == groupMember.Id )
                             .Sum( a => (decimal?)a.Amount ) ?? 0.00M;
 
@@ -223,8 +259,8 @@ namespace RockWeb.Blocks.Fundraising
 
             // Tab:Details
             lDetailsHtml.Text = group.GetAttributeValue( "OpportunityDetails" );
-            var opportunityTerm = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityTerm" ).AsGuid() );
-            btnDetailsTab.Text = string.Format( "{0} Details", opportunityTerm );
+            var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
+            btnDetailsTab.Text = string.Format( "{0} Details", opportunityType );
 
             // Tab:Updates
             btnUpdatesTab.Visible = false;
@@ -241,7 +277,7 @@ namespace RockWeb.Blocks.Fundraising
                     mergeFields.Add( "ContentChannelItems", contentChannelItems );
                     lUpdatesContentItemsHtml.Text = updatesLavaTemplate.ResolveMergeFields( mergeFields );
 
-                    btnUpdatesTab.Text = string.Format( "{0} Updates ({1})", opportunityTerm, contentChannelItems.Count() );
+                    btnUpdatesTab.Text = string.Format( "{0} Updates ({1})", opportunityType, contentChannelItems.Count() );
                 }
             }
 
@@ -262,6 +298,12 @@ namespace RockWeb.Blocks.Fundraising
             notesCommentsTimeline.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             btnCommentsTab.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             btnCommentsTab.Text = string.Format( "Comments ({0})", notesCommentsTimeline.NoteCount );
+
+            // if btnDetailsTab is the only visible tab, hide the tab since there is nothing else to tab to
+            if ( !btnCommentsTab.Visible && !btnUpdatesTab.Visible )
+            {
+                btnDetailsTab.Visible = false;
+            }
         }
 
         /// <summary>

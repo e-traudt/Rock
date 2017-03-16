@@ -40,11 +40,15 @@ namespace RockWeb.Blocks.Fundraising
     [Category( "Fundraising" )]
     [Description( "Lists Fundraising Opportunities (Groups) that have the ShowPublic attribute set to true" )]
 
-    [LinkedPage( "Details Page", required: false, order: 1 )]
+    [DefinedValueField( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Fundraising Opportunity Types", "Select which opportunity types are shown, or leave blank to show all", false, true, order:1 )]
+    [LinkedPage( "Details Page", required: false, order: 2 )]
     [CodeEditorField( "Lava Template", "The lava template to use for the results", CodeEditorMode.Lava, CodeEditorTheme.Rock, defaultValue:
 @"
 {% for item in GroupList %}
-<img src='{{ item | Attribute:'OpportunityPhoto','Url' }}' CssClass='img-responsive' width=200  />
+{% assign photoUrl = item | Attribute:'OpportunityPhoto','Url' %}
+{% if photoUrl != '' %}
+<img src='{{ photoUrl }}' CssClass='img-responsive' width=200  />
+{% endif %}
 <article class='margin-b-lg'>
 
     <h3>{{ item | Attribute:'OpportunityTitle' }}</h3>
@@ -65,8 +69,7 @@ namespace RockWeb.Blocks.Fundraising
 <a href='{{ DetailsPage }}?GroupId={{ item.Id }}' class='btn btn-default'>View Details »</a>    
 </article>
 {% endfor %}
-        
-        ", order: 2 )]
+        ", order: 3 )]
     public partial class FundraisingList : RockBlock
     {
         #region Base Control Methods
@@ -130,11 +133,17 @@ namespace RockWeb.Blocks.Fundraising
 
             var fundraisingGroupList = groupService.Queryable()
                 .Where( a => fundraisingGroupTypeIdList.Contains( a.GroupTypeId ) )
-                .WhereAttributeValue( rockContext, a => a.Attribute.Key == "ShowPublic" && a.ValueAsBoolean == true ).ToList();
+                .WhereAttributeValue( rockContext, "ShowPublic", true.ToString() ).ToList();
 
             foreach ( var group in fundraisingGroupList )
             {
                 group.LoadAttributes( rockContext );
+            }
+
+            var fundraisingOpportunityTypes = this.GetAttributeValue( "FundraisingOpportunityTypes" ).SplitDelimitedValues().AsGuidList();
+            if ( fundraisingOpportunityTypes.Any() )
+            {
+                fundraisingGroupList = fundraisingGroupList.Where( a => fundraisingOpportunityTypes.Contains( a.GetAttributeValue( "OpportunityType" ).AsGuid() ) ).ToList();
             }
 
             fundraisingGroupList = fundraisingGroupList.OrderBy( g => DateRange.FromDelimitedValues( g.GetAttributeValue( "OpportunityDateRange" ) ).Start ).ThenBy( g => g.GetAttributeValue( "Opportunity Title" ) ).ToList();

@@ -37,11 +37,24 @@ namespace RockWeb.Blocks.Fundraising
     [Category( "Fundraising" )]
     [Description( "Public facing block that shows a fundraising opportunity participant" )]
 
-    [CodeEditorField( "Profile Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+    [CodeEditorField( "Profile Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 400, false,
     @"
+{{ 'summary_large_image' | AddMetaTagToHead:'property','twitter:card' }}
+{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','twitter:title' }}
+{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','twitter:description' }}
+
+{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','og:title' }}
+{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','og:description' }}
+
+{% assign opportunityPhotoUrl = item | Attribute:'OpportunityPhoto','Url' %}
+{% if opportunityPhotoUrl != '' %}
+    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','og:image' }}
+    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','twitter:image' }}
+{% endif %}
+
 <div class='row'>
     <img src='{{ GroupMember.Person.PhotoUrl }}' CssClass='img-responsive' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityTerm' }}</h2>
+    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityType' }}</h2>
     {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
     {% assign dateRangePartsSize = dateRangeParts | Size %}
     {% if dateRangePartsSize == 2 %}
@@ -53,7 +66,26 @@ namespace RockWeb.Blocks.Fundraising
 </div>
 
 <p>{{ GroupMember | Attribute:'PersonalTripIntroduction' }}</p>
-", order: 1 )]
+
+<script>function fbs_click() { u = location.href; t = document.title; window.open('http://www.facebook.com/sharer.php?u=' + encodeURIComponent(u) + '&t=' + encodeURIComponent(t), 'sharer', 'toolbar=0,status=0,width=626,height=436'); return false; }</script>
+
+<ul class=""socialsharing"">
+	<li>
+		<a href=""http://www.facebook.com/share.php?u=<url>"" onclick=""return fbs_click()"" target=""_blank"" class=""socialicon socialicon-facebook"" title="""" data-original-title=""Share via Facebook"">
+			<i class=""fa fa-fw fa-facebook""></i>
+		</a>
+	</li>
+	<li>
+		<a href=""http://twitter.com/home?status={{ 'Global' | Page:'Url' | Escape }}"" class=""socialicon socialicon-twitter"" title="""" data-original-title=""Share via Twitter"">
+			<i class=""fa fa-fw fa-twitter""></i>
+		</a>
+	</li>
+	<li>
+		<a href=""mailto:?Subject={{ Event.Name | Escape }}&Body={{ 'Global' | Page:'Url' }}""  class=""socialicon socialicon-email"" title="""" data-original-title=""Share via Email"">
+			<i class=""fa fa-fw fa-envelope-o""></i>
+		</a>
+	</li>
+</ul>", order: 1 )]
 
     [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
     @"
@@ -70,6 +102,7 @@ namespace RockWeb.Blocks.Fundraising
     [NoteTypeField( "Note Type", "Note Type to use for participant comments", false, "Rock.Model.GroupMember", defaultValue: "FFFC3644-60CD-4D14-A714-E8DCC202A0E1", order: 4 )]
     [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
     [LinkedPage( "Main Page", "The main page for the fundraising opportunity", required: false, order: 6 )]
+    [BooleanField( "Show Clipboard Icon", "Show a clipboard icon which will copy the page url to the users clipboard", true, order:7)]
     public partial class FundraisingParticipant : RockBlock
     {
         #region Base Control Methods
@@ -81,6 +114,26 @@ namespace RockWeb.Blocks.Fundraising
         protected override void OnInit( EventArgs e )
         {
             base.OnInit( e );
+
+            if ( this.GetAttributeValue( "ShowClipboardIcon" ).AsBoolean() )
+            {
+                // Setup for being able to copy text to clipboard
+                RockPage.AddScriptLink( this.Page, "~/Scripts/ZeroClipboard/ZeroClipboard.js" );
+                string script = string.Format( @"
+    var client = new ZeroClipboard( $('#{0}'));
+    $('#{0}').tooltip();
+", btnCopyToClipboard.ClientID );
+                ScriptManager.RegisterStartupScript( btnCopyToClipboard, btnCopyToClipboard.GetType(), "share-copy", script, true );
+                btnCopyToClipboard.Attributes["data-clipboard-target"] = hfShareUrl.ClientID;
+
+                Uri uri = new Uri( Request.Url.ToString() );
+                hfShareUrl.Value = uri.Scheme + "://" + uri.GetComponents( UriComponents.HostAndPort, UriFormat.UriEscaped ) + CurrentPageReference.BuildUrl();
+                btnCopyToClipboard.Visible = true;
+            }
+            else
+            {
+                btnCopyToClipboard.Visible = false;
+            }
 
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
@@ -219,13 +272,13 @@ namespace RockWeb.Blocks.Fundraising
 
                 groupMember.LoadAttributes( rockContext );
                 groupMember.Group.LoadAttributes( rockContext );
-                var opportunityTerm = DefinedValueCache.Read( groupMember.Group.GetAttributeValue( "OpportunityTerm" ).AsGuid() );
+                var opportunityType = DefinedValueCache.Read( groupMember.Group.GetAttributeValue( "OpportunityType" ).AsGuid() );
 
                 lProfileTitle.Text = string.Format(
                     "{0} Profile for the {1} {2}",
                     RockFilters.Possessive( groupMember.Person.FullName ),
                     groupMember.Group.GetAttributeValue( "OpportunityTitle" ),
-                    opportunityTerm );
+                    opportunityType );
 
                 var dateRange = DateRangePicker.CalculateDateRangeFromDelimitedValues( groupMember.Group.GetAttributeValue( "OpportunityDateRange" ) );
 
@@ -285,6 +338,27 @@ namespace RockWeb.Blocks.Fundraising
                 else if ( person.PhotoId.HasValue )
                 {
                     changes.Add( "Added a photo." );
+                }
+
+                // add or update the Photo Verify group to have this person as Pending since the photo was changed or deleted
+                using ( var photoRequestRockContext = new RockContext() )
+                {
+                    GroupMemberService groupMemberService = new GroupMemberService( photoRequestRockContext );
+                    Group photoRequestGroup = new GroupService( photoRequestRockContext ).Get( Rock.SystemGuid.Group.GROUP_PHOTO_REQUEST.AsGuid() );
+
+                    var photoRequestGroupMember = groupMemberService.Queryable().Where( a => a.GroupId == photoRequestGroup.Id && a.PersonId == person.Id ).FirstOrDefault();
+                    if ( photoRequestGroupMember == null )
+                    {
+                        photoRequestGroupMember = new GroupMember();
+                        photoRequestGroupMember.GroupId = photoRequestGroup.Id;
+                        photoRequestGroupMember.PersonId = person.Id;
+                        photoRequestGroupMember.GroupRoleId = photoRequestGroup.GroupType.DefaultGroupRoleId ?? -1;
+                        groupMemberService.Add( photoRequestGroupMember );
+                    }
+
+                    photoRequestGroupMember.GroupMemberStatus = GroupMemberStatus.Pending;
+
+                    photoRequestRockContext.SaveChanges();
                 }
             }
 
@@ -437,10 +511,21 @@ namespace RockWeb.Blocks.Fundraising
 
             // Top Main
             string profileLavaTemplate = this.GetAttributeValue( "ProfileLavaTemplate" );
-            if ( !groupMember.Person.PhotoId.HasValue || groupMember.GetAttributeValue( "PersonalTripIntroduction" ).IsNullOrWhiteSpace() )
+            if ( groupMember.PersonId == this.CurrentPersonId )
             {
                 // show a warning about missing Photo or Intro if the current person is viewing their own profile
-                nbProfileWarning.Visible = groupMember.PersonId == this.CurrentPersonId;
+                var warningItems = new List<string>();
+                if ( !groupMember.Person.PhotoId.HasValue )
+                {
+                    warningItems.Add( "profile photo" );
+                }
+                if ( groupMember.GetAttributeValue( "PersonalTripIntroduction" ).IsNullOrWhiteSpace())
+                {
+                    warningItems.Add( "personal trip introduction" );
+                }
+
+                nbProfileWarning.Text = "A " + warningItems.AsDelimited( ", ", " and " ) + " is recommended. Click Edit Preferences.";
+                nbProfileWarning.Visible = warningItems.Any();
             }
             else
             {
@@ -459,12 +544,10 @@ namespace RockWeb.Blocks.Fundraising
             btnContributionsTab.Visible = !disablePublicContributionRequests;
 
             // Progress
-            var transactionTypeFundraisingValueId = DefinedValueCache.Read( "142EA7C8-04E5-4708-9E29-9C89127061C7" ).Id;
             var entityTypeIdGroupMember = EntityTypeCache.GetId<Rock.Model.GroupMember>();
 
             var contributionTotal = new FinancialTransactionDetailService( rockContext ).Queryable()
-                        .Where( d => d.Transaction.TransactionTypeValueId == transactionTypeFundraisingValueId
-                                && d.EntityTypeId == entityTypeIdGroupMember
+                        .Where( d => d.EntityTypeId == entityTypeIdGroupMember
                                 && d.EntityId == groupMemberId )
                         .Sum( a => (decimal?)a.Amount ) ?? 0.00M;
 
@@ -496,7 +579,7 @@ namespace RockWeb.Blocks.Fundraising
                 Math.Round( percentMet ?? 0, 2 ), percentMet > 100 ? 100 : percentMet );
 
 
-            var opportunityTerm = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityTerm" ).AsGuid() );
+            var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
 
             // Tab:Updates
             btnUpdatesTab.Visible = false;
@@ -514,11 +597,18 @@ namespace RockWeb.Blocks.Fundraising
 
                     mergeFields.Add( "ContentChannelItems", contentChannelItems );
                     lUpdatesContentItemsHtml.Text = updatesLavaTemplate.ResolveMergeFields( mergeFields );
-                    btnUpdatesTab.Text = string.Format( "{0} Updates ({1})", opportunityTerm, contentChannelItems.Count() );
+                    btnUpdatesTab.Text = string.Format( "{0} Updates ({1})", opportunityType, contentChannelItems.Count() );
                 }
             }
 
-            btnMakeDonation.Text = string.Format( "Contribute to {0} {1}", RockFilters.Possessive( groupMember.Person.NickName ), opportunityTerm );
+            if ( groupMember.PersonId == this.CurrentPersonId )
+            {
+                btnMakeDonation.Text = "Make Payment";
+            }
+            else
+            {
+                btnMakeDonation.Text = string.Format( "Contribute to {0} {1}", RockFilters.Possessive( groupMember.Person.NickName ), opportunityType );
+            }
 
             // Tab: Contributions
             BindContributionsGrid();
@@ -537,8 +627,17 @@ namespace RockWeb.Blocks.Fundraising
 
             notesCommentsTimeline.RebuildNotes( true );
 
-            notesCommentsTimeline.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
-            pnlComments.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
+            var enableCommenting = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
+            notesCommentsTimeline.Visible = enableCommenting;
+            pnlComments.Visible = enableCommenting;
+
+            pnlUpdatesContributions.CssClass = enableCommenting ? "col-md-8" : "col-md-12";
+
+            // if btnContributionsTab is the only visible tab, hide the tab since there is nothing else to tab to
+            if ( !btnUpdatesTab.Visible )
+            {
+                btnContributionsTab.Visible = false;
+            }
         }
 
         /// <summary>
@@ -547,12 +646,10 @@ namespace RockWeb.Blocks.Fundraising
         protected void BindContributionsGrid()
         {
             var rockContext = new RockContext();
-            var transactionTypeFundraisingValueId = DefinedValueCache.Read( "142EA7C8-04E5-4708-9E29-9C89127061C7" ).Id;
             var entityTypeIdGroupMember = EntityTypeCache.GetId<Rock.Model.GroupMember>();
             int groupMemberId = hfGroupMemberId.Value.AsInteger();
 
-            var financialTransactionQry = new FinancialTransactionService( rockContext ).Queryable()
-                .Where( a => a.TransactionTypeValueId == transactionTypeFundraisingValueId );
+            var financialTransactionQry = new FinancialTransactionService( rockContext ).Queryable();
 
             financialTransactionQry = financialTransactionQry.Where( a =>
                 a.TransactionDetails.Any( d => d.EntityTypeId == entityTypeIdGroupMember && d.EntityId == groupMemberId ) );

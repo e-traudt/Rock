@@ -95,8 +95,17 @@ namespace RockWeb.Blocks.Fundraising
             }
 
             PopulateGroupDropDown();
+            ddlFundraisingOpportunity.Visible = group == null;
+            lFundraisingOpportunity.Visible = group != null;
             if ( group != null )
             {
+                group.LoadAttributes( rockContext );
+                var opportunityTitle = group.GetAttributeValue( "OpportunityTitle" );
+                lFundraisingOpportunity.Text = opportunityTitle;
+                RockPage.Title = "Donate to " + opportunityTitle;
+                RockPage.BrowserTitle = "Donate to " + opportunityTitle;
+                RockPage.Header.Title = "Donate to " + opportunityTitle;
+
                 ddlFundraisingOpportunity.SetValue( group.Id );
                 ddlFundraisingOpportunity_SelectedIndexChanged( null, null );
             }
@@ -212,12 +221,10 @@ namespace RockWeb.Blocks.Fundraising
 
                     if ( groupMember.Group.GetAttributeValue( "CapFundraisingAmount" ).AsBoolean() )
                     {
-                        var transactionTypeFundraisingValueId = DefinedValueCache.Read( "142EA7C8-04E5-4708-9E29-9C89127061C7" ).Id;
                         var entityTypeIdGroupMember = EntityTypeCache.GetId<Rock.Model.GroupMember>();
 
                         var contributionTotal = new FinancialTransactionDetailService( rockContext ).Queryable()
-                                    .Where( d => d.Transaction.TransactionTypeValueId == transactionTypeFundraisingValueId
-                                            && d.EntityTypeId == entityTypeIdGroupMember
+                                    .Where( d => d.EntityTypeId == entityTypeIdGroupMember
                                             && d.EntityId == groupMemberId )
                                     .Sum( a => (decimal?)a.Amount ) ?? 0.00M;
 
