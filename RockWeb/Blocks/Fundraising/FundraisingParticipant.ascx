@@ -21,10 +21,9 @@
                         <Rock:NotificationBox ID="nbProfileWarning" runat="server" Text="A Profile Photo and Summary is recommended. Click Edit Preferences to set these." NotificationBoxType="Warning" Visible="false" />
                         <div class="pull-right">
                             <button id="btnCopyToClipboard" runat="server"
-                                data-toggle="tooltip" data-placement="top" data-original-title="Copy Link to Clipboard"
+                                data-toggle="tooltip" data-placement="top" data-trigger="hover" data-delay="250" title="Copy Link to Clipboard"
                                 class="btn btn-link btn-copy-to-clipboard padding-all-none"
-                                onmouseover="$(this).tooltip('hide').attr('data-original-title','Copy Link to Clipboard').tooltip('fixTitle').tooltip('show');"
-                                onclick="$(this).tooltip('hide').attr('data-original-title','Copied').tooltip('fixTitle').tooltip('show');return false;">
+                                onclick="$(this).attr('data-original-title', 'Copied').tooltip('show').attr('data-original-title', 'Copy Link to Clipboard');return false;">
                                 <i class='fa fa-clipboard'></i>
                             </button>
                         </div>
