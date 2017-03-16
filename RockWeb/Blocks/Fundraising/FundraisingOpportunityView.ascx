@@ -9,7 +9,7 @@
             <div class="row">
 
                 <%-- Left Sidebar --%>
-                <div class="col-md-4 margin-t-lg">
+                <div class="col-md-4">
                     <asp:Image ID="imgOpportunityPhoto" runat="server" CssClass="title-image img-responsive" />
                     <asp:LinkButton ID="btnDonateToParticipant" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Donate to a Participant" OnClick="btnDonateToParticipant_Click" />
                     <asp:LinkButton ID="btnLeaderToolbox" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Leader Toolbox" OnClick="btnLeaderToolbox_Click" />

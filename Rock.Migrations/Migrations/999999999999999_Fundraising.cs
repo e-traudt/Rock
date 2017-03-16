@@ -260,49 +260,9 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             // Attrib for BlockType: Fundraising Leader Toolbox:Participant Page
             RockMigrationHelper.UpdateBlockTypeAttribute( "B90F730D-6319-4749-A3C0-BBFDD69D9BC3", "BD53F9C9-EBA9-4D3F-82EA-DE5DD34A8108", "Participant Page", "ParticipantPage", "", "The partipant page for a participant of this fundraising opportunity", 2, @"", "A2C8F514-8805-4E0A-9493-75289F543B43" );
             // Attrib for BlockType: Fundraising Leader Toolbox:Summary Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "B90F730D-6319-4749-A3C0-BBFDD69D9BC3", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Summary Lava Template", "SummaryLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", 1, @"
-<h1>{{ Group | Attribute:'OpportunityTitle' }}</h1>
-{% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-{% assign dateRangePartsSize = dateRangeParts | Size %}
-{% if dateRangePartsSize == 2 %}
-    {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-{% elsif dateRangePartsSize == 1  %}      
-    {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-{% endif %}
-{{ Group | Attribute:'OpportunityLocation' }}
-
-<br />
-<br />
-<p>
-{{ Group | Attribute:'OpportunitySummary' }}
-</p>
-", "6F245AB0-5EEC-4EF9-A029-6C6BFB0ED64B" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "B90F730D-6319-4749-A3C0-BBFDD69D9BC3", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Summary Lava Template", "SummaryLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", 1, @"", "6F245AB0-5EEC-4EF9-A029-6C6BFB0ED64B" );
             // Attrib for BlockType: Fundraising List:Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "E664BB02-D501-40B0-AAD6-D8FA0E63438B", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Lava Template", "LavaTemplate", "", "The lava template to use for the results", 2, @"
-{% for item in GroupList %}
-<img src='{{ item | Attribute:'OpportunityPhoto','Url' }}' CssClass='img-responsive' width=200  />
-<article class='margin-b-lg'>
-
-    <h3>{{ item | Attribute:'OpportunityTitle' }}</h3>
-    
-    {% assign dateRangeParts = item | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    
-    {{ item | Attribute:'OpportunityLocation' }}
-
-    <div>
-    {{ item | Attribute:'OpportunitySummary' }}
-    </div>
-<a href='{{ DetailsPage }}?GroupId={{ item.Id }}' class='btn btn-default'>View Details »</a>    
-</article>
-{% endfor %}
-        
-        ", "ED2EA497-4316-4E44-A5A4-69E69CC7ECBC" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "E664BB02-D501-40B0-AAD6-D8FA0E63438B", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Lava Template", "LavaTemplate", "", "The lava template to use for the results", 2, @"", "ED2EA497-4316-4E44-A5A4-69E69CC7ECBC" );
             // Attrib for BlockType: Fundraising List:Details Page
             RockMigrationHelper.UpdateBlockTypeAttribute( "E664BB02-D501-40B0-AAD6-D8FA0E63438B", "BD53F9C9-EBA9-4D3F-82EA-DE5DD34A8108", "Details Page", "DetailsPage", "", "", 1, @"", "F17BD62D-8134-47A5-BDBC-F7F6CD07974E" );
             // Attrib for BlockType: Fundraising Opportunity View:Leader Toolbox Page
@@ -312,103 +272,26 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             // Attrib for BlockType: Fundraising Opportunity View:Donation Page
             RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "BD53F9C9-EBA9-4D3F-82EA-DE5DD34A8108", "Donation Page", "DonationPage", "", "The page where a person can donate to the fundraising opportunity", 5, @"", "685DA61C-AF28-4389-AA7F-4BC26BED6CDD" );
             // Attrib for BlockType: Fundraising Opportunity View:Summary Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Summary Lava Template", "SummaryLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", 1, @"
-<h1>{{ Group | Attribute:'OpportunityTitle' }}</h1>
-{{ Group | Attribute:'OpportunitySummary' }}
-", "B802BE78-42DE-4E0F-8C1E-5788582C905B" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Summary Lava Template", "SummaryLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", 1, @"", "B802BE78-42DE-4E0F-8C1E-5788582C905B" );
             // Attrib for BlockType: Fundraising Opportunity View:Sidebar Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Sidebar Lava Template", "SidebarLavaTemplate", "", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", 2, @"
-{% if (RegistrationInstance.ContactPersonAlias.Person.FullName | Trim != '') or RegistrationInstance.ContactEmail != '' or RegistrationInstance.ContactPhone != '' %}
-  <p>
-	<strong>Contact</strong><br />
-	{% if RegistrationInstance.ContactPersonAlias.Person.FullName | Trim != '' %}
-	{{ RegistrationInstance.ContactPersonAlias.Person.FullName }} <br />
-	{% endif %}
-
-	{% if RegistrationInstance.ContactEmail != '' %}
-	{{ RegistrationInstance.ContactEmail }} <br />
-	{% endif %}
-
-	{{ RegistrationInstance.ContactPhone }}
-  </p>
-{% endif %}
-", "393030EB-18B6-4D91-943F-BAB3853B84BD" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Sidebar Lava Template", "SidebarLavaTemplate", "", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", 2, "", "393030EB-18B6-4D91-943F-BAB3853B84BD" );
             // Attrib for BlockType: Fundraising Opportunity View:Updates Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Updates Lava Template", "UpdatesLavaTemplate", "", "Lava template for the Updates (Content Channel Items)", 3, @"
-{% for item in ContentChannelItems %}
-<article class='margin-b-lg'>
-  <h3>{{ item.Title }}</h3>
-  {{ item | Attribute:'Image' }}
-  <div>
-    {{ item.Content }}
-  </div>
-
-</article>
-{% endfor %}", "AFC2C61D-87F8-4C4E-9CC2-98F2009A500C" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Updates Lava Template", "UpdatesLavaTemplate", "", "Lava template for the Updates (Content Channel Items)", 3, @"", "AFC2C61D-87F8-4C4E-9CC2-98F2009A500C" );
             // Attrib for BlockType: Fundraising Opportunity View:Note Type
             RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "E3FF88AC-13F6-4DF8-8371-FC0D7FD9A571", "Note Type", "NoteType", "", "Note Type to use for comments", 4, @"9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95", "287571CE-B731-477A-B948-FD05736C2CFE" );
             // Attrib for BlockType: Fundraising Opportunity Participant:Note Type
             RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "E3FF88AC-13F6-4DF8-8371-FC0D7FD9A571", "Note Type", "NoteType", "", "Note Type to use for participant comments", 4, @"FFFC3644-60CD-4D14-A714-E8DCC202A0E1", "C3494517-31E3-4B04-AE37-570331073903" );
             // Attrib for BlockType: Fundraising Opportunity Participant:Profile Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Profile Lava Template", "ProfileLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", 1, @"
-<div class='row'>
-    <img src='{{ GroupMember.Person.PhotoUrl }}' CssClass='img-responsive' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityType' }}</h2>
-    {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    {{ Group | Attribute:'OpportunityLocation' }}
-</div>
-
-<p>{{ GroupMember | Attribute:'PersonalTripIntroduction' }}</p>
-", "84C3DD64-436E-40BC-ADC3-7F86BBB890C0" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Profile Lava Template", "ProfileLavaTemplate", "", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", 1, @"", "84C3DD64-436E-40BC-ADC3-7F86BBB890C0" );
             // Attrib for BlockType: Fundraising Opportunity Participant:Updates Lava Template
-            RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Updates Lava Template", "UpdatesLavaTemplate", "", "Lava template for the Updates (Content Channel Items)", 3, @"
-{% for item in ContentChannelItems %}
-<article class='margin-b-lg'>
-  <h3>{{ item.Title }}</h3>
-  {{ item | Attribute:'Image' }}
-  <div>
-    {{ item.Content }}
-  </div>
-
-</article>
-{% endfor %}", "17DF7E42-B2D7-4E5D-9EF7-EE25758139FC" );
+            RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Updates Lava Template", "UpdatesLavaTemplate", "", "Lava template for the Updates (Content Channel Items)", 3, @"", "17DF7E42-B2D7-4E5D-9EF7-EE25758139FC" );
             // Attrib for BlockType: Fundraising Opportunity Participant:Main Page
             RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "BD53F9C9-EBA9-4D3F-82EA-DE5DD34A8108", "Main Page", "MainPage", "", "The main page for the fundraising opportunity", 6, @"", "592C88ED-6993-4292-96FA-C05CB8A6F00C" );
             // Attrib for BlockType: Fundraising Opportunity Participant:Donation Page
             RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "BD53F9C9-EBA9-4D3F-82EA-DE5DD34A8108", "Donation Page", "DonationPage", "", "The page where a person can donate to the fundraising opportunity", 5, @"", "5A0D8B2E-8692-481D-BD1E-48236021BFF0" );
             // Attrib Value for Block:Fundraising List, Attribute:Details Page Page: Missions, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "7759CDA6-BCE0-42D9-99C8-E991600F7E0D", "F17BD62D-8134-47A5-BDBC-F7F6CD07974E", @"ba673abe-a45a-4835-a3a0-94a60341b96f" );
-            // Attrib Value for Block:Fundraising List, Attribute:Lava Template Page: Missions, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "7759CDA6-BCE0-42D9-99C8-E991600F7E0D", "ED2EA497-4316-4E44-A5A4-69E69CC7ECBC", @"{% for item in GroupList %}
-<img src='{{ item | Attribute:'OpportunityPhoto','Url' }}' CssClass='img-responsive' width=200  />
-<article class='margin-b-lg'>
-
-    <h3>{{ item | Attribute:'OpportunityTitle' }}</h3>
-    
-    {% assign dateRangeParts = item | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    
-    {{ item | Attribute:'OpportunityLocation' }}
-
-    <div>
-    {{ item | Attribute:'OpportunitySummary' }}
-    </div>
-<a href='{{ DetailsPage }}?GroupId={{ item.Id }}' class='btn btn-default'>View Details »</a>    
-</article>
-{% endfor %}
-        
-        " );
+            
             // Attrib Value for Block:Fundraising Opportunity View, Attribute:Leader Toolbox Page Page: Fundraising Opportunity View, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "9F8F6E06-338F-403E-9D2D-A4FCBA13A844", @"9dadc93f-c9e7-4567-b73e-ad264a93e37d" );
             // Attrib Value for Block:Fundraising Opportunity View, Attribute:Note Type Page: Fundraising Opportunity View, Site: External Website
@@ -417,66 +300,10 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "EF966837-E420-45B9-A740-F1E43C08469D", @"9f76591c-cee4-4824-8478-e3bda48d66ed" );
             // Attrib Value for Block:Fundraising Opportunity View, Attribute:Donation Page Page: Fundraising Opportunity View, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "685DA61C-AF28-4389-AA7F-4BC26BED6CDD", @"e40bea3d-0304-4ad2-a45d-9bad9852e3ba" );
-            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Summary Lava Template Page: Fundraising Opportunity View, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "B802BE78-42DE-4E0F-8C1E-5788582C905B", @"<h1>{{ Group | Attribute:'OpportunityTitle' }}</h1>
-{{ Group | Attribute:'OpportunitySummary' }}
-" );
-            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Sidebar Lava Template Page: Fundraising Opportunity View, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "393030EB-18B6-4D91-943F-BAB3853B84BD", @"{% if (RegistrationInstance.ContactPersonAlias.Person.FullName | Trim != '') or RegistrationInstance.ContactEmail != '' or RegistrationInstance.ContactPhone != '' %}
-  <p>
-	<strong>Contact</strong><br />
-	{% if RegistrationInstance.ContactPersonAlias.Person.FullName | Trim != '' %}
-	{{ RegistrationInstance.ContactPersonAlias.Person.FullName }} <br />
-	{% endif %}
-
-	{% if RegistrationInstance.ContactEmail != '' %}
-	{{ RegistrationInstance.ContactEmail }} <br />
-	{% endif %}
-
-	{{ RegistrationInstance.ContactPhone }}
-  </p>
-{% endif %}
-" );
-            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Updates Lava Template Page: Fundraising Opportunity View, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "AFC2C61D-87F8-4C4E-9CC2-98F2009A500C", @"{% for item in ContentChannelItems %}
-<article class='margin-b-lg'>
-  <h3>{{ item.Title }}</h3>
-  {{ item | Attribute:'Image' }}
-  <div>
-    {{ item.Content }}
-  </div>
-
-</article>
-{% endfor %}" );
-            // Attrib Value for Block:Fundraising Opportunity Participant, Attribute:Profile Lava Template Page: Fundraising Participant, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "BAF6AD44-BFBB-46AE-B1F2-89511C273FAE", "84C3DD64-436E-40BC-ADC3-7F86BBB890C0", @"<div class='row'>
-    <img src='{{ GroupMember.Person.PhotoUrl }}' CssClass='img-responsive' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityType' }}</h2>
-    {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    {{ Group | Attribute:'OpportunityLocation' }}
-</div>
-
-<p>{{ GroupMember | Attribute:'PersonalTripIntroduction' }}</p>
-" );
+            
             // Attrib Value for Block:Fundraising Opportunity Participant, Attribute:Main Page Page: Fundraising Participant, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "BAF6AD44-BFBB-46AE-B1F2-89511C273FAE", "592C88ED-6993-4292-96FA-C05CB8A6F00C", @"ba673abe-a45a-4835-a3a0-94a60341b96f" );
-            // Attrib Value for Block:Fundraising Opportunity Participant, Attribute:Updates Lava Template Page: Fundraising Participant, Site: External Website
-            RockMigrationHelper.AddBlockAttributeValue( "BAF6AD44-BFBB-46AE-B1F2-89511C273FAE", "17DF7E42-B2D7-4E5D-9EF7-EE25758139FC", @"{% for item in ContentChannelItems %}
-<article class='margin-b-lg'>
-  <h3>{{ item.Title }}</h3>
-  {{ item | Attribute:'Image' }}
-  <div>
-    {{ item.Content }}
-  </div>
-
-</article>
-{% endfor %}" );
+            
             // Attrib Value for Block:Fundraising Opportunity Participant, Attribute:Note Type Page: Fundraising Participant, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "BAF6AD44-BFBB-46AE-B1F2-89511C273FAE", "C3494517-31E3-4B04-AE37-570331073903", @"FFFC3644-60CD-4D14-A714-E8DCC202A0E1" );
             // Attrib Value for Block:Fundraising Opportunity Participant, Attribute:Donation Page Page: Fundraising Participant, Site: External Website
@@ -700,8 +527,32 @@ WHERE AttributeId = (
             // Attrib Value for Block:Fundraising Leader Toolbox, Attribute:Participant Page Page: Fundraising Leader Toolbox, Site: External Website
             RockMigrationHelper.AddBlockAttributeValue( "558375A3-2DFF-43F3-A9EF-04F503C7EB55", "A2C8F514-8805-4E0A-9493-75289F543B43", @"9f76591c-cee4-4824-8478-e3bda48d66ed" );
 
+            // Attrib for BlockType: Fundraising Opportunity View:Set Page Title to Opportunity Title
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Set Page Title to Opportunity Title", "SetPageTitletoOpportunityTitle", "", "", 8, @"True", "61C77239-8954-4826-8C18-E1C822C540E7" );
 
-
+            // Attrib for BlockType: Fundraising Opportunity Participant:Show Clipboard Icon
+            RockMigrationHelper.UpdateBlockTypeAttribute( "1FEA697F-DD12-4FE0-BC58-EE896123E7F1", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Show Clipboard Icon", "ShowClipboardIcon", "", "Show a clipboard icon which will copy the page url to the users clipboard", 7, @"True", "8CEF54C3-D5E1-4A8F-911B-A20DE91A9007" );
+            
+            // Attrib for BlockType: Fundraising Opportunity View:Max Occurrences
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Max Occurrences", "MaxOccurrences", "", "The maximum number of event registration occurrences to show.", 10, @"100", "4FAB5601-E142-456A-A081-3E1D05694FA5" );
+            // Attrib for BlockType: Fundraising Opportunity View:Registration Page
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "BD53F9C9-EBA9-4D3F-82EA-DE5DD34A8108", "Registration Page", "RegistrationPage", "", "The page to use for registrations.", 11, @"", "98CE1B2F-F478-443E-9217-E864B3799D79" );
+            // Attrib for BlockType: Fundraising List:Fundraising Opportunity Types
+            RockMigrationHelper.UpdateBlockTypeAttribute( "E664BB02-D501-40B0-AAD6-D8FA0E63438B", "59D5A94C-94A0-4630-B80A-BB25697D74C7", "Fundraising Opportunity Types", "FundraisingOpportunityTypes", "", "Select which opportunity types are shown, or leave blank to show all", 1, @"", "8BE53032-17AE-449F-9A42-1CC83A66DA2B" );
+            // Attrib for BlockType: Fundraising Opportunity View:Date Range
+            RockMigrationHelper.UpdateBlockTypeAttribute( "DA5F83B9-7F6A-4CF6-AF23-0D89DA4D4241", "55810BC5-45EA-4044-B783-0CCE0A445C6F", "Date Range", "DateRange", "", "Optional date range to filter the event registration occurrences on.", 9, @",", "A49B230A-C23D-442A-B3A6-7DCFD3F4DACE" );
+            
+            
+            // Attrib Value for Block:Fundraising List, Attribute:Fundraising Opportunity Types Page: Missions, Site: External Website
+            RockMigrationHelper.AddBlockAttributeValue( "7759CDA6-BCE0-42D9-99C8-E991600F7E0D", "8BE53032-17AE-449F-9A42-1CC83A66DA2B", @"3bb5607b-8a77-434d-8aef-f10d513be963,db378b20-525e-40e6-b7e3-80acbd2ae8a0" );
+            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Set Page Title to Opportunity Title Page: Fundraising Opportunity View, Site: External Website
+            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "61C77239-8954-4826-8C18-E1C822C540E7", @"True" );
+            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Date Range Page: Fundraising Opportunity View, Site: External Website
+            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "A49B230A-C23D-442A-B3A6-7DCFD3F4DACE", @"All||||" );
+            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Registration Page Page: Fundraising Opportunity View, Site: External Website
+            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "98CE1B2F-F478-443E-9217-E864B3799D79", @"f7ca6e0f-c319-47ab-9a6d-247c5716d846" );
+            // Attrib Value for Block:Fundraising Opportunity View, Attribute:Max Occurrences Page: Fundraising Opportunity View, Site: External Website
+            RockMigrationHelper.AddBlockAttributeValue( "59786A7C-8AFE-4DB2-988A-F72B82D6FD5C", "4FAB5601-E142-456A-A081-3E1D05694FA5", @"100" );
         }
 
         /// <summary>
