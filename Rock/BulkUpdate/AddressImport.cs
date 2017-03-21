@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Rock.Data;
-
-namespace Rock.BulkUpdate
+﻿namespace Rock.BulkUpdate
 {
     /// <summary>
     /// 
@@ -40,7 +37,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The location type value identifier.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.GROUP_LOCATION_TYPE )]
         public int GroupLocationTypeValueId { get; set; }
 
         /// <summary>
@@ -71,7 +67,6 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String"/> representing the First line of the Location's Street/Mailing Address. If the Location does not have
         /// a Street/Mailing address, this value is null.
         /// </value>
-        [MaxLength( 100 )]
         public string Street1 { get; set; }
 
         /// <summary>
@@ -81,7 +76,6 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String"/> representing the second line of the Location's Street/Mailing Address. if this Location does not have 
         /// Street/Mailing Address or if the address does not have a 2nd line, this value is null.
         /// </value>
-        [MaxLength( 100 )]
         public string Street2 { get; set; }
 
         /// <summary>
@@ -91,7 +85,6 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String"/> representing the city component of the Location's Street/Mailing Address. If this Location does not have
         /// a Street/Mailing Address this value will be null.
         /// </value>
-        [MaxLength( 50 )]
         public string City { get; set; }
 
         /// <summary>
@@ -100,7 +93,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The county.
         /// </value>
-        [MaxLength( 50 )]
         public string County { get; set; }
 
         /// <summary>
@@ -110,7 +102,6 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String"/> representing the state component of the Location's Street/Mailing Address. If this Location does not have 
         /// a Street/Mailing Address, this value will be null.
         /// </value>
-        [MaxLength( 50 )]
         public string State { get; set; }
 
         /// <summary>
@@ -120,7 +111,6 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String" /> representing the country component of the Location's Street/Mailing Address. If this Location does not have a 
         /// Street/Mailing Address, this value will be null.
         /// </value>
-        [MaxLength( 50 )]
         public string Country { get; set; }
 
         /// <summary>
@@ -130,7 +120,6 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String"/> representing the Zip/Postal Code component of the Location's Street/Mailing Address. If this Location does not have 
         /// Street/Mailing Address, this value will be null.
         /// </value>
-        [MaxLength( 50 )]
         public string PostalCode { get; set; }
     }
 }

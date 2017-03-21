@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Rock.Data;
-using Rock.Model;
 
 namespace Rock.BulkUpdate
 {
@@ -39,6 +35,12 @@ namespace Rock.BulkUpdate
         /// </value>
         public int GroupRoleId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the campus identifier.
+        /// </summary>
+        /// <value>
+        /// The campus identifier.
+        /// </value>
         public int? CampusId { get; set; }
 
         /// <summary>
@@ -59,7 +61,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the Id of the <see cref="Rock.Model.DefinedValue"/> identifying the person record type. If no value is selected this can be null.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_RECORD_TYPE )]
         public int? RecordTypeValueId { get; set; }
 
         /// <summary>
@@ -68,7 +69,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the Id of the Record Status <see cref="Rock.Model.DefinedValue"/> representing the status of this entity.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_RECORD_STATUS )]
         public int? RecordStatusValueId { get; set; }
 
         /// <summary>
@@ -85,7 +85,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the Id of the Record Status Reason <see cref="Rock.Model.DefinedValue"/> representing the reason why a person entity would have a set status.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_RECORD_STATUS_REASON )]
         public int? RecordStatusReasonValueId { get; set; }
 
         /// <summary>
@@ -94,7 +93,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the connection status of the Person.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_CONNECTION_STATUS )]
         public int? ConnectionStatusValueId { get; set; }
 
         /// <summary>
@@ -103,7 +101,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the reason a record needs to be reviewed.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_REVIEW_REASON )]
         public int? ReviewReasonValueId { get; set; }
 
         /// <summary>
@@ -120,7 +117,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// An <see cref="System.Int32"/> representing the Title <see cref="Rock.Model.DefinedValue"/> that is associated with the Person.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_TITLE )]
         public int? TitleValueId { get; set; }
 
         /// <summary>
@@ -129,7 +125,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> representing the first name of the Person.
         /// </value>
-        [MaxLength( 50 )]
         public string FirstName { get; set; }
 
         /// <summary>
@@ -141,7 +136,6 @@ namespace Rock.BulkUpdate
         /// <remarks>
         /// The name that the person goes by.
         /// </remarks>
-        [MaxLength( 50 )]
         public string NickName { get; set; }
 
         /// <summary>
@@ -150,7 +144,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> that represents the middle name of the Person.
         /// </value>
-        [MaxLength( 50 )]
         public string MiddleName { get; set; }
 
         /// <summary>
@@ -159,7 +152,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> that represents the Last Name of the Person.
         /// </value>
-        [MaxLength( 50 )]
         public string LastName { get; set; }
 
         /// <summary>
@@ -172,7 +164,6 @@ namespace Rock.BulkUpdate
         /// <remarks>
         /// Examples include: Sr., Jr., III, IV, DMD,  MD, PhD, etc.
         /// </remarks>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_SUFFIX )]
         public int? SuffixValueId { get; set; }
 
         /// <summary>
@@ -207,7 +198,7 @@ namespace Rock.BulkUpdate
         /// A <see cref="Rock.Model.Gender"/> enum value representing the Person's gender.  Valid values are <c>Gender.Unknown</c> if the Person's gender is unknown,
         /// <c>Gender.Male</c> if the Person's gender is Male, <c>Gender.Female</c> if the Person's gender is Female.
         /// </value>
-        public Gender Gender { get; set; }
+        public int Gender { get; set; }
 
         /// <summary>
         /// Gets or sets Id of the Marital Status <see cref="Rock.Model.DefinedValue"/> representing the Person's martial status.
@@ -215,7 +206,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the Id of the Marital Status <see cref="Rock.Model.DefinedValue"/> representing the Person's martial status.  This value is nullable.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_MARITAL_STATUS )]
         public int? MaritalStatusValueId { get; set; }
 
         /// <summary>
@@ -224,7 +214,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.DateTime"/> representing the anniversary date of the Person's wedding. If the anniversary date is not known or they are not married this value will be null.
         /// </value>
-        [Column( TypeName = "Date" )]
         public DateTime? AnniversaryDate { get; set; }
 
         /// <summary>
@@ -241,8 +230,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> containing the Person's email address.
         /// </value>
-        [MaxLength( 75 )]
-        [RegularExpression( @"[\w\.\'_%-]+(\+[\w-]*)?@([\w-]+\.)+[\w-]+", ErrorMessage = "The Email address is invalid" )]
         public string Email { get; set; }
 
         /// <summary>
@@ -259,7 +246,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> representing a note about the Person's email address.
         /// </value>
-        [MaxLength( 250 )]
         public string EmailNote { get; set; }
 
         /// <summary>
@@ -268,7 +254,7 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The email preference.
         /// </value>
-        public EmailPreference EmailPreference { get; set; }
+        public int EmailPreference { get; set; }
 
         /// <summary>
         /// Gets or sets the Inactive Reason Note
@@ -276,7 +262,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> representing an Inactive Reason Note.
         /// </value>
-        [MaxLength( 1000 )]
         public string InactiveReasonNote { get; set; }
 
         #endregion Person Fields that map directly to Rock.Model.Person
@@ -326,6 +311,8 @@ namespace Rock.BulkUpdate
         /// The modified date time.
         /// </value>
         public DateTime? ModifiedDateTime { get; set; }
+        public string FamilyName { get; internal set; }
+        public string FamilyImageUrl { get; internal set; }
 
         #endregion
     }

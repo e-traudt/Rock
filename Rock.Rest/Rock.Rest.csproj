@@ -296,6 +296,7 @@
     <Compile Include="Controllers\PhoneNumbersController.Partial.cs" />
     <Compile Include="Controllers\PrayerRequestsController.Parial.cs" />
     <Compile Include="Controllers\SearchController.cs" />
+    <Compile Include="Controllers\SlingshotController.cs" />
     <Compile Include="Controllers\TaggedItemsController.Partial.cs" />
     <Compile Include="Controllers\TagsController.Partial.cs" />
     <Compile Include="Controllers\UserLoginsController.Partial.cs" />

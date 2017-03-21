@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rock.Data;
-
-namespace Rock.BulkUpdate
+﻿namespace Rock.BulkUpdate
 {
     /// <summary>
     /// 
@@ -38,7 +30,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> representing the phone number without string formatting.
         /// </value>
-        [MaxLength( 20 )]
         public string Number { get; set; }
 
         /// <summary>
@@ -47,7 +38,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.String"/> representing the extensions that would need to be dialed to contact the owner. If no extension is required, this property will be null. 
         /// </value>
-        [MaxLength( 20 )]
         public string Extension { get; set; }
 
         /// <summary>
@@ -56,7 +46,6 @@ namespace Rock.BulkUpdate
         /// <value>
         /// A <see cref="System.Int32"/> representing the Number Type <see cref="Rock.Model.DefinedValue"/> Id. If unknown, this value will be null.
         /// </value>
-        [DefinedValue( SystemGuid.DefinedType.PERSON_PHONE_TYPE )]
         public int? NumberTypeValueId { get; set; }
 
         /// <summary>
@@ -65,7 +54,6 @@ namespace Rock.BulkUpdate
         /// <value>
         ///   A <see cref="System.Boolean"/> value that is <c>true</c> if the phone number has opted in for SMS messaging; otherwise <c>false</c>.
         /// </value>
-        [Required]
         public bool IsMessagingEnabled { get; set; }
 
         /// <summary>
