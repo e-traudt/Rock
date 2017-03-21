@@ -41,7 +41,7 @@ namespace Rock.Migrations
             RockMigrationHelper.AddDefinedValue( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Project", "", "DFF45DA6-6077-4651-A804-BCBE9CD68375", false );
 
             // GroupType: Fundraising Opportunity 4BE7FC44-332D-40A8-978E-47B7035D7A0C
-            RockMigrationHelper.AddGroupType( "Fundraising Opportunity", "A group that can be used to manage a fundraising opportunity such as a mission trip or internship.", "Group", "Member", false, true, true, "fa fa-money", 0, null, 0, null, "4BE7FC44-332D-40A8-978E-47B7035D7A0C" );
+            RockMigrationHelper.AddGroupType( "Fundraising Opportunity", "A group that can be used to manage a fundraising opportunity such as a mission trip or internship.", "Group", "Member", false, true, true, "fa fa-certificate ", 0, null, 0, null, "4BE7FC44-332D-40A8-978E-47B7035D7A0C" );
 
             // Let GroupType: Fundraising Opportunity have child group types of GroupType: Fundraising Opportunity
             this.Sql( @"INSERT INTO GroupTypeAssociation (
@@ -112,7 +112,7 @@ END
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Cap Fundraising Amount", @"If this is set to 'Yes', the individual won't be able to fundraise for more than the Individual Fundraising Goal amount", 12, "False", "49012757-0ADE-419A-981C-384417D2E543" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "434D7B6F-F8DD-45B7-8C3E-C76EF10BE56A", "Financial Account", @"The financial account that the donations should be tied to.", 13, "", "7C6FF01B-F68E-4A83-A96D-85071A92AAF1", true );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Show Public", @"Determines if this Fundraising Opportunity should be included in lists that are displayed on the public web site.", 14, true.ToString(), "BBD6C818-765C-43FB-AA72-5AF66F91B499", true );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "DD7ED4C0-A9E0-434F-ACFE-BD4F56B043DF", "Registration Notes", @"", 15, "", "7360CF56-7DF5-42E9-AD2B-AD839E0D4EDB" );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "C28C7BF3-A552-4D77-9408-DEDCF760CED0", "Registration Notes", @"", 15, "", "7360CF56-7DF5-42E9-AD2B-AD839E0D4EDB" );
 
 
             RockMigrationHelper.AddGroupTypeGroupMemberAttribute( "4BE7FC44-332D-40A8-978E-47B7035D7A0C", "3EE69CBC-35CE-4496-88CC-8327A447603F", "Individual Fundraising Goal", @"Optional override of the default individual fund raising goal.  This is configurable only in internal group member editor. An individual could not adjust this themselves.", 0, "", "EABAE672-0886-450B-9296-2BADC56A0137" );
@@ -192,7 +192,7 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
 
             //// Pages and Blocks migration for Fundraising
 
-            RockMigrationHelper.AddPage( "142627AE-6590-48E3-BFCA-3669260B8CF2", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Fundraising Transaction Matching", "", "A3EF32AC-B0FE-4140-A6F4-134FDD247CBD", "" ); // Site:Rock RMS
+            RockMigrationHelper.AddPage( "142627AE-6590-48E3-BFCA-3669260B8CF2", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Fundraising Matching", "", "A3EF32AC-B0FE-4140-A6F4-134FDD247CBD", "" ); // Site:Rock RMS
             RockMigrationHelper.AddPage( "5A8FBB92-85E5-4FD3-AF88-F3897C6CBC35", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Opportunity View", "", "BA673ABE-A45A-4835-A3A0-94A60341B96F", "" ); // Site:External Website
             RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Leader Toolbox", "", "9DADC93F-C9E7-4567-B73E-AD264A93E37D", "" ); // Site:External Website
             RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Donation", "", "E40BEA3D-0304-4AD2-A45D-9BAD9852E3BA", "" ); // Site:External Website

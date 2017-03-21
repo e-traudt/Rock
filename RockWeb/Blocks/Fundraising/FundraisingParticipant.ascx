@@ -15,19 +15,21 @@
                     <div class="col-md-4 margin-t-md">
                         <asp:Image ID="imgOpportunityPhoto" runat="server" CssClass="title-image img-responsive" />
                         <asp:LinkButton ID="btnEditPreferences" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Edit Preferences" OnClick="btnEditPreferences_Click" />
-                        <asp:LinkButton ID="btnMainPage" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Main Page" OnClick="btnMainPage_Click" />
+                        <asp:LinkButton ID="btnMainPage" runat="server" CssClass="btn btn-primary btn-block margin-t-sm" Text="Main Page" OnClick="btnMainPage_Click" />
                     </div>
                     <div class="col-md-8">
-                        <Rock:NotificationBox ID="nbProfileWarning" runat="server" Text="A Profile Photo and Summary is recommended. Click Edit Preferences to set these." NotificationBoxType="Warning" Visible="false" />
+                        
                         <div class="pull-right">
                             <button id="btnCopyToClipboard" runat="server"
                                 data-toggle="tooltip" data-placement="top" data-trigger="hover" data-delay="250" title="Copy Link to Clipboard"
-                                class="btn btn-link btn-copy-to-clipboard padding-all-none"
+                                class="btn btn-default btn-xs btn-copy-to-clipboard cursor-pointer"
                                 onclick="$(this).attr('data-original-title', 'Copied').tooltip('show').attr('data-original-title', 'Copy Link to Clipboard');return false;">
-                                <i class='fa fa-clipboard'></i>
+                                <i class='fa fa-clipboard'></i> Copy Profile Link
                             </button>
                         </div>
                         <asp:Literal ID="lMainTopContentHtml" runat="server" />
+
+                        <Rock:NotificationBox ID="nbProfileWarning" runat="server" Text="A Profile Photo and Summary is recommended. Click Edit Preferences to set these." NotificationBoxType="Success" Visible="false" />
                     </div>
                 </div>
 
@@ -48,7 +50,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="actions pull-right">
-                                    <asp:LinkButton ID="btnMakeDonation" runat="server" CssClass="btn btn-primary" Text="Contribute to..." OnClick="btnMakeDonation_Click" />
+                                    <asp:LinkButton ID="btnMakeDonation" runat="server" CssClass="btn btn-sm btn-primary" Text="Contribute to..." OnClick="btnMakeDonation_Click" />
                                 </div>
                             </div>
                         </div>
@@ -71,8 +73,8 @@
                                 <Columns>
                                     <asp:BoundField DataField="AuthorizedPersonAlias.Person.FullName" HeaderText="Name" />
                                     <Rock:RockLiteralField ID="lAddress" HeaderText="Address" />
-                                    <Rock:DateTimeField DataField="TransactionDateTime" HeaderText="Date" />
-                                    <Rock:CurrencyField DataField="TotalAmount" HeaderText="Amount" />
+                                    <Rock:DateTimeField DataField="TransactionDateTime" HeaderText="Date" ItemStyle-HorizontalAlign="Left" />
+                                    <Rock:CurrencyField DataField="TotalAmount" HeaderText="Amount" HeaderStyle-HorizontalAlign="Right" />
                                 </Columns>
                             </Rock:Grid>
                         </asp:Panel>

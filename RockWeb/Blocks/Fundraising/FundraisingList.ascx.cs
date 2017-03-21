@@ -43,33 +43,41 @@ namespace RockWeb.Blocks.Fundraising
     [DefinedValueField( "53C8FFF6-3022-4A2D-9BAE-FD3435BEA43D", "Fundraising Opportunity Types", "Select which opportunity types are shown, or leave blank to show all", false, true, order:1 )]
     [LinkedPage( "Details Page", required: false, order: 2 )]
     [CodeEditorField( "Lava Template", "The lava template to use for the results", CodeEditorMode.Lava, CodeEditorTheme.Rock, defaultValue:
-@"
-{% for item in GroupList %}
-{% assign photoUrl = item | Attribute:'OpportunityPhoto','Url' %}
-{% if photoUrl != '' %}
-<img src='{{ photoUrl }}' CssClass='img-responsive' width=200  />
-{% endif %}
-<article class='margin-b-lg'>
+@"<div class='panel panel-default'>
+    <div class='panel-heading'>Upcoming Fundraising Opportunities</div>
+    <div class='panel-body'>
 
-    <h3>{{ item | Attribute:'OpportunityTitle' }}</h3>
-    
-    {% assign dateRangeParts = item | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    
-    {{ item | Attribute:'OpportunityLocation' }}
-
-    <div>
-    {{ item | Attribute:'OpportunitySummary' }}
+        {% for item in GroupList %}
+            <div class='row margin-b-lg'>
+                <div class='col-md-4'>
+                    {% assign photoUrl = item | Attribute:'OpportunityPhoto','Url' %}
+                    {% if photoUrl != '' %}
+                        <img src='{{ photoUrl }}' class='img-responsive img-thumbnail' />
+                    {% endif %}
+                </div>  
+                <div class='col-md-8'>    
+                    <h3 class='margin-t-none'>{{ item | Attribute:'OpportunityTitle' }}</h3>
+                    
+                    {% assign dateRangeParts = item | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
+                    {% assign dateRangePartsSize = dateRangeParts | Size %}
+                    {% if dateRangePartsSize == 2 %}
+                      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
+                    {% elsif dateRangePartsSize == 1  %}      
+                      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
+                    {% endif %}
+                    
+                    {{ item | Attribute:'OpportunityLocation' }}
+                
+                    <div class='margin-v-md'>
+                        {{ item | Attribute:'OpportunitySummary' }}
+                    </div>
+                    <a href='{{ DetailsPage }}?GroupId={{ item.Id }}' class='btn btn-default'>View Details »</a>
+                </div>
+            </div>
+        {% endfor %}
+        
     </div>
-<a href='{{ DetailsPage }}?GroupId={{ item.Id }}' class='btn btn-default'>View Details »</a>    
-</article>
-{% endfor %}
-        ", order: 3 )]
+</div>", order: 3 )]
     public partial class FundraisingList : RockBlock
     {
         #region Base Control Methods

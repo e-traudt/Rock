@@ -10,9 +10,9 @@
 
                 <%-- Left Sidebar --%>
                 <div class="col-md-4">
-                    <asp:Image ID="imgOpportunityPhoto" runat="server" CssClass="title-image img-responsive" />
+                    <asp:Image ID="imgOpportunityPhoto" runat="server" CssClass="img-responsive " />
                     <asp:LinkButton ID="btnDonateToParticipant" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Donate to a Participant" OnClick="btnDonateToParticipant_Click" />
-                    <asp:LinkButton ID="btnLeaderToolbox" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Leader Toolbox" OnClick="btnLeaderToolbox_Click" />
+                    <asp:LinkButton ID="btnLeaderToolbox" runat="server" CssClass="btn btn-primary btn-block margin-t-sm" Text="Leader Toolbox" OnClick="btnLeaderToolbox_Click" />
                     <asp:Literal ID="lSidebarHtml" runat="server" />
                 </div>
 
@@ -47,7 +47,7 @@
 
                     <br />
 
-                    <div class="btn-group margin-t-md">
+                    <div id="tlTabList" runat="server" class="btn-group margin-v-md">
                         <asp:LinkButton ID="btnDetailsTab" runat="server" Text="Details" CssClass="btn btn-primary" OnClick="btnDetailsTab_Click" />
                         <asp:LinkButton ID="btnUpdatesTab" runat="server" Text="Updates" CssClass="btn btn-default" OnClick="btnUpdatesTab_Click" />
                         <asp:LinkButton ID="btnCommentsTab" runat="server" Text="Comments" CssClass="btn btn-default" OnClick="btnCommentsTab_Click" />

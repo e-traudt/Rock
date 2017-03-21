@@ -39,7 +39,6 @@ namespace RockWeb.Blocks.Fundraising
 
     [CodeEditorField( "Profile Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 400, false,
     @"
-{{ 'summary_large_image' | AddMetaTagToHead:'property','twitter:card' }}
 {{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','twitter:title' }}
 {{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','twitter:description' }}
 
@@ -50,11 +49,12 @@ namespace RockWeb.Blocks.Fundraising
 {% if opportunityPhotoUrl != '' %}
     {{ opportunityPhotoUrl | AddMetaTagToHead:'property','og:image' }}
     {{ opportunityPhotoUrl | AddMetaTagToHead:'property','twitter:image' }}
+    {{ 'summary_large_image' | AddMetaTagToHead:'property','twitter:card' }}
 {% endif %}
 
 <div class='row'>
-    <img src='{{ GroupMember.Person.PhotoUrl }}' CssClass='img-responsive' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityTitle' }} {{ Group | Attribute:'OpportunityType' }}</h2>
+    <img src='{{ GroupMember.Person.PhotoUrl }}' class='img-circle pull-left margin-r-md' width=100 class='pull-left margin-all-md' />
+    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityType' }}</h2>
     {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
     {% assign dateRangePartsSize = dateRangeParts | Size %}
     {% if dateRangePartsSize == 2 %}
@@ -65,44 +65,34 @@ namespace RockWeb.Blocks.Fundraising
     {{ Group | Attribute:'OpportunityLocation' }}
 </div>
 
-<p>{{ GroupMember | Attribute:'PersonalTripIntroduction' }}</p>
+<p class='margin-v-lg'>
+    {{ GroupMember | Attribute:'PersonalTripIntroduction' }}
+</p>
 
 <script>function fbs_click() { u = location.href; t = document.title; window.open('http://www.facebook.com/sharer.php?u=' + encodeURIComponent(u) + '&t=' + encodeURIComponent(t), 'sharer', 'toolbar=0,status=0,width=626,height=436'); return false; }</script>
 
-<ul class=""socialsharing"">
+<ul class='socialsharing margin-b-lg'>
 	<li>
-		<a href=""http://www.facebook.com/share.php?u=<url>"" onclick=""return fbs_click()"" target=""_blank"" class=""socialicon socialicon-facebook"" title="""" data-original-title=""Share via Facebook"">
-			<i class=""fa fa-fw fa-facebook""></i>
+		<a href='http://www.facebook.com/share.php?u=<url>' onclick='return fbs_click()' target='_blank' class='socialicon socialicon-facebook' title='' data-original-title='Share via Facebook'>
+			<i class='fa fa-fw fa-facebook'></i>
 		</a>
 	</li>
 	<li>
-		<a href=""http://twitter.com/home?status={{ 'Global' | Page:'Url' | Escape }}"" class=""socialicon socialicon-twitter"" title="""" data-original-title=""Share via Twitter"">
-			<i class=""fa fa-fw fa-twitter""></i>
+		<a href='http://twitter.com/home?status=Help%20Fund%20Me {{ 'Global' | Page:'Url' | Escape }}' class='socialicon socialicon-twitter' title='' data-original-title='Share via Twitter'>
+			<i class='fa fa-fw fa-twitter'></i>
 		</a>
 	</li>
 	<li>
-		<a href=""mailto:?Subject={{ Event.Name | Escape }}&Body={{ 'Global' | Page:'Url' }}""  class=""socialicon socialicon-email"" title="""" data-original-title=""Share via Email"">
-			<i class=""fa fa-fw fa-envelope-o""></i>
+		<a href='mailto:?subject={{ Group | Attribute:'OpportunityTitle' | Escape }}&body=%0D%0A{{ 'Global' | Page:'Url' }}'  class='socialicon socialicon-email' title='' data-original-title='Share via Email'>
+			<i class='fa fa-fw fa-envelope-o'></i>
 		</a>
 	</li>
-</ul>", order: 1 )]
-
-    [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
-    @"
-{% for item in ContentChannelItems %}
-<article class='margin-b-lg'>
-  <h3>{{ item.Title }}</h3>
-  {{ item | Attribute:'Image' }}
-  <div>
-    {{ item.Content }}
-  </div>
-
-</article>
-{% endfor %}", order: 3 )]
+</ul>", order: 3 )]
     [NoteTypeField( "Note Type", "Note Type to use for participant comments", false, "Rock.Model.GroupMember", defaultValue: "FFFC3644-60CD-4D14-A714-E8DCC202A0E1", order: 4 )]
     [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
     [LinkedPage( "Main Page", "The main page for the fundraising opportunity", required: false, order: 6 )]
     [BooleanField( "Show Clipboard Icon", "Show a clipboard icon which will copy the page url to the users clipboard", true, order:7)]
+    [TextField( "Image CSS Class", "CSS class to apply to the image.", false, "img-thumbnail", key: "ImageCssClass", order: 8 )]
     public partial class FundraisingParticipant : RockBlock
     {
         #region Base Control Methods
@@ -161,6 +151,8 @@ namespace RockWeb.Blocks.Fundraising
                 {
                     pnlView.Visible = false;
                 }
+
+                imgOpportunityPhoto.CssClass = GetAttributeValue( "ImageCssClass" );
             }
             else
             {
@@ -497,6 +489,12 @@ namespace RockWeb.Blocks.Fundraising
             }
 
             group.LoadAttributes( rockContext );
+
+            // set page title to the trip name
+            RockPage.Title = group.GetAttributeValue( "OpportunityTitle" );
+            RockPage.BrowserTitle = group.GetAttributeValue( "OpportunityTitle" );
+            RockPage.Header.Title = group.GetAttributeValue( "OpportunityTitle" );
+
             var mergeFields = LavaHelper.GetCommonMergeFields( this.RockPage, this.CurrentPerson, new CommonMergeFieldsOptions { GetLegacyGlobalMergeFields = false } );
             mergeFields.Add( "Group", group );
 
@@ -524,7 +522,7 @@ namespace RockWeb.Blocks.Fundraising
                     warningItems.Add( "personal trip introduction" );
                 }
 
-                nbProfileWarning.Text = "A " + warningItems.AsDelimited( ", ", " and " ) + " is recommended. Click Edit Preferences.";
+                nbProfileWarning.Text = "<stong>Tip!</strong> A " + warningItems.AsDelimited( ", ", " and " ) + " is recommended. Click Edit Preferences.";
                 nbProfileWarning.Visible = warningItems.Any();
             }
             else
@@ -580,6 +578,9 @@ namespace RockWeb.Blocks.Fundraising
 
 
             var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
+
+            // set text on the return button
+            btnMainPage.Text = opportunityType.Value + " Page";
 
             // Tab:Updates
             btnUpdatesTab.Visible = false;

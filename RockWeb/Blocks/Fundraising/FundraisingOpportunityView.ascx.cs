@@ -39,31 +39,61 @@ namespace RockWeb.Blocks.Fundraising
 
     [CodeEditorField( "Summary Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 200, false,
         @"
+{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','twitter:title' }}
+{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','twitter:description' }}
+
+{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','og:title' }}
+{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','og:description' }}
+
+{% assign opportunityPhotoUrl = item | Attribute:'OpportunityPhoto','Url' %}
+{% if opportunityPhotoUrl != '' %}
+    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','og:image' }}
+    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','twitter:image' }}
+    {{ 'summary_large_image' | AddMetaTagToHead:'property','twitter:card' }}
+{% endif %}
+
 {% assign setPageTitleToOpportunityTitle = Block | Attribute:'SetPageTitletoOpportunityTitle','RawValue' %}
 {% if setPageTitleToOpportunityTitle != true %}
 <h1>{{ Group | Attribute:'OpportunityTitle' }}</h1>
 {% endif %}
 
-{% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-{% assign dateRangePartsSize = dateRangeParts | Size %}
-{% if dateRangePartsSize == 2 %}
-    {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-{% elsif dateRangePartsSize == 1  %}      
-    {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-{% endif %}
-{{ Group | Attribute:'OpportunityLocation' }}
+<div class='opportunity-whenwhere margin-b-lg lead'>
+    {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
+    {% assign dateRangePartsSize = dateRangeParts | Size %}
+    {% if dateRangePartsSize == 2 %}
+        {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
+    {% elsif dateRangePartsSize == 1  %}      
+        {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
+    {% endif %}
+    {{ Group | Attribute:'OpportunityLocation' }}
+</div>
 
-<br />
-<br />
-<p>
-{{ Group | Attribute:'OpportunitySummary' }}
-</p>
+<div class='opportunity-summary'>
+    {{ Group | Attribute:'OpportunitySummary' }}
+</div>
 
+<ul class='socialsharing margin-b-lg'>
+	<li>
+		<a href='http://www.facebook.com/share.php?u=<url>' onclick='return fbs_click()' target='_blank' class='socialicon socialicon-facebook' title='' data-original-title='Share via Facebook'>
+			<i class='fa fa-fw fa-facebook'></i>
+		</a>
+	</li>
+	<li>
+		<a href='http://twitter.com/home?status={{ Group | Attribute:'OpportunityTitle' | Escape }}%20{{ 'Global' | Page:'Url' | Escape }}' class='socialicon socialicon-twitter' title='' data-original-title='Share via Twitter'>
+			<i class='fa fa-fw fa-twitter'></i>
+		</a>
+	</li>
+	<li>
+		<a href='mailto:?subject={{ Group | Attribute:'OpportunityTitle' | Escape }}&body=%0D%0A{{ 'Global' | Page:'Url' }}'  class='socialicon socialicon-email' title='' data-original-title='Share via Email'>
+			<i class='fa fa-fw fa-envelope-o'></i>
+		</a>
+	</li>
+</ul>
 ", order: 1 )]
 
     [CodeEditorField( "Sidebar Lava Template", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 400, false,
         @"
-<div class='well margin-t-sm'>
+<div class='well margin-t-md'>
   {% if RegistrationInstance %}
 	{% assign daysTillStartDate = 'Now' | DateDiff:RegistrationInstance.StartDateTime,'m' %}
 	{% assign daysTillEndDate = 'Now' | DateDiff:RegistrationInstance.EndDateTime,'m' %}
@@ -81,9 +111,9 @@ namespace RockWeb.Blocks.Fundraising
 	{% endif %}
 
     {% if showRegistration %}
-    <div class='btn-success btn-block text-center padding-all-sm margin-b-sm'>Open</div>
+        <div class='label label-success text-center' style='display: block; padding: 8px; margin-bottom: 12px;'>Registration Open</div>
     {% else %}
-    <div class='btn-danger btn-block text-center padding-all-sm margin-b-sm'>Closed</div>
+        <div class='label label-default text-center' style='display: block; padding: 8px; margin-bottom: 12px;'>Registration Closed</div>
     {% endif %}
   
       {% if (RegistrationInstance.ContactPersonAlias.Person.Fullname | Trim != '') or RegistrationInstance.ContactEmail != '' or RegistrationInstance.ContactPhone != '' %}
@@ -124,11 +154,13 @@ namespace RockWeb.Blocks.Fundraising
 		  {{ registrationMessage }}
       {% endif %}
       
+      <small>
       {% if RegistrationSpotsAvailable == 1 %} 
         {{ RegistrationSpotsAvailable }} spot available   
       {% elseif RegistrationSpotsAvailable > 1 %} 
         {{ RegistrationSpotsAvailable }} spots available   
       {% endif %}
+      </small>
     
   {% endif %}
 </div>
@@ -143,7 +175,7 @@ namespace RockWeb.Blocks.Fundraising
   <div>
     {{ item.Content }}
   </div>
-
+  <hr />
 </article>
 {% endfor %}", order: 3 )]
     [NoteTypeField( "Note Type", "Note Type to use for comments", false, "Rock.Model.Group", defaultValue: "9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95", order: 4 )]
@@ -151,8 +183,8 @@ namespace RockWeb.Blocks.Fundraising
     [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 6 )]
     [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
     [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 8 )]
-
     [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 9 )]
+    [TextField( "Image CSS Class", "CSS class to apply to the image.", false, "img-thumbnail", key: "ImageCssClass", order: 10 )]
     public partial class FundraisingOpportunityView : RockBlock
     {
         #region Base Control Methods
@@ -190,6 +222,8 @@ namespace RockWeb.Blocks.Fundraising
                 {
                     pnlView.Visible = false;
                 }
+
+                imgOpportunityPhoto.CssClass = GetAttributeValue( "ImageCssClass" );
             }
         }
 
@@ -390,7 +424,7 @@ namespace RockWeb.Blocks.Fundraising
             // if btnDetailsTab is the only visible tab, hide the tab since there is nothing else to tab to
             if ( !btnCommentsTab.Visible && !btnUpdatesTab.Visible )
             {
-                btnDetailsTab.Visible = false;
+                tlTabList.Visible = false;
             }
         }
 
