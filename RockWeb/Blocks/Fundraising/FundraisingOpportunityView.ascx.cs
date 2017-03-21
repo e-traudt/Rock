@@ -63,8 +63,8 @@ namespace RockWeb.Blocks.Fundraising
 
     [CodeEditorField( "Sidebar Lava Template", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 400, false,
         @"
-{% if RegistrationInstance %}
-  <div class='well margin-t-sm'>
+<div class='well margin-t-sm'>
+  {% if RegistrationInstance %}
 	{% assign daysTillStartDate = 'Now' | DateDiff:RegistrationInstance.StartDateTime,'m' %}
 	{% assign daysTillEndDate = 'Now' | DateDiff:RegistrationInstance.EndDateTime,'m' %}
 	{% assign showRegistration = true %}
@@ -85,60 +85,53 @@ namespace RockWeb.Blocks.Fundraising
     {% else %}
     <div class='btn-danger btn-block text-center padding-all-sm margin-b-sm'>Closed</div>
     {% endif %}
-
   
-    {% for EventItemOccurrence in EventItemOccurrences %}
-
-      {% if EventItemOccurrence.Campus != null %}
-        <h4> {{ EventItemOccurrence.Campus.Name }} Campus</h4>
-      {% endif %}
-
-      {% if (EventItemOccurrence.ContactPersonAlias.Person.Fullname | Trim != '') or EventItemOccurrence.ContactEmail != '' or EventItemOccurrence.ContactPhone != '' %}
+      {% if (RegistrationInstance.ContactPersonAlias.Person.Fullname | Trim != '') or RegistrationInstance.ContactEmail != '' or RegistrationInstance.ContactPhone != '' %}
 		<p>
 			<strong>Contact</strong><br />
-			{% if EventItemOccurrence.ContactPersonAlias.Person.Fullname | Trim != '' %}
-			{{ EventItemOccurrence.ContactPersonAlias.Person.FullName }} <br />
+			{% if RegistrationInstance.ContactPersonAlias.Person.FullName | Trim != '' %}
+			{{ RegistrationInstance.ContactPersonAlias.Person.FullName }} <br />
 			{% endif %}
 
-			{% if EventItemOccurrence.ContactEmail != '' %}
-			{{ EventItemOccurrence.ContactEmail }} <br />
+			{% if RegistrationInstance.ContactEmail != '' %}
+			{{ RegistrationInstance.ContactEmail }} <br />
 			{% endif %}
 
-			{{ EventItemOccurrence.ContactPhone }}
+			{{ RegistrationInstance.ContactPhone }}
 		</p>
       {% endif %}
 
-      {% if EventItemOccurrence.Location != '' %}
+      {% assign locationText = Group | Attribute:'Location' %}
+      
+      {% if locationText != '' %}
       <p>
         <strong> Location</strong> <br />
-        {{ EventItemOccurrence.Location }}
+        locationText
       </p>
       {% endif %}
+     
 
-      {% assign scheduledDates = EventItemOccurrence.Schedule.iCalendarContent | DatesFromICal:'all' %}
-      <strong>Date / Time</strong>
-      <ul class='list-unstyled'>
-        {% for scheduledDate in scheduledDates %}
-        <li>
-          {{ scheduledDate | Date:'dddd, MMMM d, yyyy @ h:mm tt' }}
-        </li>
-        {% endfor %}
-      </ul>
-
-      {% if EventItemOccurrence.Note != '' %}
-      <strong>Note</strong><br />
-      {{ EventItemOccurrence.Note }}
+      {% assign registrationNotes = Group | Attribute:'RegistrationNotes' %}
+      
+      {% if registrationNotes != '' %}
+      <strong>Registration Notes</strong><br />
+      {{ registrationNotes }}
       {% endif %}
 
       {% if showRegistration == true %}
-		  <a href='{{ RegistrationPage }}?RegistrationInstanceId={{ RegistrationInstance.Id }}&EventOccurrenceID={{ EventItemOccurrence.Id }}' class='btn btn-primary btn-block margin-t-md'>{{ RegistrationStatusLabel }}</a>
+		  <a href='{{ RegistrationPage }}?RegistrationInstanceId={{ RegistrationInstance.Id }}' class='btn btn-primary btn-block margin-t-md'>{{ RegistrationStatusLabel }}</a>
       {% else %}
 		  {{ registrationMessage }}
       {% endif %}
-
-    {% endfor %}
-  </div>
-{% endif %}
+      
+      {% if RegistrationSpotsAvailable == 1 %} 
+        {{ RegistrationSpotsAvailable }} spot available   
+      {% elseif RegistrationSpotsAvailable > 1 %} 
+        {{ RegistrationSpotsAvailable }} spots available   
+      {% endif %}
+    
+  {% endif %}
+</div>
 ", order: 2 )]
 
     [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 200, false,
@@ -159,9 +152,7 @@ namespace RockWeb.Blocks.Fundraising
     [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
     [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 8 )]
 
-    [SlidingDateRangeField( "Date Range", "Optional date range to filter the event registration occurrences on (if there is more than one).", false, "", "Registration Filter", enabledSlidingDateRangeTypes: "Next,Upcoming,Current", order: 9 )]
-    [IntegerField( "Max Occurrences", "The maximum number of event registration occurrences to show.", false, 100, "Registration Filter", order: 10 )]
-    [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 11 )]
+    [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 9 )]
     public partial class FundraisingOpportunityView : RockBlock
     {
         #region Base Control Methods
@@ -261,29 +252,7 @@ namespace RockWeb.Blocks.Fundraising
 
             if ( registrationInstance != null )
             {
-                List<EventItemOccurrence> eventItemOccurrences = registrationInstance.Linkages.Select( a => a.EventItemOccurrence ).ToList();
-                
-                if ( eventItemOccurrences.Count() > 1 )
-                {
-                    // if there is more than one eventItemOccurrence, filter by date range and limit the count
-                    var dateRange = SlidingDateRangePicker.CalculateDateRangeFromDelimitedValues( GetAttributeValue( "DateRange" ) );
-                    if ( dateRange.Start != null && dateRange.End != null )
-                    {
-                        eventItemOccurrences.RemoveAll( o => o.GetStartTimes( dateRange.Start.Value, dateRange.End.Value ).Count() == 0 );
-                    }
-                    else
-                    {
-                        // default show all future (max 1 year)
-                        eventItemOccurrences.RemoveAll( o => o.GetStartTimes( RockDateTime.Now, RockDateTime.Now.AddDays( 365 ) ).Count() == 0 );
-                    }
-
-                    // limit results
-                    int maxItems = GetAttributeValue( "MaxOccurrences" ).AsInteger();
-                    eventItemOccurrences = eventItemOccurrences.OrderBy( i => i.NextStartDateTime ).Take( maxItems ).ToList();
-                }
-
                 mergeFields.Add( "RegistrationInstance", registrationInstance );
-                mergeFields.Add( "EventItemOccurrences", eventItemOccurrences );
 
                 // determine if the registration is full
                 var maxRegistrantCount = 0;
@@ -303,8 +272,11 @@ namespace RockWeb.Blocks.Fundraising
                                                     .Count();
                 }
 
-
                 mergeFields.Add( "RegistrationStatusLabel", ( maxRegistrantCount - currentRegistrationCount > 0 ) ? "Register" : "Join Wait List" );
+                if ( maxRegistrantCount != 0 )
+                {
+                    mergeFields.Add( "RegistrationSpotsAvailable", maxRegistrantCount - currentRegistrationCount );
+                }
             }
 
             string sidebarLavaTemplate = this.GetAttributeValue( "SidebarLavaTemplate" );
