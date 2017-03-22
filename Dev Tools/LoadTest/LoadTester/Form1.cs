@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,8 +20,8 @@ namespace LoadTester
     public partial class Form1 : Form
     {
         private static int clientCount;
-        private static int requestCountPerClient;
         private static int requestDelayMS;
+        private static int startOffsetMS;
         private static string url;
         private static bool downloadHeaderSrcElements;
         private static bool downloadBodySrcElements;
@@ -34,6 +35,10 @@ namespace LoadTester
         private static long responseCount = 0;
         private static int threadCount = 0;
         private static string requestMethod = "GET";
+        private static bool keepRunning = false;
+        private static int testDurationMS = 0;
+        private static Stopwatch stopwatchTestDuration = null;
+        private static List<Task> requestTasks = null;
 
         public Form1()
         {
@@ -76,16 +81,26 @@ namespace LoadTester
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void btnStart_Click( object sender, EventArgs e )
         {
+            Debug.WriteLine( GC.GetTotalMemory( false ) / 1024 );
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+
+            Debug.WriteLine( GC.GetTotalMemory( false ) / 1024 );
+            keepRunning = true;
             lblStatus.Text = "RUNNING";
             chartResults = new ConcurrentBag<ChartData>();
             exceptions = new ConcurrentBag<Exception>();
 
             clientCount = tbClientCount.Text.AsInteger();
-            requestCountPerClient = tbRequestCount.Text.AsInteger();
-            requestDelayMS = tbRequestsDelay.Text.AsInteger();
+            requestDelayMS = tbRequestsDelayMS.Text.AsInteger();
+
+            // spread out the start of the threads over the start window
+            startOffsetMS = tbStartWindowMS.Text.AsInteger() / clientCount;
+
             url = tbUrl.Text;
             downloadHeaderSrcElements = cbDownloadHeaderSrcElements.Checked;
             downloadBodySrcElements = cbDownloadBodySrcElements.Checked;
+            testDurationMS = (int)( tbTestDurationSecs.Text.AsDecimal() * 1000 );
             asciiEncoding = new ASCIIEncoding();
             postData = HttpUtility.ParseQueryString( string.Empty );
             foreach ( var line in tbPostBody.Lines )
@@ -96,12 +111,12 @@ namespace LoadTester
 
             postBytes = asciiEncoding.GetBytes( postData.ToString() );
 
-            pgbRequestCount.Maximum = clientCount * requestCountPerClient;
-            pgbRequestCount.Show();
+            pgbRequestCount.Visible = testDurationMS == 0;
+            pgbRequestCount.Maximum = clientCount;
             pgbRequestCount.Invalidate();
 
-            pgbResponseCount.Maximum = clientCount * requestCountPerClient;
-            pgbResponseCount.Show();
+            pgbResponseCount.Visible = testDurationMS == 0;
+            pgbResponseCount.Maximum = clientCount;
             pgbResponseCount.Invalidate();
 
             lblThreadCount.Text = "0";
@@ -110,15 +125,17 @@ namespace LoadTester
             requestMethod = radPOST.Checked ? "POST" : "GET";
 
             backgroundWorker1.RunWorkerAsync();
+
+            timer1.Enabled = true;
         }
 
+        /// <summary>
+        /// Runs the load test.
+        /// </summary>
+        /// <param name="bw">The bw.</param>
         private static void RunLoadTest( System.ComponentModel.BackgroundWorker bw )
         {
-            //System.Net.ServicePointManager.DefaultConnectionLimit = 960;
-            //System.Net.ServicePointManager.Expect100Continue = false;
-            //System.Net.ServicePointManager.UseNagleAlgorithm = false;
-
-            var stopwatchTestDuration = Stopwatch.StartNew();
+            stopwatchTestDuration = Stopwatch.StartNew();
             requestCount = 0;
             responseCount = 0;
             threadCount = 0;
@@ -128,7 +145,7 @@ namespace LoadTester
 
             var random = new Random();
 
-            List<Task> requestTasks = new List<Task>(clientCount);
+            requestTasks = new List<Task>( clientCount );
 
             //Parallel.For( 0, clientCount, ( i ) =>
             for ( int i = 0; i < clientCount; i++ )
@@ -136,28 +153,64 @@ namespace LoadTester
 
                 var task = new Task( () =>
                 {
-                    
-                    Interlocked.Increment( ref threadCount );
-                    bw.ReportProgress( 0 );
-                    
-                    requestCount++;
-                    DoHttpRequest( stopwatchTestDuration, baseUri, random );
-                    responseCount++;
+                    while ( true )
+                    {
+                        Interlocked.Increment( ref threadCount );
+                        bw.ReportProgress( 0 );
 
-                    Interlocked.Decrement( ref threadCount );
-                    bw.ReportProgress( 0 );
+                        requestCount++;
+                        if ( !keepRunning )
+                        {
+                            return;
+                        }
+
+                        if ( testDurationMS > 0 )
+                        {
+                            if ( stopwatchTestDuration.ElapsedMilliseconds > testDurationMS )
+                            {
+                                return;
+                            }
+                        }
+
+                        DoHttpRequest( baseUri, random );
+                        responseCount++;
+
+                        Interlocked.Decrement( ref threadCount );
+                        bw.ReportProgress( 0 );
+
+                        if ( testDurationMS == 0 )
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            if ( stopwatchTestDuration.ElapsedMilliseconds > testDurationMS )
+                            {
+                                break;
+                            }
+                        }
+                    }
 
                 }, TaskCreationOptions.LongRunning );
 
                 requestTasks.Add( task );
             }
 
-            requestTasks.ForEach( a => {
+            requestTasks.ForEach( a =>
+            {
                 a.Start();
-                Thread.Sleep( 10 );
+                Thread.Sleep( startOffsetMS );
             } );
 
-            Task.WaitAll( requestTasks.ToArray() );
+
+            if ( testDurationMS > 0 )
+            {
+                Task.WaitAll( requestTasks.ToArray(), testDurationMS );
+            }
+            else
+            {
+                Task.WaitAll( requestTasks.ToArray() );
+            }
 
             stopwatchTestDuration.Stop();
             bw.ReportProgress( 0 );
@@ -200,57 +253,48 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
             statsText += Environment.NewLine + exceptions.Select( a => a.Message ).ToList().AsDelimited( Environment.NewLine );
         }
 
-        private static void DoHttpRequest( Stopwatch stopwatchTestDuration, Uri baseUri, Random random )
+        private static void DoHttpRequest( Uri baseUri, Random random )
         {
             try
             {
-                int requestCounter = 0;
+
                 CookieContainer cookieContainer = new CookieContainer();
 
-                while ( requestCounter < requestCountPerClient )
+                HttpWebRequest clientRequest = GetClientRequest( url, random, postBytes, cookieContainer );
+
+                var threadStopwatch = Stopwatch.StartNew();
+                string pageLoadTimeMS = string.Empty;
+                long responseLength = 0;
+
+                var httpResponse = clientRequest.GetResponse() as HttpWebResponse;
+
+                if ( httpResponse.ResponseUri != clientRequest.RequestUri )
                 {
-                    requestCounter++;
-                    HttpWebRequest clientRequest = GetClientRequest( url, random, postBytes, cookieContainer );
-
-                    var threadStopwatch = Stopwatch.StartNew();
-                    string pageLoadTimeMS = string.Empty;
-                    long responseLength = 0;
-
-                    //var httpResponseTask = clientRequest.GetResponseAsync() as Task<WebResponse>;
-                    var httpResponse = clientRequest.GetResponse() as HttpWebResponse;
-
-                    //httpResponseTask.ContinueWith( ( r ) =>
-                    //{
-                    //var httpResponse = r.Result as HttpWebResponse;
-                    if ( httpResponse.ResponseUri != clientRequest.RequestUri )
-                    {
-                        throw new Exception( "Redirected:" + httpResponse.ResponseUri );
-                    }
-
-                    if ( httpResponse.StatusCode != HttpStatusCode.OK )
-                    {
-                        throw new Exception( "StatusCode:" + httpResponse.StatusCode.ToString() );
-                    }
-
-                    responseLength = 0;
-
-                    threadStopwatch.Stop();
-
-                    if ( ( downloadHeaderSrcElements || downloadBodySrcElements ) )
-                    {
-                        responseLength = ProcessResponse( exceptions, baseUri, downloadHeaderSrcElements, downloadBodySrcElements, requestCounter, httpResponse );
-                    }
-                    //} ).Wait();
-
-                    threadStopwatch.Stop();
-                    chartResults.Add( new ChartData
-                    {
-                        XValue = new DateTime( 2016, 1, 1 ).Add( stopwatchTestDuration.Elapsed ),
-                        YValue = Math.Round( threadStopwatch.Elapsed.TotalMilliseconds, 3 ),
-                        Series = string.Format( "ThreadId:{0}", Thread.CurrentThread.ManagedThreadId ),
-                        ResponseLength = responseLength
-                    } );
+                    throw new Exception( "Redirected:" + httpResponse.ResponseUri );
                 }
+
+                if ( httpResponse.StatusCode != HttpStatusCode.OK )
+                {
+                    throw new Exception( "StatusCode:" + httpResponse.StatusCode.ToString() );
+                }
+
+                responseLength = 0;
+
+                threadStopwatch.Stop();
+
+                if ( ( downloadHeaderSrcElements || downloadBodySrcElements ) )
+                {
+                    responseLength = ProcessResponse( exceptions, baseUri, downloadHeaderSrcElements, downloadBodySrcElements, httpResponse );
+                }
+
+                threadStopwatch.Stop();
+                chartResults.Add( new ChartData
+                {
+                    XValue = new DateTime( 2016, 1, 1 ).Add( stopwatchTestDuration.Elapsed ),
+                    YValue = Math.Round( threadStopwatch.Elapsed.TotalMilliseconds, 3 ),
+                    Series = string.Format( "ThreadId:{0}", Thread.CurrentThread.ManagedThreadId ),
+                    ResponseLength = responseLength
+                } );
 
                 System.Threading.Thread.Sleep( requestDelayMS );
             }
@@ -268,7 +312,7 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
             clientRequest.CookieContainer = cookieContainer;
             clientRequest.UserAgent = UserAgentStrings[0];// random.Next( 0, UserAgentStrings.Count() - 1 )];
             clientRequest.Timeout = 60000;
-            clientRequest.ReadWriteTimeout = 30000;
+            clientRequest.ReadWriteTimeout = 60000;
             clientRequest.Method = requestMethod;
 
             if ( requestMethod == "POST" )
@@ -280,16 +324,18 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
                 using ( var postStream = clientRequest.GetRequestStream() )
                 {
                     postStream.WriteTimeout = 30000;
-                    postStream.Write( postBytes, 0, postBytes.Length );
-                    postStream.Flush();
-                    postStream.Close();
+                    postStream.WriteAsync( postBytes, 0, postBytes.Length ).ContinueWith( ( a ) =>
+                    {
+                        postStream.Flush();
+                        postStream.Close();
+                    } ).Wait();
                 }
             }
 
             return clientRequest;
         }
 
-        private static long ProcessResponse( ConcurrentBag<Exception> exceptions, Uri baseUri, bool downloadHeaderSrcElements, bool downloadBodySrcElements, int requestCounter, HttpWebResponse httpResponse )
+        private static long ProcessResponse( ConcurrentBag<Exception> exceptions, Uri baseUri, bool downloadHeaderSrcElements, bool downloadBodySrcElements, HttpWebResponse httpResponse )
         {
             long responseLength;
             using ( var stream = httpResponse.GetResponseStream() )
@@ -298,7 +344,7 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
                 {
                     var responseHtml = reader.ReadToEnd();
                     responseLength = responseHtml.Length;
-                    if ( requestCounter == 1 && ( downloadHeaderSrcElements || downloadBodySrcElements ) )
+                    if ( downloadHeaderSrcElements || downloadBodySrcElements )
                     {
                         var htmlDoc = new HtmlAgilityPack.HtmlDocument();
                         htmlDoc.LoadHtml( responseHtml );
@@ -368,22 +414,36 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
         /// </summary>
         /// <param name="requestCount">The request count.</param>
         /// <param name="threadCount">The thread count.</param>
-        private void UpdateProgressBar( long requestCount, long responseCount , long threadCount )
+        private void UpdateProgressBar()
         {
             if ( InvokeRequired )
             {
-                BeginInvoke( new Action<long, long, long>( UpdateProgressBar ), new object[] { requestCount, threadCount } );
+                BeginInvoke( new Action( UpdateProgressBar ), new object[] { requestCount, threadCount } );
                 return;
             }
 
-            pgbRequestCount.Value = (int)Interlocked.Read( ref requestCount );
-            pgbResponseCount.Value = (int)Interlocked.Read( ref responseCount );
-
-            if ( lblThreadCount.Text != threadCount.ToString() )
+            if ( pgbRequestCount.Visible )
             {
-                lblThreadCount.Text = threadCount.ToString();
+                pgbRequestCount.Value = (int)Interlocked.Read( ref requestCount );
+            }
+
+            if ( pgbResponseCount.Visible )
+            {
+                pgbResponseCount.Value = (int)Interlocked.Read( ref responseCount );
+            }
+
+            //if ( lblThreadCount.Text != threadCount.ToString() )
+            {
+                lblThreadCount.Text = $"Threads: {threadCount}\nRequests: {requestCount}\nResponses: {responseCount}";
+                if (exceptions.Any())
+                {
+                    lblThreadCount.Text += $"\nExceptions:{exceptions.Count()}";
+                }
+
                 lblThreadCount.Refresh();
             }
+
+            lblStatus.Text = $"RUNNING:{Math.Round( stopwatchTestDuration.Elapsed.TotalSeconds, 1 )}s";
         }
 
         /// <summary>
@@ -427,6 +487,8 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
         /// <param name="e">The <see cref="System.ComponentModel.RunWorkerCompletedEventArgs"/> instance containing the event data.</param>
         private void backgroundWorker1_RunWorkerCompleted( object sender, System.ComponentModel.RunWorkerCompletedEventArgs e )
         {
+            timer1.Enabled = false;
+
             if ( e.Error != null )
             {
                 lblStatus.Text = $"{e.Error.Message}, {e.Error.StackTrace}";
@@ -435,6 +497,8 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
             {
                 lblStatus.Text = "DONE";
             }
+
+            keepRunning = false;
 
             chart1.Invalidate();
             lblThreadCount.Visible = false;
@@ -492,11 +556,32 @@ Requests/sec: {requestsPerMillisecond * 1000:0.0}
             }
 
             tbStats.Text = statsText;
+
+            tbExceptions.Lines = exceptions.Select( a => a.Message + "@" +  a.StackTrace ).ToArray();
         }
 
         private void backgroundWorker1_ProgressChanged( object sender, System.ComponentModel.ProgressChangedEventArgs e )
         {
-            UpdateProgressBar( requestCount, responseCount, threadCount );
+            UpdateProgressBar();
+        }
+
+        private void btnStop_Click( object sender, EventArgs e )
+        {
+            if ( keepRunning )
+            {
+                keepRunning = false;
+                lblStatus.Text = "Stopping...";
+            }
+        }
+
+        private void timer1_Tick( object sender, EventArgs e )
+        {
+            UpdateProgressBar();
+        }
+
+        private void tbUrl_TextChanged( object sender, EventArgs e )
+        {
+
         }
     }
 }
