@@ -18,13 +18,13 @@ using Rock.Web.Cache;
 
 namespace Rock.Rest.Controllers
 {
-    public class SlingshotController : ApiControllerBase
+    public class PersonImportController : ApiControllerBase
     {
-        [System.Web.Http.Route( "api/Slingshot/PostPersonImport" )]
+        [System.Web.Http.Route( "api/PersonImport" )]
         [HttpPost]
        // [RequireHttps]
       //  [Authenticate, Secured]
-        public System.Net.Http.HttpResponseMessage PostPersonImport( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
+        public System.Net.Http.HttpResponseMessage Post( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
             Stopwatch stopwatch = Stopwatch.StartNew();
