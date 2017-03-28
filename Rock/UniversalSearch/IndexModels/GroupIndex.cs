@@ -45,7 +45,7 @@ namespace Rock.UniversalSearch.IndexModels
         /// <value>
         /// The name of the group type.
         /// </value>
-        [RockIndexField( Boost = 4)]
+        [RockIndexField]
         public string GroupTypeName { get; set; }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Rock.UniversalSearch.IndexModels
         /// <value>
         /// The leader list.
         /// </value>
-        [RockIndexField]
+        [RockIndexField( Boost = 2 )]
         public string LeaderList { get; set; }
 
         /// <summary>
