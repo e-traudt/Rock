@@ -20,11 +20,12 @@ namespace Rock.BulkUpdate
 
         /// <summary>
         /// Gets or sets the family foreign identifier.
+        /// NOTE: If this is set to NULL, autocreate a new family for this person
         /// </summary>
         /// <value>
         /// The family foreign identifier.
         /// </value>
-        public int FamilyForeignId { get; set; }
+        public int? FamilyForeignId { get; set; }
 
         /// <summary>
         /// Gets or sets the group role identifier.
@@ -50,6 +51,22 @@ namespace Rock.BulkUpdate
         ///   <c>true</c> if [giving individually]; otherwise, <c>false</c>.
         /// </value>
         public bool GivingIndividually { get; set; }
+
+        /// <summary>
+        /// Gets the name of the family.
+        /// </summary>
+        /// <value>
+        /// The name of the family.
+        /// </value>
+        public string FamilyName { get; internal set; }
+
+        /// <summary>
+        /// Gets the family image URL.
+        /// </summary>
+        /// <value>
+        /// The family image URL.
+        /// </value>
+        public string FamilyImageUrl { get; internal set; }
 
         #endregion Family Fields
 
@@ -218,11 +235,20 @@ namespace Rock.BulkUpdate
 
         /// <summary>
         /// Gets or sets the date of the Person's projected or actual high school graduation year. This value is used to determine what grade a student is in.
+        /// If this is not known, but Grade is, set Grade to have Rock calculate the GraduationYear
         /// </summary>
         /// <value>
         /// The Person's projected or actual high school graduation year
         /// </value>
         public int? GraduationYear { get; set; }
+
+        /// <summary>
+        /// Gets or sets the grade, which will be used to determine the GraduationYear
+        /// </summary>
+        /// <value>
+        /// The grade.
+        /// </value>
+        public string Grade { get; set; }
 
         /// <summary>
         /// Gets or sets the Person's email address.
@@ -263,6 +289,14 @@ namespace Rock.BulkUpdate
         /// A <see cref="System.String"/> representing an Inactive Reason Note.
         /// </value>
         public string InactiveReasonNote { get; set; }
+
+        /// <summary>
+        /// Gets the person photo URL.
+        /// </summary>
+        /// <value>
+        /// The person photo URL.
+        /// </value>
+        public string PersonPhotoUrl { get; internal set; }
 
         #endregion Person Fields that map directly to Rock.Model.Person
 
@@ -311,8 +345,7 @@ namespace Rock.BulkUpdate
         /// The modified date time.
         /// </value>
         public DateTime? ModifiedDateTime { get; set; }
-        public string FamilyName { get; internal set; }
-        public string FamilyImageUrl { get; internal set; }
+        public string Note { get; internal set; }
 
         #endregion
     }
