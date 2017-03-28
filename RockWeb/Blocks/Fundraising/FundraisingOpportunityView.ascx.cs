@@ -27,6 +27,7 @@ using Rock.Attribute;
 using Rock.Data;
 using Rock.Lava;
 using Rock.Model;
+using Rock.Web;
 using Rock.Web.Cache;
 using Rock.Web.UI;
 using Rock.Web.UI.Controls;
@@ -37,154 +38,25 @@ namespace RockWeb.Blocks.Fundraising
     [Category( "Fundraising" )]
     [Description( "Public facing block that shows a fundraising opportunity" )]
 
-    [CodeEditorField( "Summary Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 200, false,
-        @"
-{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','twitter:title' }}
-{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','twitter:description' }}
+    [CodeEditorField( "Summary Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display title and other details about the fundraising opportunity.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingOpportunitySummary.lava' %}", order: 1 )]
 
-{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','og:title' }}
-{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','og:description' }}
+    [CodeEditorField( "Sidebar Lava Template", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingOpportunitySidebar.lava' %}", order: 2 )]
 
-{% assign opportunityPhotoUrl = item | Attribute:'OpportunityPhoto','Url' %}
-{% if opportunityPhotoUrl != '' %}
-    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','og:image' }}
-    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','twitter:image' }}
-    {{ 'summary_large_image' | AddMetaTagToHead:'property','twitter:card' }}
-{% endif %}
-
-{% assign setPageTitleToOpportunityTitle = Block | Attribute:'SetPageTitletoOpportunityTitle','RawValue' %}
-{% if setPageTitleToOpportunityTitle != true %}
-<h1>{{ Group | Attribute:'OpportunityTitle' }}</h1>
-{% endif %}
-
-<div class='opportunity-whenwhere margin-b-lg lead'>
-    {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-        {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-        {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    {{ Group | Attribute:'OpportunityLocation' }}
-</div>
-
-<div class='opportunity-summary'>
-    {{ Group | Attribute:'OpportunitySummary' }}
-</div>
-
-<ul class='socialsharing margin-b-lg'>
-	<li>
-		<a href='http://www.facebook.com/share.php?u=<url>' onclick='return fbs_click()' target='_blank' class='socialicon socialicon-facebook' title='' data-original-title='Share via Facebook'>
-			<i class='fa fa-fw fa-facebook'></i>
-		</a>
-	</li>
-	<li>
-		<a href='http://twitter.com/home?status={{ Group | Attribute:'OpportunityTitle' | Escape }}%20{{ 'Global' | Page:'Url' | Escape }}' class='socialicon socialicon-twitter' title='' data-original-title='Share via Twitter'>
-			<i class='fa fa-fw fa-twitter'></i>
-		</a>
-	</li>
-	<li>
-		<a href='mailto:?subject={{ Group | Attribute:'OpportunityTitle' | Escape }}&body=%0D%0A{{ 'Global' | Page:'Url' }}'  class='socialicon socialicon-email' title='' data-original-title='Share via Email'>
-			<i class='fa fa-fw fa-envelope-o'></i>
-		</a>
-	</li>
-</ul>
-", order: 1 )]
-
-    [CodeEditorField( "Sidebar Lava Template", "Lava template for what to display on the left side bar. Usually used to show event registration or other info.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 400, false,
-        @"
-<div class='well margin-t-md'>
-  {% if RegistrationInstance %}
-	{% assign daysTillStartDate = 'Now' | DateDiff:RegistrationInstance.StartDateTime,'m' %}
-	{% assign daysTillEndDate = 'Now' | DateDiff:RegistrationInstance.EndDateTime,'m' %}
-	{% assign showRegistration = true %}
-	{% assign registrationMessage = '' %}
-
-	{% if daysTillStartDate and daysTillStartDate > 0 %}
-		{% assign showRegistration = false %}
-		{% capture registrationMessage %}<p>Registration opens on {{ RegistrationInstance.StartDateTime | Date:'dddd, MMMM d, yyyy' }}</p>{% endcapture %}
-	{% endif %}
-
-	{% if daysTillEndDate and daysTillEndDate < 0 %}
-		{% assign showRegistration = false %}
-		{% capture registrationMessage %}<p>Registration closed on {{ RegistrationInstance.EndDateTime | Date:'dddd, MMMM d, yyyy' }}</p>{% endcapture %}
-	{% endif %}
-
-    {% if showRegistration %}
-        <div class='label label-success text-center' style='display: block; padding: 8px; margin-bottom: 12px;'>Registration Open</div>
-    {% else %}
-        <div class='label label-default text-center' style='display: block; padding: 8px; margin-bottom: 12px;'>Registration Closed</div>
-    {% endif %}
-  
-      {% if (RegistrationInstance.ContactPersonAlias.Person.Fullname | Trim != '') or RegistrationInstance.ContactEmail != '' or RegistrationInstance.ContactPhone != '' %}
-		<p>
-			<strong>Contact</strong><br />
-			{% if RegistrationInstance.ContactPersonAlias.Person.FullName | Trim != '' %}
-			{{ RegistrationInstance.ContactPersonAlias.Person.FullName }} <br />
-			{% endif %}
-
-			{% if RegistrationInstance.ContactEmail != '' %}
-			{{ RegistrationInstance.ContactEmail }} <br />
-			{% endif %}
-
-			{{ RegistrationInstance.ContactPhone }}
-		</p>
-      {% endif %}
-
-      {% assign locationText = Group | Attribute:'Location' %}
-      
-      {% if locationText != '' %}
-      <p>
-        <strong> Location</strong> <br />
-        locationText
-      </p>
-      {% endif %}
-     
-
-      {% assign registrationNotes = Group | Attribute:'RegistrationNotes' %}
-      
-      {% if registrationNotes != '' %}
-      <strong>Registration Notes</strong><br />
-      {{ registrationNotes }}
-      {% endif %}
-
-      {% if showRegistration == true %}
-		  <a href='{{ RegistrationPage }}?RegistrationInstanceId={{ RegistrationInstance.Id }}' class='btn btn-primary btn-block margin-t-md'>{{ RegistrationStatusLabel }}</a>
-      {% else %}
-		  {{ registrationMessage }}
-      {% endif %}
-      
-      <small>
-      {% if RegistrationSpotsAvailable == 1 %} 
-        {{ RegistrationSpotsAvailable }} spot available   
-      {% elseif RegistrationSpotsAvailable > 1 %} 
-        {{ RegistrationSpotsAvailable }} spots available   
-      {% endif %}
-      </small>
-    
-  {% endif %}
-</div>
-", order: 2 )]
-
-    [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 200, false,
-        @"
-{% for item in ContentChannelItems %}
-<article class='margin-b-lg'>
-  <h3>{{ item.Title }}</h3>
-  {{ item | Attribute:'Image' }}
-  <div>
-    {{ item.Content }}
-  </div>
-  <hr />
-</article>
-{% endfor %}", order: 3 )]
+    [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingOpportunityUpdates.lava' %}", order: 3 )]
     [NoteTypeField( "Note Type", "Note Type to use for comments", false, "Rock.Model.Group", defaultValue: "9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95", order: 4 )]
     [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
     [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 6 )]
     [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
-    [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 8 )]
-    [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 9 )]
-    [TextField( "Image CSS Class", "CSS class to apply to the image.", false, "img-thumbnail", key: "ImageCssClass", order: 10 )]
+
+    [CodeEditorField( "Participant Lava Template", "Lava template for how the partipant actions and progress bar should be displayed ", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingOpportunityUpdates.lava' %}", order: 8 )]
+
+    [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 9 )]
+    [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 10 )]
+    [TextField( "Image CSS Class", "CSS class to apply to the image.", false, "img-thumbnail", key: "ImageCssClass", order: 11 )]
     public partial class FundraisingOpportunityView : RockBlock
     {
         #region Base Control Methods
@@ -225,6 +97,37 @@ namespace RockWeb.Blocks.Fundraising
 
                 imgOpportunityPhoto.CssClass = GetAttributeValue( "ImageCssClass" );
             }
+        }
+
+        /// <summary>
+        /// Returns breadcrumbs specific to the block that should be added to navigation
+        /// based on the current page reference.  This function is called during the page's
+        /// oninit to load any initial breadcrumbs.
+        /// </summary>
+        /// <param name="pageReference">The <see cref="T:Rock.Web.PageReference" />.</param>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.List`1" /> of block related <see cref="T:Rock.Web.UI.BreadCrumb">BreadCrumbs</see>.
+        /// </returns>
+        public override List<BreadCrumb> GetBreadCrumbs( PageReference pageReference )
+        {
+            var breadCrumbs = new List<BreadCrumb>();
+
+            int? groupId = PageParameter( pageReference, "GroupId" ).AsIntegerOrNull();
+            if ( groupId != null )
+            {
+                Group group = new GroupService( new RockContext() ).Get( groupId.Value );
+                if ( group != null )
+                {
+                    group.LoadAttributes();
+                    breadCrumbs.Add( new BreadCrumb( group.GetAttributeValue( "OpportunityTitle" ), pageReference ) );
+                }
+            }
+            else
+            {
+                // don't show a breadcrumb if we don't have a pageparam to work with
+            }
+
+            return breadCrumbs;
         }
 
         #endregion
@@ -287,6 +190,7 @@ namespace RockWeb.Blocks.Fundraising
             if ( registrationInstance != null )
             {
                 mergeFields.Add( "RegistrationInstance", registrationInstance );
+                mergeFields.Add( "RegistrationInstanceLinkages", registrationInstance.Linkages.Where(a => !string.IsNullOrEmpty(a.UrlSlug)) );
 
                 // determine if the registration is full
                 var maxRegistrantCount = 0;
@@ -332,14 +236,16 @@ namespace RockWeb.Blocks.Fundraising
             {
                 hfGroupMemberId.Value = groupMember.Id.ToString();
                 pnlParticipantActions.Visible = true;
-                imgParticipant.ImageUrl = Person.GetPersonPhotoUrl( groupMember.Person, 75, 75 );
             }
             else
             {
                 hfGroupMemberId.Value = null;
                 pnlParticipantActions.Visible = false;
-                imgParticipant.ImageUrl = null;
             }
+
+            mergeFields.Add( "GroupMember", groupMember );
+
+            var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
 
             // Progress
             if ( groupMember != null && pnlParticipantActions.Visible )
@@ -359,40 +265,45 @@ namespace RockWeb.Blocks.Fundraising
 
                 var amountLeft = individualFundraisingGoal - contributionTotal;
                 var percentMet = individualFundraisingGoal > 0 ? contributionTotal * 100 / individualFundraisingGoal : 100;
-                if ( amountLeft >= 0 )
+
+                mergeFields.Add( "AmountLeft", amountLeft );
+                mergeFields.Add( "PercentMet", percentMet );
+
+                var queryParams = new Dictionary<string, string>();
+                queryParams.Add( "GroupId", hfGroupId.Value );
+                queryParams.Add( "GroupMemberId", hfGroupMemberId.Value );
+                mergeFields.Add( "MakeDonationUrl", LinkedPageUrl( "DonationPage", queryParams ) );
+                mergeFields.Add( "ParticipantPageUrl", LinkedPageUrl( "ParticipantPage", queryParams ) );
+
+                string makeDonationButtonText = null;
+                if ( groupMember.PersonId == this.CurrentPersonId )
                 {
-                    lFundraisingAmountLeftText.Text = string.Format( "{0} left", amountLeft.FormatAsCurrency() );
+                    makeDonationButtonText = "Make Payment";
                 }
                 else
                 {
-                    // over 100% of the goal, so display percent
-                    lFundraisingAmountLeftText.Text = string.Format( "{0}%", Math.Round( percentMet ?? 0 ) );
+                    makeDonationButtonText = string.Format( "Contribute to {0} {1}", RockFilters.Possessive( groupMember.Person.NickName ), opportunityType );
                 }
 
-                lFundraisingProgressTitle.Text = "Fundraising Progress";
-                lFundraisingProgressBar.Text = string.Format(
-                    @"<div class='progress'>
-                    <div class='progress-bar' role='progressbar' aria-valuenow='{0}' aria-valuemin='0' aria-valuemax='100' style='width: {1}%;'>
-                    <span class='sr-only'>{0}% Complete</span>
-                    </div>
-                 </div>",
-                    Math.Round( percentMet ?? 0, 2 ), percentMet > 100 ? 100 : percentMet );
+                mergeFields.Add( "MakeDonationButtonText", makeDonationButtonText );
+
+                var participantLavaTemplate = this.GetAttributeValue( "ParticipantLavaTemplate" );
+                lParticipantActionsHtml.Text = participantLavaTemplate.ResolveMergeFields( mergeFields );
             }
 
             // Tab:Details
             lDetailsHtml.Text = group.GetAttributeValue( "OpportunityDetails" );
-            var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
             btnDetailsTab.Text = string.Format( "{0} Details", opportunityType );
 
             // Tab:Updates
-            btnUpdatesTab.Visible = false;
+            liUpdatesTab.Visible = false;
             var updatesContentChannelGuid = group.GetAttributeValue( "UpdateContentChannel" ).AsGuidOrNull();
             if ( updatesContentChannelGuid.HasValue )
             {
                 var contentChannel = new ContentChannelService( rockContext ).Get( updatesContentChannelGuid.Value );
                 if ( contentChannel != null )
                 {
-                    btnUpdatesTab.Visible = true;
+                    liUpdatesTab.Visible = true;
                     string updatesLavaTemplate = this.GetAttributeValue( "UpdatesLavaTemplate" );
                     var contentChannelItems = new ContentChannelItemService( rockContext ).Queryable().Where( a => a.ContentChannelId == contentChannel.Id ).AsNoTracking().ToList();
 
@@ -418,11 +329,11 @@ namespace RockWeb.Blocks.Fundraising
             notesCommentsTimeline.RebuildNotes( true );
 
             notesCommentsTimeline.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
-            btnCommentsTab.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
+            liCommentsTab.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             btnCommentsTab.Text = string.Format( "Comments ({0})", notesCommentsTimeline.NoteCount );
 
             // if btnDetailsTab is the only visible tab, hide the tab since there is nothing else to tab to
-            if ( !btnCommentsTab.Visible && !btnUpdatesTab.Visible )
+            if ( !liCommentsTab.Visible && !liUpdatesTab.Visible )
             {
                 tlTabList.Visible = false;
             }
@@ -438,9 +349,25 @@ namespace RockWeb.Blocks.Fundraising
             pnlDetails.Visible = tabName == "Details";
             pnlUpdates.Visible = tabName == "Updates";
             pnlComments.Visible = tabName == "Comments";
-            btnDetailsTab.CssClass = tabName == "Details" ? "btn btn-primary" : "btn btn-default";
-            btnUpdatesTab.CssClass = tabName == "Updates" ? "btn btn-primary" : "btn btn-default";
-            btnCommentsTab.CssClass = tabName == "Comments" ? "btn btn-primary" : "btn btn-default";
+
+            if ( tabName == "Details" )
+            {
+                liUpdatesTab.RemoveCssClass( "active" );
+                liDetailsTab.AddCssClass( "active" );
+                liCommentsTab.RemoveCssClass( "active" );
+            }
+            else if ( tabName == "Updates" )
+            {
+                liUpdatesTab.AddCssClass( "active" );
+                liDetailsTab.RemoveCssClass( "active" );
+                liCommentsTab.RemoveCssClass( "active" );
+            }
+            else if ( tabName == "Comments" )
+            {
+                liUpdatesTab.RemoveCssClass( "active" );
+                liDetailsTab.RemoveCssClass( "active" );
+                liCommentsTab.AddCssClass( "active" );
+            }
         }
 
         #endregion
@@ -486,33 +413,7 @@ namespace RockWeb.Blocks.Fundraising
         {
             SetActiveTab( "Comments" );
         }
-
-        /// <summary>
-        /// Handles the Click event of the btnParticipantPage control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void btnParticipantPage_Click( object sender, EventArgs e )
-        {
-            var queryParams = new Dictionary<string, string>();
-            queryParams.Add( "GroupId", hfGroupId.Value );
-            queryParams.Add( "GroupMemberId", hfGroupMemberId.Value );
-            NavigateToLinkedPage( "ParticipantPage", queryParams );
-        }
-
-        /// <summary>
-        /// Handles the Click event of the btnMakePayment control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void btnMakePayment_Click( object sender, EventArgs e )
-        {
-            var queryParams = new Dictionary<string, string>();
-            queryParams.Add( "GroupId", hfGroupId.Value );
-            queryParams.Add( "GroupMemberId", hfGroupMemberId.Value );
-            NavigateToLinkedPage( "DonationPage", queryParams );
-        }
-
+               
         /// <summary>
         /// Handles the Click event of the btnDonateToParticipant control.
         /// </summary>

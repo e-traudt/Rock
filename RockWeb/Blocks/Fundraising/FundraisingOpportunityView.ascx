@@ -23,35 +23,17 @@
 
                     <asp:Panel ID="pnlParticipantActions" runat="server">
                         <asp:HiddenField ID="hfGroupMemberId" runat="server" />
-                        <div class="well margin-t-md">
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <asp:Image ID="imgParticipant" runat="server" CssClass="pull-left margin-r-md img-circle" />
-                                    <label>
-                                        <asp:Literal ID="lFundraisingProgressTitle" runat="server" Text="Fundraising Progress" />
-                                    </label>
-                                    <label class='pull-right'>
-                                        <asp:Literal ID="lFundraisingAmountLeftText" runat="server" Text="$320 left" />
-                                    </label>
-                                    <asp:Literal ID="lFundraisingProgressBar" runat="server" />
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="pull-right">
-                                        <asp:LinkButton ID="btnParticipantPage" runat="server" Text="Participant Page" CssClass="btn btn-xs btn-block btn-primary" OnClick="btnParticipantPage_Click" />
-                                        <asp:LinkButton ID="btnMakePayment" runat="server" Text="Make Payment" CssClass="btn btn-xs btn-block btn-default" OnClick="btnMakePayment_Click" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <asp:Literal ID="lParticipantActionsHtml" runat="server" />
                     </asp:Panel>
 
                     <br />
 
-                    <div id="tlTabList" runat="server" class="btn-group margin-v-md">
-                        <asp:LinkButton ID="btnDetailsTab" runat="server" Text="Details" CssClass="btn btn-primary" OnClick="btnDetailsTab_Click" />
-                        <asp:LinkButton ID="btnUpdatesTab" runat="server" Text="Updates" CssClass="btn btn-default" OnClick="btnUpdatesTab_Click" />
-                        <asp:LinkButton ID="btnCommentsTab" runat="server" Text="Comments" CssClass="btn btn-default" OnClick="btnCommentsTab_Click" />
-                    </div>
+                    <ul id="tlTabList" runat="server" class="nav nav-pills margin-v-md">
+                        <li id="liDetailsTab" runat="server"><asp:LinkButton ID="btnDetailsTab" runat="server" Text="Details" OnClick="btnDetailsTab_Click" /></li>
+                        <li id="liUpdatesTab" runat="server"><asp:LinkButton ID="btnUpdatesTab" runat="server" Text="Updates" OnClick="btnUpdatesTab_Click" /></li>
+                        <li id="liCommentsTab" runat="server"><asp:LinkButton ID="btnCommentsTab" runat="server" Text="Comments" OnClick="btnCommentsTab_Click" /></li>
+                    </ul>
+
                     <asp:Panel ID="pnlDetails" CssClass="margin-t-md" runat="server">
                         <asp:Literal ID="lDetailsHtml" runat="server" />
                     </asp:Panel>

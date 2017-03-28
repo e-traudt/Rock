@@ -37,62 +37,21 @@ namespace RockWeb.Blocks.Fundraising
     [Category( "Fundraising" )]
     [Description( "Public facing block that shows a fundraising opportunity participant" )]
 
-    [CodeEditorField( "Profile Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 400, false,
-    @"
-{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','twitter:title' }}
-{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','twitter:description' }}
+    [CodeEditorField( "Profile Lava Template", "Lava template for what to display at the top of the main panel. Usually used to display information about the participant such as photo, name, etc.", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingParticipantProfile.lava' %}", order: 1 )]
 
-{{ Group | Attribute:'OpportunityTitle' | AddMetaTagToHead:'property','og:title' }}
-{{ Group | Attribute:'OpportunitySummary' | AddMetaTagToHead:'property','og:description' }}
+    [CodeEditorField( "Progress Lava Template", "Lava template for how the progress bar should be displayed ", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingParticipantProgress.lava' %}", order: 2)]
 
-{% assign opportunityPhotoUrl = item | Attribute:'OpportunityPhoto','Url' %}
-{% if opportunityPhotoUrl != '' %}
-    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','og:image' }}
-    {{ opportunityPhotoUrl | AddMetaTagToHead:'property','twitter:image' }}
-    {{ 'summary_large_image' | AddMetaTagToHead:'property','twitter:card' }}
-{% endif %}
+    [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingOpportunityUpdates.lava' %}", order: 3 )]
 
-<div class='row'>
-    <img src='{{ GroupMember.Person.PhotoUrl }}' class='img-circle pull-left margin-r-md' width=100 class='pull-left margin-all-md' />
-    <h2>{{ GroupMember.Person.FullName | Possessive }} {{ Group | Attribute:'OpportunityType' }}</h2>
-    {% assign dateRangeParts = Group | Attribute:'OpportunityDateRange','RawValue' | Split:',' %}
-    {% assign dateRangePartsSize = dateRangeParts | Size %}
-    {% if dateRangePartsSize == 2 %}
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }} to {{ dateRangeParts[1] | Date:'MMMM dd, yyyy' }}<br/>
-    {% elsif dateRangePartsSize == 1  %}      
-      {{ dateRangeParts[0] | Date:'MMMM dd, yyyy' }}
-    {% endif %}
-    {{ Group | Attribute:'OpportunityLocation' }}
-</div>
-
-<p class='margin-v-lg'>
-    {{ GroupMember | Attribute:'PersonalTripIntroduction' }}
-</p>
-
-<script>function fbs_click() { u = location.href; t = document.title; window.open('http://www.facebook.com/sharer.php?u=' + encodeURIComponent(u) + '&t=' + encodeURIComponent(t), 'sharer', 'toolbar=0,status=0,width=626,height=436'); return false; }</script>
-
-<ul class='socialsharing margin-b-lg'>
-	<li>
-		<a href='http://www.facebook.com/share.php?u=<url>' onclick='return fbs_click()' target='_blank' class='socialicon socialicon-facebook' title='' data-original-title='Share via Facebook'>
-			<i class='fa fa-fw fa-facebook'></i>
-		</a>
-	</li>
-	<li>
-		<a href='http://twitter.com/home?status=Help%20Fund%20Me {{ 'Global' | Page:'Url' | Escape }}' class='socialicon socialicon-twitter' title='' data-original-title='Share via Twitter'>
-			<i class='fa fa-fw fa-twitter'></i>
-		</a>
-	</li>
-	<li>
-		<a href='mailto:?subject={{ Group | Attribute:'OpportunityTitle' | Escape }}&body=%0D%0A{{ 'Global' | Page:'Url' }}'  class='socialicon socialicon-email' title='' data-original-title='Share via Email'>
-			<i class='fa fa-fw fa-envelope-o'></i>
-		</a>
-	</li>
-</ul>", order: 3 )]
-    [NoteTypeField( "Note Type", "Note Type to use for participant comments", false, "Rock.Model.GroupMember", defaultValue: "FFFC3644-60CD-4D14-A714-E8DCC202A0E1", order: 4 )]
-    [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
-    [LinkedPage( "Main Page", "The main page for the fundraising opportunity", required: false, order: 6 )]
-    [BooleanField( "Show Clipboard Icon", "Show a clipboard icon which will copy the page url to the users clipboard", true, order:7)]
-    [TextField( "Image CSS Class", "CSS class to apply to the image.", false, "img-thumbnail", key: "ImageCssClass", order: 8 )]
+    [NoteTypeField( "Note Type", "Note Type to use for participant comments", false, "Rock.Model.GroupMember", defaultValue: "FFFC3644-60CD-4D14-A714-E8DCC202A0E1", order: 5 )]
+    [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 6 )]
+    [LinkedPage( "Main Page", "The main page for the fundraising opportunity", required: false, order: 7 )]
+    [BooleanField( "Show Clipboard Icon", "Show a clipboard icon which will copy the page url to the users clipboard", true, order:8)]
+    [TextField( "Image CSS Class", "CSS class to apply to the image.", false, "img-thumbnail", key: "ImageCssClass", order: 9 )]
+    [AttributeField( Rock.SystemGuid.EntityType.PERSON, "PersonAttributes", "The Person Attributes that the participant can edit", false, true, order: 7 )]
     public partial class FundraisingParticipant : RockBlock
     {
         #region Base Control Methods
@@ -207,19 +166,6 @@ namespace RockWeb.Blocks.Fundraising
         }
 
         /// <summary>
-        /// Handles the Click event of the btnMakeDonation control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void btnMakeDonation_Click( object sender, EventArgs e )
-        {
-            var queryParams = new Dictionary<string, string>();
-            queryParams.Add( "GroupId", hfGroupId.Value );
-            queryParams.Add( "GroupMemberId", hfGroupMemberId.Value );
-            NavigateToLinkedPage( "DonationPage", queryParams );
-        }
-
-        /// <summary>
         /// Handles the Click event of the btnUpdatesTab control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -278,8 +224,20 @@ namespace RockWeb.Blocks.Fundraising
 
                 // GroupMember Attributes (all of them)
                 phGroupMemberAttributes.Controls.Clear();
+                
 
-                Rock.Attribute.Helper.AddEditControls( groupMember, phGroupMemberAttributes, true, "vgProfileEdit", true );
+                List<string> excludes = new List<string>();
+                if (!groupMember.Group.GetAttributeValue( "AllowIndividualDisablingofContributionRequests" ).AsBoolean() )
+                {
+                    excludes.Add( "DisablePublicContributionRequests" );
+                }
+
+                if ( !groupMember.Group.GetAttributeValue( "AllowIndividualEditingofFundraisingGoal" ).AsBoolean() )
+                {
+                    excludes.Add( "IndividualFundraisingGoal" );
+                }
+
+                Rock.Attribute.Helper.AddEditControls( groupMember, phGroupMemberAttributes, true, "vgProfileEdit", excludes, true );
 
                 // Person Attributes (the ones they picked in the Block Settings)
                 phPersonAttributes.Controls.Clear();
@@ -517,9 +475,9 @@ namespace RockWeb.Blocks.Fundraising
                 {
                     warningItems.Add( "profile photo" );
                 }
-                if ( groupMember.GetAttributeValue( "PersonalTripIntroduction" ).IsNullOrWhiteSpace())
+                if ( groupMember.GetAttributeValue( "PersonalOpportunityIntroduction" ).IsNullOrWhiteSpace())
                 {
-                    warningItems.Add( "personal trip introduction" );
+                    warningItems.Add( "personal opportunity introduction" );
                 }
 
                 nbProfileWarning.Text = "<stong>Tip!</strong> A " + warningItems.AsDelimited( ", ", " and " ) + " is recommended. Click Edit Preferences.";
@@ -536,11 +494,9 @@ namespace RockWeb.Blocks.Fundraising
 
             bool disablePublicContributionRequests = groupMember.GetAttributeValue( "DisablePublicContributionRequests" ).AsBoolean();
 
-            // only show Contribution stuff for Participants that haven't disabled contributions
-            pnlFundraising.Visible = !disablePublicContributionRequests;
-            pnlContributions.Visible = !disablePublicContributionRequests;
-            btnContributionsTab.Visible = !disablePublicContributionRequests;
-
+            // only show Contribution stuff if the current person is the participant and contribution requests haven't been disabled
+            btnContributionsTab.Visible = !disablePublicContributionRequests && ( groupMember.PersonId == this.CurrentPersonId );
+            
             // Progress
             var entityTypeIdGroupMember = EntityTypeCache.GetId<Rock.Model.GroupMember>();
 
@@ -557,27 +513,31 @@ namespace RockWeb.Blocks.Fundraising
 
             var amountLeft = individualFundraisingGoal - contributionTotal;
             var percentMet = individualFundraisingGoal > 0 ? contributionTotal * 100 / individualFundraisingGoal : 100;
-            if ( amountLeft >= 0 )
+
+            mergeFields.Add( "AmountLeft", amountLeft );
+            mergeFields.Add( "PercentMet", percentMet );
+         
+            var queryParams = new Dictionary<string, string>();
+            queryParams.Add( "GroupId", hfGroupId.Value );
+            queryParams.Add( "GroupMemberId", hfGroupMemberId.Value );
+            mergeFields.Add( "MakeDonationUrl", LinkedPageUrl( "DonationPage", queryParams ));
+
+            var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
+
+            string makeDonationButtonText = null;
+            if ( groupMember.PersonId == this.CurrentPersonId )
             {
-                lFundraisingAmountLeftText.Text = string.Format( "{0} left", amountLeft.FormatAsCurrency() );
+                makeDonationButtonText = "Make Payment";
             }
             else
             {
-                // over 100% of the goal, so display percent
-                lFundraisingAmountLeftText.Text = string.Format( "{0}%", Math.Round( percentMet ?? 0 ) );
+                makeDonationButtonText = string.Format( "Contribute to {0} {1}", RockFilters.Possessive( groupMember.Person.NickName ), opportunityType );
             }
 
-            lFundraisingProgressTitle.Text = "Fundraising Progress";
-            lFundraisingProgressBar.Text = string.Format(
-                @"<div class='progress'>
-                    <div class='progress-bar' role='progressbar' aria-valuenow='{0}' aria-valuemin='0' aria-valuemax='100' style='width: {1}%;'>
-                    <span class='sr-only'>{0}% Complete</span>
-                    </div>
-                 </div>",
-                Math.Round( percentMet ?? 0, 2 ), percentMet > 100 ? 100 : percentMet );
+            mergeFields.Add( "MakeDonationButtonText", makeDonationButtonText );
 
-
-            var opportunityType = DefinedValueCache.Read( group.GetAttributeValue( "OpportunityType" ).AsGuid() );
+            var progressLavaTemplate = this.GetAttributeValue( "ProgressLavaTemplate" );
+            lProgressHtml.Text = progressLavaTemplate.ResolveMergeFields( mergeFields );
 
             // set text on the return button
             btnMainPage.Text = opportunityType.Value + " Page";
@@ -602,15 +562,6 @@ namespace RockWeb.Blocks.Fundraising
                 }
             }
 
-            if ( groupMember.PersonId == this.CurrentPersonId )
-            {
-                btnMakeDonation.Text = "Make Payment";
-            }
-            else
-            {
-                btnMakeDonation.Text = string.Format( "Contribute to {0} {1}", RockFilters.Possessive( groupMember.Person.NickName ), opportunityType );
-            }
-
             // Tab: Contributions
             BindContributionsGrid();
 
@@ -629,10 +580,21 @@ namespace RockWeb.Blocks.Fundraising
             notesCommentsTimeline.RebuildNotes( true );
 
             var enableCommenting = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
-            notesCommentsTimeline.Visible = enableCommenting;
-            pnlComments.Visible = enableCommenting;
 
-            pnlUpdatesContributions.CssClass = enableCommenting ? "col-md-8" : "col-md-12";
+            if ( CurrentPerson == null )
+            {
+                notesCommentsTimeline.Visible = enableCommenting && ( notesCommentsTimeline.NoteCount > 0 );
+                lNoLoginNoCommentsYet.Visible = notesCommentsTimeline.NoteCount == 0;
+                pnlComments.Visible = enableCommenting;
+                btnLoginToComment.Visible = enableCommenting;
+            }
+            else
+            {
+                lNoLoginNoCommentsYet.Visible = false;
+                notesCommentsTimeline.Visible = enableCommenting;
+                pnlComments.Visible = enableCommenting;
+                btnLoginToComment.Visible = false;
+            }
 
             // if btnContributionsTab is the only visible tab, hide the tab since there is nothing else to tab to
             if ( !btnUpdatesTab.Visible )
@@ -684,12 +646,38 @@ namespace RockWeb.Blocks.Fundraising
         protected void SetActiveTab( string tabName )
         {
             hfActiveTab.Value = tabName;
-            pnlUpdates.Visible = tabName == "Updates";
+            pnlUpdatesComments.Visible = tabName == "Updates";
             pnlContributions.Visible = tabName == "Contributions";
-            btnUpdatesTab.CssClass = tabName == "Updates" ? "btn btn-primary" : "btn btn-default";
-            btnContributionsTab.CssClass = tabName == "Contributions" ? "btn btn-primary" : "btn btn-default";
+            if (tabName == "Updates")
+            {
+                liUpdatesTab.AddCssClass( "active" );
+                liContributionsTab.RemoveCssClass( "active" );
+            }
+            else if (tabName == "Contributions")
+            {
+                liUpdatesTab.RemoveCssClass( "active" );
+                liContributionsTab.AddCssClass( "active" );
+            }
         }
 
         #endregion
+
+        /// <summary>
+        /// Handles the Click event of the btnLoginToComment control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void btnLoginToComment_Click( object sender, EventArgs e )
+        {
+            var site = RockPage.Layout.Site;
+            if ( site.LoginPageId.HasValue )
+            {
+                site.RedirectToLoginPage( true );
+            }
+            else
+            {
+                System.Web.Security.FormsAuthentication.RedirectToLoginPage();
+            }
+        }
     }
 }

@@ -18,13 +18,13 @@
                         <asp:LinkButton ID="btnMainPage" runat="server" CssClass="btn btn-primary btn-block margin-t-sm" Text="Main Page" OnClick="btnMainPage_Click" />
                     </div>
                     <div class="col-md-8">
-                        
+
                         <div class="pull-right">
                             <button id="btnCopyToClipboard" runat="server"
                                 data-toggle="tooltip" data-placement="top" data-trigger="hover" data-delay="250" title="Copy Link to Clipboard"
                                 class="btn btn-default btn-xs btn-copy-to-clipboard cursor-pointer"
                                 onclick="$(this).attr('data-original-title', 'Copied').tooltip('show').attr('data-original-title', 'Copy Link to Clipboard');return false;">
-                                <i class='fa fa-clipboard'></i> Copy Profile Link
+                                <i class='fa fa-clipboard'></i>&nbsp;Copy Profile Link
                             </button>
                         </div>
                         <asp:Literal ID="lMainTopContentHtml" runat="server" />
@@ -33,57 +33,39 @@
                     </div>
                 </div>
 
-                <asp:Panel ID="pnlFundraising" runat="server">
-                    <div class="well margin-t-md">
-                        <div class="row">
-                            <div class="col-md-12">
+                <asp:Literal ID="lProgressHtml" runat="server" />
 
-                                <label>
-                                    <asp:Literal ID="lFundraisingProgressTitle" runat="server" Text="Fundraising Progress" />
-                                </label>
-                                <label class='pull-right'>
-                                    <asp:Literal ID="lFundraisingAmountLeftText" runat="server" Text="$320 left" />
-                                </label>
-                                <asp:Literal ID="lFundraisingProgressBar" runat="server" />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="actions pull-right">
-                                    <asp:LinkButton ID="btnMakeDonation" runat="server" CssClass="btn btn-sm btn-primary" Text="Contribute to..." OnClick="btnMakeDonation_Click" />
-                                </div>
-                            </div>
-                        </div>
+                <br />
+
+                <ul id="tlTabList" runat="server" class="nav nav-pills margin-v-md">
+                    <li id="liUpdatesTab" runat="server"><asp:LinkButton ID="btnUpdatesTab" runat="server" Text="Updates" OnClick="btnUpdatesTab_Click" /></li>
+                    <li id="liContributionsTab" runat="server"><asp:LinkButton ID="btnContributionsTab" runat="server" Text="Contributions" OnClick="btnContributionsTab_Click" /></li>
+                </ul>
+
+                <asp:Panel ID="pnlUpdatesComments" CssClass="row" runat="server">
+                    <div class="col-md-8">
+                        <asp:Literal ID="lUpdatesContentItemsHtml" runat="server" />
+                    </div>
+                    <div id="pnlComments" runat="server" class="col-md-4">
+                        <label>Comments</label>
+                        <Rock:NoteContainer ID="notesCommentsTimeline" runat="server" UsePersonIcon="true" AddAllowed="true" DisplayType="Full" />
+                        <asp:Literal ID="lNoLoginNoCommentsYet" runat="server" ><br /><i>No comments yet.</i></asp:Literal>
+                        <asp:LinkButton ID="btnLoginToComment" CssClass="btn btn-link pull-right" runat="server" Text="Login to Comment" OnClick="btnLoginToComment_Click" />
                     </div>
                 </asp:Panel>
 
+                <asp:Panel ID="pnlContributions" runat="server">
+                    <Rock:Grid ID="gContributions" runat="server" DisplayType="Light" OnRowDataBound="gContributions_RowDataBound">
+                        <Columns>
+                            <asp:BoundField DataField="AuthorizedPersonAlias.Person.FullName" HeaderText="Name" />
+                            <Rock:RockLiteralField ID="lAddress" HeaderText="Address" />
+                            <Rock:DateTimeField DataField="TransactionDateTime" HeaderText="Date" ItemStyle-HorizontalAlign="Left" />
+                            <Rock:CurrencyField DataField="TotalAmount" HeaderText="Amount" HeaderStyle-HorizontalAlign="Right" />
+                        </Columns>
+                    </Rock:Grid>
+                </asp:Panel>
 
 
-                <div class="row margin-t-md">
-                    <asp:Panel ID="pnlUpdatesContributions" CssClass="col-md-8" runat="server">
-                        <div class="btn-group">
-                            <asp:LinkButton ID="btnUpdatesTab" runat="server" Text="Updates" CssClass="btn btn-default" OnClick="btnUpdatesTab_Click" />
-                            <asp:LinkButton ID="btnContributionsTab" runat="server" Text="Contributions" CssClass="btn btn-default" OnClick="btnContributionsTab_Click" />
-                        </div>
-                        <asp:Panel ID="pnlUpdates" runat="server">
-                            <asp:Literal ID="lUpdatesContentItemsHtml" runat="server" />
-                        </asp:Panel>
-                        <asp:Panel ID="pnlContributions" runat="server">
-                            <Rock:Grid ID="gContributions" runat="server" DisplayType="Light" OnRowDataBound="gContributions_RowDataBound">
-                                <Columns>
-                                    <asp:BoundField DataField="AuthorizedPersonAlias.Person.FullName" HeaderText="Name" />
-                                    <Rock:RockLiteralField ID="lAddress" HeaderText="Address" />
-                                    <Rock:DateTimeField DataField="TransactionDateTime" HeaderText="Date" ItemStyle-HorizontalAlign="Left" />
-                                    <Rock:CurrencyField DataField="TotalAmount" HeaderText="Amount" HeaderStyle-HorizontalAlign="Right" />
-                                </Columns>
-                            </Rock:Grid>
-                        </asp:Panel>
-                    </asp:Panel>
-                    <asp:Panel ID="pnlComments" CssClass="col-md-4" runat="server">
-                        <label>Comments</label>
-                        <Rock:NoteContainer ID="notesCommentsTimeline" runat="server" UsePersonIcon="true" AddAllowed="true" DisplayType="Full" />
-                    </asp:Panel>
-                </div>
             </asp:Panel>
 
             <%-- Edit Preferences Panel --%>
