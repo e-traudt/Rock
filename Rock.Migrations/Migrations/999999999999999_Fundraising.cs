@@ -196,10 +196,23 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
             RockMigrationHelper.AddPage( "142627AE-6590-48E3-BFCA-3669260B8CF2", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Fundraising Matching", "", "A3EF32AC-B0FE-4140-A6F4-134FDD247CBD", "" ); // Site:Rock RMS
             RockMigrationHelper.AddPage( "5A8FBB92-85E5-4FD3-AF88-F3897C6CBC35", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Opportunity View", "", "BA673ABE-A45A-4835-A3A0-94A60341B96F", "" ); // Site:External Website
 
+            // Turn off BreadCrumbDisplayName for Fundraising Opportunity View
             Sql( @"UPDATE [Page]
 SET BreadCrumbDisplayName = 0
 WHERE[Guid] = 'BA673ABE-A45A-4835-A3A0-94A60341B96F'" );
 
+            // If the "Missions" page doesn't exist, the Fundraising Opportunity View won't have a parent page, so change it to Installed Plugins Instead
+            Sql( @"DECLARE @InstalledPluginsPageId INT = (
+		SELECT TOP 1 Id
+		FROM [Page]
+		WHERE [Guid] = '5B6DBC42-8B03-4D15-8D92-AAFA28FD8616'
+		)
+
+UPDATE [Page]
+SET ParentPageId = @InstalledPluginsPageId
+WHERE [Guid] = 'BA673ABE-A45A-4835-A3A0-94A60341B96F'
+	AND ParentPageId IS NULL
+" );
 
             RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Leader Toolbox", "", "9DADC93F-C9E7-4567-B73E-AD264A93E37D", "" ); // Site:External Website
             RockMigrationHelper.AddPage( "BA673ABE-A45A-4835-A3A0-94A60341B96F", "5FEAF34C-7FB6-4A11-8A1E-C452EC7849BD", "Fundraising Donation", "", "E40BEA3D-0304-4AD2-A45D-9BAD9852E3BA", "" ); // Site:External Website
