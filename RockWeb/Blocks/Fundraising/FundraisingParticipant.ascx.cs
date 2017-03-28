@@ -118,23 +118,7 @@ namespace RockWeb.Blocks.Fundraising
                 var groupMember = new GroupMemberService( new RockContext() ).Get( hfGroupMemberId.Value.AsInteger() );
                 if ( groupMember != null )
                 {
-                    groupMember.LoadAttributes();
-                    var person = groupMember.Person;
-                    phGroupMemberAttributes.Controls.Clear();
-                    Rock.Attribute.Helper.AddEditControls( groupMember, phGroupMemberAttributes, false, BlockValidationGroup );
-
-                    // Person Attributes (the ones they picked in the Block Settings)
-                    phPersonAttributes.Controls.Clear();
-
-                    var personAttributes = this.GetAttributeValue( "PersonAttributes" ).SplitDelimitedValues().AsGuidList().Select( a => AttributeCache.Read( a ) );
-                    if ( personAttributes.Any() )
-                    {
-                        person.LoadAttributes();
-                        foreach ( var personAttribute in personAttributes.OrderBy( a => a.Order ) )
-                        {
-                            personAttribute.AddControl( phPersonAttributes.Controls, person.GetAttributeValue( personAttribute.Key ), "vgProfileEdit", false, true );
-                        }
-                    }
+                    CreateDynamicControls( groupMember );
                 }
             }
         }
@@ -221,35 +205,44 @@ namespace RockWeb.Blocks.Fundraising
                 var dateRange = DateRangePicker.CalculateDateRangeFromDelimitedValues( groupMember.Group.GetAttributeValue( "OpportunityDateRange" ) );
 
                 lDateRange.Text = dateRange.ToString( "MMMM dd, yyyy" );
+                CreateDynamicControls( groupMember );
+            }
+        }
 
-                // GroupMember Attributes (all of them)
-                phGroupMemberAttributes.Controls.Clear();
-                
+        /// <summary>
+        /// Creates the dynamic controls.
+        /// </summary>
+        /// <param name="groupMember">The group member.</param>
+        private void CreateDynamicControls( GroupMember groupMember )
+        {
+            groupMember.LoadAttributes();
+            // GroupMember Attributes (all of them)
+            phGroupMemberAttributes.Controls.Clear();
 
-                List<string> excludes = new List<string>();
-                if (!groupMember.Group.GetAttributeValue( "AllowIndividualDisablingofContributionRequests" ).AsBoolean() )
+            List<string> excludes = new List<string>();
+            if ( !groupMember.Group.GetAttributeValue( "AllowIndividualDisablingofContributionRequests" ).AsBoolean() )
+            {
+                excludes.Add( "DisablePublicContributionRequests" );
+            }
+
+            if ( !groupMember.Group.GetAttributeValue( "AllowIndividualEditingofFundraisingGoal" ).AsBoolean() )
+            {
+                excludes.Add( "IndividualFundraisingGoal" );
+            }
+
+            Rock.Attribute.Helper.AddEditControls( groupMember, phGroupMemberAttributes, true, "vgProfileEdit", excludes, true );
+
+            // Person Attributes (the ones they picked in the Block Settings)
+            phPersonAttributes.Controls.Clear();
+
+            var personAttributes = this.GetAttributeValue( "PersonAttributes" ).SplitDelimitedValues().AsGuidList().Select( a => AttributeCache.Read( a ) );
+            if ( personAttributes.Any() )
+            {
+                var person = groupMember.Person;
+                person.LoadAttributes();
+                foreach ( var personAttribute in personAttributes.OrderBy( a => a.Order ) )
                 {
-                    excludes.Add( "DisablePublicContributionRequests" );
-                }
-
-                if ( !groupMember.Group.GetAttributeValue( "AllowIndividualEditingofFundraisingGoal" ).AsBoolean() )
-                {
-                    excludes.Add( "IndividualFundraisingGoal" );
-                }
-
-                Rock.Attribute.Helper.AddEditControls( groupMember, phGroupMemberAttributes, true, "vgProfileEdit", excludes, true );
-
-                // Person Attributes (the ones they picked in the Block Settings)
-                phPersonAttributes.Controls.Clear();
-
-                var personAttributes = this.GetAttributeValue( "PersonAttributes" ).SplitDelimitedValues().AsGuidList().Select( a => AttributeCache.Read( a ) );
-                if ( personAttributes.Any() )
-                {
-                    person.LoadAttributes( rockContext );
-                    foreach ( var personAttribute in personAttributes.OrderBy( a => a.Order ) )
-                    {
-                        personAttribute.AddControl( phPersonAttributes.Controls, person.GetAttributeValue( personAttribute.Key ), "vgProfileEdit", true, true );
-                    }
+                    personAttribute.AddControl( phPersonAttributes.Controls, person.GetAttributeValue( personAttribute.Key ), "vgProfileEdit", true, true );
                 }
             }
         }
@@ -660,8 +653,6 @@ namespace RockWeb.Blocks.Fundraising
             }
         }
 
-        #endregion
-
         /// <summary>
         /// Handles the Click event of the btnLoginToComment control.
         /// </summary>
@@ -679,5 +670,7 @@ namespace RockWeb.Blocks.Fundraising
                 System.Web.Security.FormsAuthentication.RedirectToLoginPage();
             }
         }
+
+        #endregion
     }
 }
