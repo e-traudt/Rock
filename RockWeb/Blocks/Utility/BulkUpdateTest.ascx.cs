@@ -137,9 +137,9 @@ namespace RockWeb.Blocks.Utility
             {
                 Group family = null;
 
-                if ( familiesLookup.ContainsKey( personImport.FamilyForeignId ) )
+                if ( familiesLookup.ContainsKey( personImport.FamilyForeignId.Value ) )
                 {
-                    family = familiesLookup[personImport.FamilyForeignId];
+                    family = familiesLookup[personImport.FamilyForeignId.Value];
                 }
 
                 if ( family == null )
@@ -150,7 +150,7 @@ namespace RockWeb.Blocks.Utility
                     family.CampusId = personImport.CampusId;
 
                     family.ForeignId = personImport.FamilyForeignId;
-                    familiesLookup.Add( personImport.FamilyForeignId, family );
+                    familiesLookup.Add( personImport.FamilyForeignId.Value, family );
                 }
 
                 Person person = null;

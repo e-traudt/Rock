@@ -52,10 +52,20 @@ namespace Rock.Rest.Controllers
             foreach ( var personImport in personImports )
             {
                 Group family = null;
-
-                if ( familiesLookup.ContainsKey( personImport.FamilyForeignId ) )
+                
+                if ( personImport.FamilyForeignId.HasValue )
                 {
-                    family = familiesLookup[personImport.FamilyForeignId];
+                    if ( personImport.FamilyForeignId.HasValue )
+                    {
+                        if ( familiesLookup.ContainsKey( personImport.FamilyForeignId.Value ) )
+                        {
+                            family = familiesLookup[personImport.FamilyForeignId.Value];
+                        }
+                    }
+                }
+                else
+                {
+                    // TODO: If personImport.FamilyForeignId is null, that means we need to create a new family
                 }
 
                 if ( family == null )
@@ -66,7 +76,7 @@ namespace Rock.Rest.Controllers
                     //family.CampusId = personImport.Campus.
 
                     family.ForeignId = personImport.FamilyForeignId;
-                    familiesLookup.Add( personImport.FamilyForeignId, family );
+                    familiesLookup.Add( personImport.FamilyForeignId.Value, family );
                 }
 
                 Person person = null;
