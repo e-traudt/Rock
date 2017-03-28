@@ -263,6 +263,8 @@ namespace RockWeb.Blocks.Finance
         private void CreateTableControls( int? batchId )
         {
             RockContext rockContext = new RockContext();
+            nbSaveSuccess.Visible = false;
+            btnSave.Visible = false;
 
             if ( _transactionEntityType != null )
             {
@@ -275,6 +277,7 @@ namespace RockWeb.Blocks.Finance
 
                 var financialTransactionDetailList = financialTransactionDetailQuery.Where( a => a.Transaction.BatchId == batchId.Value ).OrderByDescending( a => a.Transaction.TransactionDateTime ).ToList();
                 phTableRows.Controls.Clear();
+                btnSave.Visible = financialTransactionDetailList.Any();
                 foreach ( var financialTransactionDetail in financialTransactionDetailList )
                 {
                     var tr = new HtmlGenericContainer( "tr" );
@@ -301,8 +304,6 @@ namespace RockWeb.Blocks.Finance
                             tdEntityControls.Controls.Add( ddlGroup );
                             var ddlGroupMember = new RockDropDownList { ID = "ddlGroupMember_" + financialTransactionDetail.Id.ToString(), Visible = false };
                             ddlGroupMember.Label = "Group Member";
-                            ddlGroupMember.AutoPostBack = true;
-                            ddlGroupMember.SelectedIndexChanged += ddlGroupMember_SelectedIndexChanged;
                             tdEntityControls.Controls.Add( ddlGroupMember );
                         }
                         else if ( _transactionEntityType.Id == EntityTypeCache.GetId<Group>() )
@@ -315,18 +316,12 @@ namespace RockWeb.Blocks.Finance
                         else if ( _transactionEntityType.Id == EntityTypeCache.GetId<DefinedValue>() )
                         {
                             var ddlDefinedValue = new DefinedValuePicker { ID = "ddlDefinedValue_" + financialTransactionDetail.Id.ToString() };
-                            ddlDefinedValue.AutoPostBack = true;
-                            ddlDefinedValue.SelectedIndexChanged += ddlDefinedValue_SelectedIndexChanged;
                             tdEntityControls.Controls.Add( ddlDefinedValue );
                         }
                         else if ( _transactionEntityType.SingleValueFieldType != null )
                         {
                             var entityPicker = _transactionEntityType.SingleValueFieldType.Field.EditControl( new Dictionary<string, Rock.Field.ConfigurationValue>(), "entityPicker_" + financialTransactionDetail.Id.ToString() );
                             tdEntityControls.Controls.Add( entityPicker );
-                            var btnSaveEntity = new BootstrapButton { ID = "btnSaveEntity_" + financialTransactionDetail.Id.ToString(), CssClass = "btn btn-sm btn-primary margin-t-sm", Text = "Save" };
-                            btnSaveEntity.ToolTip = "Last Modified at " + financialTransactionDetail.ModifiedDateTime.ToString();
-                            btnSaveEntity.Click += btnSaveEntity_Click;
-                            tdEntityControls.Controls.Add( btnSaveEntity );
                         }
                     }
 
@@ -339,52 +334,6 @@ namespace RockWeb.Blocks.Finance
             {
                 pnlTransactions.Visible = false;
             }
-        }
-
-        /// <summary>
-        /// Handles the Click event of the btnSaveEntity control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void btnSaveEntity_Click( object sender, EventArgs e )
-        {
-            var btnSaveEntity = sender as LinkButton;
-
-            var entityPicker = btnSaveEntity.Parent.ControlsOfTypeRecursive<Control>().Where( a => a.ID.StartsWith( "entityPicker_" ) ).FirstOrDefault();
-            var entityId = ( _transactionEntityType.SingleValueFieldType.Field as Rock.Field.IEntityFieldType ).GetEditValueAsEntityId( entityPicker, new Dictionary<string, Rock.Field.ConfigurationValue>() );
-
-            var financialTransactionDetailId = btnSaveEntity.ID.Replace( "btnSaveEntity_", string.Empty ).AsIntegerOrNull();
-            AssignEntityToTransactionDetail( entityId, financialTransactionDetailId );
-        }
-
-        /// <summary>
-        /// Handles the SelectedIndexChanged event of the ddlDefinedValue control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void ddlDefinedValue_SelectedIndexChanged( object sender, EventArgs e )
-        {
-            var ddlDefinedValue = sender as DefinedValuePicker;
-
-            var definedValueId = ddlDefinedValue.SelectedValue.AsIntegerOrNull();
-
-            var financialTransactionDetailId = ddlDefinedValue.ID.Replace( "ddlDefinedValue_", string.Empty ).AsIntegerOrNull();
-            AssignEntityToTransactionDetail( definedValueId, financialTransactionDetailId );
-        }
-
-        /// <summary>
-        /// Handles the SelectedIndexChanged event of the ddlGroupMember control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void ddlGroupMember_SelectedIndexChanged( object sender, EventArgs e )
-        {
-            var ddlGroupMember = sender as RockDropDownList;
-
-            var groupMemberId = ddlGroupMember.SelectedValue.AsIntegerOrNull();
-
-            var financialTransactionDetailId = ddlGroupMember.ID.Replace( "ddlGroupMember_", string.Empty ).AsIntegerOrNull();
-            AssignEntityToTransactionDetail( groupMemberId, financialTransactionDetailId );
         }
 
         /// <summary>
@@ -407,7 +356,7 @@ namespace RockWeb.Blocks.Finance
                 {
                     blockTransactionType = DefinedValueCache.Read( blockTransactionTypeGuid.Value );
                 }
-                
+
                 if ( blockTransactionType != null && blockTransactionType.Id != financialTransactionDetail.Transaction.TransactionTypeValueId )
                 {
                     financialTransactionDetail.Transaction.TransactionTypeValueId = blockTransactionType.Id;
@@ -441,14 +390,6 @@ namespace RockWeb.Blocks.Finance
                 if ( _transactionEntityType.Id == EntityTypeCache.GetId<GroupMember>() )
                 {
                     LoadGroupMembersDropDown( ddlGroup );
-
-                    var financialTransactionDetailId = ddlGroup.ID.Replace( "ddlGroup_", string.Empty ).AsIntegerOrNull();
-                    AssignEntityToTransactionDetail( null, financialTransactionDetailId );
-                }
-                else if ( _transactionEntityType.Id == EntityTypeCache.GetId<Group>() )
-                {
-                    var financialTransactionDetailId = ddlGroup.ID.Replace( "ddlGroup_", string.Empty ).AsIntegerOrNull();
-                    AssignEntityToTransactionDetail( ddlGroup.SelectedValue.AsIntegerOrNull(), financialTransactionDetailId );
                 }
             }
         }
@@ -483,6 +424,63 @@ namespace RockWeb.Blocks.Finance
 
                 ddlGroupMember.Visible = groupId.HasValue;
             }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnSave control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void btnSave_Click( object sender, EventArgs e )
+        {
+            if ( _transactionEntityType != null )
+            {
+                if ( _transactionEntityType.Id == EntityTypeCache.GetId<GroupMember>() )
+                {
+                    foreach ( var ddlGroupMember in phTableRows.ControlsOfTypeRecursive<RockDropDownList>().Where( a => a.ID.StartsWith( "ddlGroupMember_" ) ) )
+                    {
+                        int? financialTransactionDetailId = ddlGroupMember.ID.Replace( "ddlGroupMember_", string.Empty ).AsInteger();
+                        int? groupMemberId = ddlGroupMember.SelectedValue.AsIntegerOrNull();
+                        AssignEntityToTransactionDetail( groupMemberId, financialTransactionDetailId );
+                    }
+                }
+                else if ( _transactionEntityType.Id == EntityTypeCache.GetId<Group>() )
+                {
+                    foreach ( var ddlGroup in phTableRows.ControlsOfTypeRecursive<RockDropDownList>().Where( a => a.ID.StartsWith( "ddlGroup_" ) ) )
+                    {
+                        int? financialTransactionDetailId = ddlGroup.ID.Replace( "ddlGroup_", string.Empty ).AsInteger();
+                        int? groupId = ddlGroup.SelectedValue.AsIntegerOrNull();
+                        AssignEntityToTransactionDetail( groupId, financialTransactionDetailId );
+                    }
+                }
+                else if ( _transactionEntityType.Id == EntityTypeCache.GetId<DefinedValue>() )
+                {
+                    foreach ( var ddlDefinedValue in phTableRows.ControlsOfTypeRecursive<DefinedValuePicker>().Where( a => a.ID.StartsWith( "ddlDefinedValue_" ) ) )
+                    {
+                        int? financialTransactionDetailId = ddlDefinedValue.ID.Replace( "ddlDefinedValue_", string.Empty ).AsInteger();
+                        int? definedValueId = ddlDefinedValue.SelectedValue.AsIntegerOrNull();
+                        AssignEntityToTransactionDetail( definedValueId, financialTransactionDetailId );
+                    }
+                }
+                else if ( _transactionEntityType.SingleValueFieldType != null )
+                {
+                    foreach ( var entityPicker in phTableRows.ControlsOfTypeRecursive<Control>().Where( a => a.ID != null && a.ID.StartsWith( "entityPicker_" ) ) )
+                    {
+                        var entityFieldType = _transactionEntityType.SingleValueFieldType.Field as IEntityFieldType;
+                        if ( entityFieldType != null )
+                        {
+                            int? financialTransactionDetailId = entityPicker.ID.Replace( "entityPicker_", string.Empty ).AsIntegerOrNull();
+                            if ( financialTransactionDetailId.HasValue )
+                            {
+                                int? entityId = entityFieldType.GetEditValueAsEntityId( entityPicker, new Dictionary<string, ConfigurationValue>() );
+                                AssignEntityToTransactionDetail( entityId, financialTransactionDetailId );
+                            }
+                        }
+                    }
+                }
+            }
+
+            nbSaveSuccess.Visible = true;
         }
 
         #endregion
@@ -556,7 +554,7 @@ namespace RockWeb.Blocks.Finance
             if ( etpEntityType.SelectedEntityTypeId.HasValue )
             {
                 var entityType = EntityTypeCache.Read( etpEntityType.SelectedEntityTypeId.Value );
-                if (entityType != null)
+                if ( entityType != null )
                 {
                     entityTypeGuid = entityType.Guid;
                 }
@@ -570,7 +568,6 @@ namespace RockWeb.Blocks.Finance
             {
                 blockTransactionType = DefinedValueCache.Read( selectedTransactionTypeId.Value );
             }
-
 
             this.SetAttributeValue( "TransactionTypeGuid", blockTransactionType != null ? blockTransactionType.Guid.ToString() : null );
             this.SetAttributeValue( "EntityTypeQualifierColumn", tbEntityTypeQualifierColumn.Text );

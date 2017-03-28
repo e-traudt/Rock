@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="TransactionEntityMatching.ascx.cs" Inherits="RockWeb.Blocks.Finance.TransactionEntityMatching" %>
 
-<asp:UpdatePanel ID="upnlContent" runat="server" >
+<asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
 
         <asp:Panel ID="pnlView" runat="server" CssClass="panel panel-block">
@@ -30,6 +30,15 @@
                                 <asp:PlaceHolder ID="phTableRows" runat="server" />
                             </tbody>
                         </table>
+
+                        <br />
+                        <div class="margin-all-md">
+                            <Rock:NotificationBox ID="nbSaveSuccess" runat="server" NotificationBoxType="Success" Text="Changes Saved" Dismissable="true" Visible="false" />
+                            <div class="actions">
+                                <asp:LinkButton ID="btnSave" runat="server" AccessKey="s" ToolTip="Alt+s" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
+                            </div>
+
+                        </div>
                     </asp:Panel>
                 </div>
 
