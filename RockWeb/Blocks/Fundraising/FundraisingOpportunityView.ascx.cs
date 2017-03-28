@@ -46,13 +46,15 @@ namespace RockWeb.Blocks.Fundraising
 
     [CodeEditorField( "Updates Lava Template", "Lava template for the Updates (Content Channel Items)", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
         @"{% include '~~/Assets/Lava/FundraisingOpportunityUpdates.lava' %}", order: 3 )]
-    [NoteTypeField( "Note Type", "Note Type to use for comments", false, "Rock.Model.Group", defaultValue: "9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95", order: 4 )]
-    [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 5 )]
-    [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 6 )]
-    [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
+
 
     [CodeEditorField( "Participant Lava Template", "Lava template for how the partipant actions and progress bar should be displayed", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
-        @"{% include '~~/Assets/Lava/FundraisingOpportunityParticipant.lava' %}", order: 8 )]
+        @"{% include '~~/Assets/Lava/FundraisingOpportunityParticipant.lava' %}", order: 4 )]
+
+    [NoteTypeField( "Note Type", "Note Type to use for comments", false, "Rock.Model.Group", defaultValue: "9BB1A7B6-0E51-4E0E-BFC0-1E42F4F2DA95", order: 5 )]
+    [LinkedPage( "Donation Page", "The page where a person can donate to the fundraising opportunity", required: false, order: 6 )]
+    [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 7 )]
+    [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 8 )]
 
     [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 9 )]
     [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 10 )]

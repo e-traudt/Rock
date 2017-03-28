@@ -197,10 +197,9 @@ namespace RockWeb.Blocks.Fundraising
                 var opportunityType = DefinedValueCache.Read( groupMember.Group.GetAttributeValue( "OpportunityType" ).AsGuid() );
 
                 lProfileTitle.Text = string.Format(
-                    "{0} Profile for the {1} {2}",
+                    "{0} Profile for {1}",
                     RockFilters.Possessive( groupMember.Person.FullName ),
-                    groupMember.Group.GetAttributeValue( "OpportunityTitle" ),
-                    opportunityType );
+                    groupMember.Group.GetAttributeValue( "OpportunityTitle" ) );
 
                 var dateRange = DateRangePicker.CalculateDateRangeFromDelimitedValues( groupMember.Group.GetAttributeValue( "OpportunityDateRange" ) );
 
@@ -473,7 +472,7 @@ namespace RockWeb.Blocks.Fundraising
                     warningItems.Add( "personal opportunity introduction" );
                 }
 
-                nbProfileWarning.Text = "<stong>Tip!</strong> A " + warningItems.AsDelimited( ", ", " and " ) + " is recommended. Click Edit Preferences.";
+                nbProfileWarning.Text = "<stong>Tip!</strong> A " + warningItems.AsDelimited( ", ", " and " ) + " is a great way to personalize your page.";
                 nbProfileWarning.Visible = warningItems.Any();
             }
             else

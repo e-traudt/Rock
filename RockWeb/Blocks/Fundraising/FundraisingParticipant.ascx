@@ -29,7 +29,7 @@
                         </div>
                         <asp:Literal ID="lMainTopContentHtml" runat="server" />
 
-                        <Rock:NotificationBox ID="nbProfileWarning" runat="server" Text="A Profile Photo and Summary is recommended. Click Edit Preferences to set these." NotificationBoxType="Success" Visible="false" />
+                        <Rock:NotificationBox ID="nbProfileWarning" runat="server" Text="Tip! A personal opportunity introduction a great way personalize your page. " Dismissable="true" NotificationBoxType="Success" Visible="false" />
                     </div>
                 </div>
 
