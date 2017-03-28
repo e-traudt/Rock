@@ -29,8 +29,6 @@ using Rock.Model;
 using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
-using CsvHelper;
-using CsvHelper.Configuration;
 using Rock.BulkUpdate;
 using System.Diagnostics;
 using System.Text;
@@ -214,7 +212,7 @@ namespace RockWeb.Blocks.Utility
             bool useSqlBulkCopy = true;
             List<int> insertedPersonForeignIds = new List<int>();
 
-            using ( var ts = new System.Transactions.TransactionScope() )
+            //using ( var ts = new System.Transactions.TransactionScope() )
             {
                 // insert all the [Group] records
                 var familiesToInsert = familiesLookup.Where( a => a.Value.Id == 0 ).Select( a => a.Value ).ToList();
@@ -262,7 +260,7 @@ namespace RockWeb.Blocks.Utility
                 sbStats.AppendFormat( "[{1}ms] BulkInsert {0} Person records\n", personsToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
                 stopwatch.Restart();
 
-                ts.Complete();
+               // ts.Complete();
             };
 
             // Make sure everybody has a PersonAlias
@@ -481,8 +479,8 @@ WHERE Id IN (
 
             using ( var personFileStream = File.OpenText( Path.Combine( slingshotDirectoryName, "person.csv" ) ) )
             {
-                CsvReader csv = new CsvReader( personFileStream );
-                csv.Configuration.HasHeaderRecord = true;
+                //CsvReader csv = new CsvReader( personFileStream );
+                //csv.Configuration.HasHeaderRecord = true;
             }
 
                 /*
