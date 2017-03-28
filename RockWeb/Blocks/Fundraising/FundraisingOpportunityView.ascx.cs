@@ -51,8 +51,8 @@ namespace RockWeb.Blocks.Fundraising
     [LinkedPage( "Leader Toolbox Page", "The toolbox page for a leader of this fundraising opportunity", required: false, order: 6 )]
     [LinkedPage( "Participant Page", "The partipant page for a participant of this fundraising opportunity", required: false, order: 7 )]
 
-    [CodeEditorField( "Participant Lava Template", "Lava template for how the partipant actions and progress bar should be displayed ", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
-        @"{% include '~~/Assets/Lava/FundraisingOpportunityUpdates.lava' %}", order: 8 )]
+    [CodeEditorField( "Participant Lava Template", "Lava template for how the partipant actions and progress bar should be displayed", CodeEditorMode.Lava, CodeEditorTheme.Rock, 100, false,
+        @"{% include '~~/Assets/Lava/FundraisingOpportunityParticipant.lava' %}", order: 8 )]
 
     [BooleanField( "Set Page Title to Opportunity Title", "", true, order: 9 )]
     [LinkedPage( "Registration Page", "The page to use for registrations.", required: false, order: 10 )]
