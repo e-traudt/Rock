@@ -328,9 +328,23 @@ namespace RockWeb.Blocks.Fundraising
 
             notesCommentsTimeline.RebuildNotes( true );
 
-            notesCommentsTimeline.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
-            liCommentsTab.Visible = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
+            var enableCommenting = group.GetAttributeValue( "EnableCommenting" ).AsBoolean();
             btnCommentsTab.Text = string.Format( "Comments ({0})", notesCommentsTimeline.NoteCount );
+
+            if ( CurrentPerson == null )
+            {
+                notesCommentsTimeline.Visible = enableCommenting && ( notesCommentsTimeline.NoteCount > 0 );
+                lNoLoginNoCommentsYet.Visible = notesCommentsTimeline.NoteCount == 0;
+                liCommentsTab.Visible = enableCommenting;
+                btnLoginToComment.Visible = enableCommenting;
+            }
+            else
+            {
+                lNoLoginNoCommentsYet.Visible = false;
+                notesCommentsTimeline.Visible = enableCommenting;
+                liCommentsTab.Visible = enableCommenting;
+                btnLoginToComment.Visible = false;
+            }
 
             // if btnDetailsTab is the only visible tab, hide the tab since there is nothing else to tab to
             if ( !liCommentsTab.Visible && !liUpdatesTab.Visible )
@@ -436,6 +450,24 @@ namespace RockWeb.Blocks.Fundraising
             var queryParams = new Dictionary<string, string>();
             queryParams.Add( "GroupId", hfGroupId.Value );
             NavigateToLinkedPage( "LeaderToolboxPage", queryParams );
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnLoginToComment control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void btnLoginToComment_Click( object sender, EventArgs e )
+        {
+            var site = RockPage.Layout.Site;
+            if ( site.LoginPageId.HasValue )
+            {
+                site.RedirectToLoginPage( true );
+            }
+            else
+            {
+                System.Web.Security.FormsAuthentication.RedirectToLoginPage();
+            }
         }
 
         #endregion
