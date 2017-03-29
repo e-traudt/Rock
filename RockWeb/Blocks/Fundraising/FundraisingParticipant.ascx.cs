@@ -178,7 +178,7 @@ namespace RockWeb.Blocks.Fundraising
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void btnEditPreferences_Click( object sender, EventArgs e )
+        protected void btnEditProfile_Click( object sender, EventArgs e )
         {
             pnlMain.Visible = false;
             pnlEditPreferences.Visible = true;
@@ -465,14 +465,14 @@ namespace RockWeb.Blocks.Fundraising
                 var warningItems = new List<string>();
                 if ( !groupMember.Person.PhotoId.HasValue )
                 {
-                    warningItems.Add( "profile photo" );
+                    warningItems.Add( "photo" );
                 }
                 if ( groupMember.GetAttributeValue( "PersonalOpportunityIntroduction" ).IsNullOrWhiteSpace())
                 {
                     warningItems.Add( "personal opportunity introduction" );
                 }
 
-                nbProfileWarning.Text = "<stong>Tip!</strong> A " + warningItems.AsDelimited( ", ", " and " ) + " is a great way to personalize your page.";
+                nbProfileWarning.Text = "<stong>Tip!</strong> Edit your profile to add a " + warningItems.AsDelimited( ", ", " and " ) + ".";
                 nbProfileWarning.Visible = warningItems.Any();
             }
             else
@@ -480,7 +480,7 @@ namespace RockWeb.Blocks.Fundraising
                 nbProfileWarning.Visible = false;
             }
 
-            btnEditPreferences.Visible = groupMember.PersonId == this.CurrentPersonId;
+            btnEditProfile.Visible = groupMember.PersonId == this.CurrentPersonId;
 
             lMainTopContentHtml.Text = profileLavaTemplate.ResolveMergeFields( mergeFields );
 

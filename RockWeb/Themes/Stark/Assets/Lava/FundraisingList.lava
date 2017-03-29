@@ -29,6 +29,7 @@
                     <a href='{{ DetailsPage }}?GroupId={{ item.Id }}' class='btn btn-default btn-xs'>View Details <i class='fa fa-chevron-right'></i></a>
                 </div>
             </div>
+
         {% endfor %}
         
     </div>

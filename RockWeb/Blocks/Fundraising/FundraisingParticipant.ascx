@@ -14,8 +14,8 @@
                 <div class="row">
                     <div class="col-md-4 margin-t-md">
                         <asp:Image ID="imgOpportunityPhoto" runat="server" CssClass="title-image img-responsive" />
-                        <asp:LinkButton ID="btnEditPreferences" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Edit Preferences" OnClick="btnEditPreferences_Click" />
-                        <asp:LinkButton ID="btnMainPage" runat="server" CssClass="btn btn-primary btn-block margin-t-sm" Text="Main Page" OnClick="btnMainPage_Click" />
+                        <asp:LinkButton ID="btnMainPage" runat="server" CssClass="btn btn-primary btn-block margin-t-md" Text="Main Page" OnClick="btnMainPage_Click" />
+                        <asp:LinkButton ID="btnEditProfile" runat="server" CssClass="btn btn-default btn-sm btn-block margin-t-sm" Text="Edit Profile" OnClick="btnEditProfile_Click" />
                     </div>
                     <div class="col-md-8">
 
