@@ -138,9 +138,6 @@ INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM A
 
 -- Opportunity Details
 INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM Attribute a, Category c WHERE a.[Guid] = '1E2F1416-2C4C-44DF-BE19-7D8FA9523115' AND c.[Guid] = '91B43FBD-F924-4934-9CCE-7990513275CF' AND NOT EXISTS (SELECT AttributeId, CategoryId FROM AttributeCategory ac WHERE AttributeId = a.Id AND CategoryId = c.Id)
-
--- Personal Opportunity Introduction
-INSERT INTO AttributeCategory (AttributeId, CategoryId) SELECT a.Id, c.Id FROM Attribute a, Category c WHERE a.[Guid] = '018B201C-D9C2-4EDE-9FC9-B52E2F799325' AND c.[Guid] = '91B43FBD-F924-4934-9CCE-7990513275CF' AND NOT EXISTS (SELECT AttributeId, CategoryId FROM AttributeCategory ac WHERE AttributeId = a.Id AND CategoryId = c.Id)
 " );
 
 

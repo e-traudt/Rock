@@ -325,8 +325,8 @@ namespace RockWeb.Blocks.Fundraising
 
             notesCommentsTimeline.EntityId = groupId;
 
-            // show the Add button on comments if the current person is a member of the Fundraising Group
-            notesCommentsTimeline.AddAllowed = group.Members.Any( a => a.PersonId == this.CurrentPersonId );
+            // show the Add button on comments for any logged in person
+            notesCommentsTimeline.AddAllowed = true;
 
             notesCommentsTimeline.RebuildNotes( true );
 
