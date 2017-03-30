@@ -81,6 +81,9 @@ namespace RockWeb.Blocks.Finance
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
 
+            nbBlockConfigurationWarning.Visible = _transactionEntityType == null;
+            lPanelTitle.Text = _transactionEntityType != null ? _transactionEntityType.FriendlyName + " Matching" : "Matching";
+
             if ( Page.IsPostBack )
             {
                 // rebuild the Table Controls (unless this is postback from ddlBatch)

@@ -7,9 +7,10 @@
             <asp:HiddenField ID="hfBatchId" runat="server" />
 
             <div class="panel-heading">
-                <h1 class="panel-title"><i class="fa fa-check-square-o"></i>&nbsp;Transaction Entity Matching</h1>
+                <h1 class="panel-title"><i class="fa fa-check-square-o"></i>&nbsp;<asp:Literal ID="lPanelTitle" runat="server" /></h1>
             </div>
             <div class="panel-body">
+                <Rock:NotificationBox ID="nbBlockConfigurationWarning" runat="server" NotificationBoxType="Warning" Text="Please set the Entity Type in block settings" Visible="false" />
                 <div class="row">
                     <div class="col-md-4">
                         <Rock:RockDropDownList ID="ddlBatch" runat="server" Label="Open Batches" AutoPostBack="true" OnSelectedIndexChanged="ddlBatch_SelectedIndexChanged" />
