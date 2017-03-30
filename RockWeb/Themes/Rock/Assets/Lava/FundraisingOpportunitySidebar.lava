@@ -21,8 +21,12 @@
     {% capture registrationMessage %}<p>Registration closed on {{ RegistrationInstance.EndDateTime | Date:'dddd, MMMM d, yyyy' }}</p>{% endcapture %}
     {% endif %}
     
-    {% if RegistrationSpotsAvailable <= 0 %}
-      {% assign registrationFull = true %}
+    {% if RegistrationSpotsAvailable %}
+      {% if RegistrationSpotsAvailable <= 0 %}
+        {% assign registrationFull = true %}
+      {% else %}
+        {% assign registrationFull = false %}
+      {% endif %}
     {% else %}
       {% assign registrationFull = false %}
     {% endif %}
@@ -67,6 +71,12 @@
     <strong>Registration Notes</strong><br />
     {{ registrationNotes }}
     {% endif %}
+    
+    {% if registrationFull and waitListEnabled %}
+      {% assign registrationButtonText = 'Join Wait List' %}
+    {% else %}
+      {% assign registrationButtonText = 'Register' %}
+    {% endif %}
 
     {% if registrationFull and waitListEnabled == false %}
       {% assign showRegistration = false %}
@@ -80,7 +90,7 @@
                 <a href='{{ RegistrationPage }}?RegistrationInstanceId={{ RegistrationInstance.Id }}&Slug={{registrationInstanceLinkage.UrlSlug}}' class='btn btn-primary btn-block margin-t-md'>{{ registrationButtonText }}</a>
             {% endfor %}
         {% else %}
-          <a href='{{ RegistrationPage }}?RegistrationInstanceId={{ RegistrationInstance.Id }}' class='btn btn-primary btn-block margin-t-md'>{{ RegistrationStatusLabel }}</a>
+          <a href='{{ RegistrationPage }}?RegistrationInstanceId={{ RegistrationInstance.Id }}' class='btn btn-primary btn-block margin-t-md'>{{ registrationButtonText }}</a>
         {% endif %}
     {% else %}
         {{ registrationMessage }}

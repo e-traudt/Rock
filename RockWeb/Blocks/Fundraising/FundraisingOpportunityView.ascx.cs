@@ -194,7 +194,7 @@ namespace RockWeb.Blocks.Fundraising
                 mergeFields.Add( "RegistrationInstance", registrationInstance );
                 mergeFields.Add( "RegistrationInstanceLinkages", registrationInstance.Linkages.Where(a => !string.IsNullOrEmpty(a.UrlSlug)) );
 
-                // determine if the registration is full
+                // populate merge fields for Registration Counts
                 var maxRegistrantCount = 0;
                 var currentRegistrationCount = 0;
 
@@ -202,19 +202,17 @@ namespace RockWeb.Blocks.Fundraising
                 {
                     maxRegistrantCount = registrationInstance.MaxAttendees;
                 }
+               
+                currentRegistrationCount = new RegistrationRegistrantService( rockContext ).Queryable().AsNoTracking()
+                                                .Where( r =>
+                                                    r.Registration.RegistrationInstanceId == registrationInstance.Id
+                                                    && r.OnWaitList == false )
+                                                .Count();
 
+                mergeFields.Add( "CurrentRegistrationCount", currentRegistrationCount );
                 if ( maxRegistrantCount != 0 )
                 {
-                    currentRegistrationCount = new RegistrationRegistrantService( rockContext ).Queryable().AsNoTracking()
-                                                    .Where( r =>
-                                                        r.Registration.RegistrationInstanceId == registrationInstance.Id
-                                                        && r.OnWaitList == false )
-                                                    .Count();
-                }
-
-                mergeFields.Add( "RegistrationStatusLabel", ( maxRegistrantCount - currentRegistrationCount > 0 ) ? "Register" : "Join Wait List" );
-                if ( maxRegistrantCount != 0 )
-                {
+                    mergeFields.Add( "MaxRegistrantCount", maxRegistrantCount );
                     mergeFields.Add( "RegistrationSpotsAvailable", maxRegistrantCount - currentRegistrationCount );
                 }
             }
