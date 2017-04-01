@@ -3,6 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay( "{Number} {Extension}" )]
     public class PhoneNumberImport
     {
         /// <summary>

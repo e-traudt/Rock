@@ -3,6 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay( "{Street}" )]
     public class AddressImport
     {
         /// <summary>

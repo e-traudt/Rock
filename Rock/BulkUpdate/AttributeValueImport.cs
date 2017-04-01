@@ -5,8 +5,17 @@ namespace Rock.BulkUpdate
     /// <summary>
     /// 
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay( "{Value}" )]
     public class AttributeValueImport
     {
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
+        /// </summary>
+        public AttributeValueImport()
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
         /// </summary>

@@ -6,6 +6,7 @@ namespace Rock.BulkUpdate
     /// <summary>
     /// 
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay( "{FirstName} {LastName}" )]
     public class PersonImport
     {
         #region Family Fields

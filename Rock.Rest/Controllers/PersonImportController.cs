@@ -17,9 +17,27 @@ namespace Rock.Rest.Controllers
     {
         [System.Web.Http.Route( "api/PersonImport" )]
         [HttpPost]
-       // [RequireHttps]
-      //  [Authenticate, Secured]
+        // [RequireHttps]
+        //  [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage Post( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
+        {
+            try
+            {
+                var content = this.Request.Content;
+                return BulkImport( personImports );
+            }
+            catch ( Exception ex )
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Bulks the import.
+        /// </summary>
+        /// <param name="personImports">The person imports.</param>
+        /// <returns></returns>
+        private HttpResponseMessage BulkImport( List<BulkUpdate.PersonImport> personImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -48,11 +66,10 @@ namespace Rock.Rest.Controllers
             sbStats.AppendFormat( "[{2}ms] Get {0} family and {1} person lookups\n", familiesLookup.Count, personLookup.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
-
             foreach ( var personImport in personImports )
             {
                 Group family = null;
-                
+
                 if ( personImport.FamilyForeignId.HasValue )
                 {
                     if ( personImport.FamilyForeignId.HasValue )
@@ -138,56 +155,47 @@ namespace Rock.Rest.Controllers
             bool useSqlBulkCopy = true;
             List<int> insertedPersonForeignIds = new List<int>();
 
-            //using ( var ts = new System.Transactions.TransactionScope() )
+            // insert all the [Group] records
+            var familiesToInsert = familiesLookup.Where( a => a.Value.Id == 0 ).Select( a => a.Value ).ToList();
+
+            // insert all the [Person] records.
+            // NOTE: we are only inserting the [Person] record, not the PersonAlias or GroupMember records yet
+            var personsToInsert = personLookup.Where( a => a.Value.Id == 0 ).Select( a => a.Value ).ToList();
+
+            rockContext.BulkInsert( familiesToInsert, useSqlBulkCopy );
+
+            stopwatch.Stop();
+            sbStats.AppendFormat( "[{1}ms] BulkInsert {0} family(Group) records\n", familiesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
+            stopwatch.Restart();
+
+            try
             {
-                // insert all the [Group] records
-                var familiesToInsert = familiesLookup.Where( a => a.Value.Id == 0 ).Select( a => a.Value ).ToList();
+                rockContext.BulkInsert( personsToInsert, useSqlBulkCopy );
 
-                // insert all the [Person] records.
-                // NOTE: we are only inserting the [Person] record, not the PersonAlias or GroupMember records yet
-                var personsToInsert = personLookup.Where( a => a.Value.Id == 0 ).Select( a => a.Value ).ToList();
-
-                rockContext.BulkInsert( familiesToInsert, useSqlBulkCopy );
-
-                stopwatch.Stop();
-                sbStats.AppendFormat( "[{1}ms] BulkInsert {0} family(Group) records\n", familiesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
-                stopwatch.Restart();
-
+                // TODO: Figure out a good way to handle database errors since SqlBulkCopy doesn't tell you which record failed.  Maybe do it like this where we catch the exception, rollback to a EF AddRange, and then report which record(s) had the problem
+            }
+            catch
+            {
                 try
                 {
-                    rockContext.BulkInsert( personsToInsert, useSqlBulkCopy );
-
-                    // TODO: Figure out a good way to handle database errors since SqlBulkCopy doesn't tell you which record failed.  Maybe do it like this where we catch the exception, rollback to a EF AddRange, and then report which record(s) had the problem
+                    // do it the EF AddRange which is slower, but it will help us determine which record fails
+                    rockContext.BulkInsert( personsToInsert, false );
                 }
-                catch
+                catch ( System.Data.Entity.Infrastructure.DbUpdateException dex )
                 {
-                    try
+                    // nbResults.Text = string.Empty;
+                    foreach ( var entry in dex.Entries )
                     {
-                        // do it the EF AddRange which is slower, but it will help us determine which record fails
-                        rockContext.BulkInsert( personsToInsert, false );
-                    }
-                    catch ( System.Data.Entity.Infrastructure.DbUpdateException dex )
-                    {
-                       // nbResults.Text = string.Empty;
-                        foreach ( var entry in dex.Entries )
-                        {
-                            var errorRecord = ( entry.Entity as IEntity );
-                         //   nbResults.NotificationBoxType = NotificationBoxType.Danger;
-                            //nbResults.Text += string.Format( "Error on record with ForeignId: {0}, value: {1}, Error:{2}\n", errorRecord.ForeignId, errorRecord.ToString(), dex.GetBaseException().Message );
-                        }
-
-                       // return;
+                        var errorRecord = entry.Entity as IEntity;
                     }
                 }
+            }
 
-                insertedPersonForeignIds = personsToInsert.Select( a => a.ForeignId.Value ).ToList();
+            insertedPersonForeignIds = personsToInsert.Select( a => a.ForeignId.Value ).ToList();
 
-                stopwatch.Stop();
-                sbStats.AppendFormat( "[{1}ms] BulkInsert {0} Person records\n", personsToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
-                stopwatch.Restart();
-
-               // ts.Complete();
-            };
+            stopwatch.Stop();
+            sbStats.AppendFormat( "[{1}ms] BulkInsert {0} Person records\n", personsToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
+            stopwatch.Restart();
 
             // Make sure everybody has a PersonAlias
             PersonAliasService personAliasService = new PersonAliasService( rockContext );
@@ -246,12 +254,11 @@ namespace Rock.Rest.Controllers
 
             var locationCreatedDateTimeStart = RockDateTime.Now;
 
-
             //NOTE: TODO To test the "Foriegn Key Issue" , do the foreach this way: foreach ( var familyRecord in personsIdsForPersonImport.GroupBy( a => a.FamilyId ) )
             foreach ( var familyRecord in personsIdsForPersonImport.Where( a => insertedPersonForeignIds.Contains( a.PersonImport.PersonForeignId ) ).GroupBy( a => a.FamilyId ) )
             {
                 // get the distinct addresses for each family in our import
-                var familyAddresses = familyRecord.SelectMany( a => a.PersonImport.Addresses ).DistinctBy( a => new { a.Street1, a.Street2, a.City, a.County, a.State, a.Country, a.PostalCode } );
+                var familyAddresses = familyRecord.Where( a => a.PersonImport?.Addresses != null ).SelectMany( a => a.PersonImport.Addresses ).DistinctBy( a => new { a.Street1, a.Street2, a.City, a.County, a.State, a.Country, a.PostalCode } );
 
                 foreach ( var address in familyAddresses )
                 {
@@ -307,26 +314,15 @@ namespace Rock.Rest.Controllers
             sbStats.AppendFormat( "[{1}ms] BulkInsert {0} GroupLocation records\n", groupLocationsToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
-
             // TODO: PhoneNumbers
             // TODO: Attributes
 
             stopwatchTotal.Stop();
             sbStats.AppendFormat( "\n\nTotal: [{0}ms] \n", stopwatchTotal.Elapsed.TotalMilliseconds );
 
-            //nbResults.NotificationBoxType = NotificationBoxType.Success;
-            //nbResults.Text = sbStats.ToString().ConvertCrLfToHtmlBr();
-
-
             // TODO: Rebuild all indexes on the effected tables to fix bogus "Foriegn Key violation" issue
-
-
-
-
-
-
-
-            return ControllerContext.Request.CreateResponse( HttpStatusCode.Created );
+            var responseText = sbStats.ToString();
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
     }
 }
