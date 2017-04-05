@@ -503,7 +503,7 @@ function(item) {
             }
 
             Uri uri = new Uri( Request.Url.ToString() );
-            hfFilterUrl.Value = uri.Scheme + "://" + uri.GetComponents( UriComponents.HostAndPort, UriFormat.UriEscaped ) + pageReference.BuildUrl();
+            hfFilterUrl.Value = uri.GetLeftPart(UriPartial.Authority) + pageReference.BuildUrl();
             btnCopyToClipboard.Disabled = false;
         }
 
@@ -1830,7 +1830,7 @@ function(item) {
 
                     var groupService = new GroupService( _rockContext );
 
-                    var cblGroupTypeGroups = new RockCheckBoxList { ID = "cblGroupTypeGroups" + groupType.Id };
+                    var cblGroupTypeGroups = new RockCheckBoxList { ID = "cblGroupTypeGroups" + groupType.Id, FormGroupCssClass = "js-groups-container" };
 
                     cblGroupTypeGroups.Label = groupType.Name;
                     cblGroupTypeGroups.Items.Clear();
