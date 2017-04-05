@@ -59,6 +59,7 @@ namespace Rock.Rest.Controllers
             // dictionary of Families. KEY is FamilyForeignId
             familiesLookup = groupService.Queryable().AsNoTracking().Where( a => a.GroupTypeId == familyGroupTypeId && a.ForeignId.HasValue )
                 .ToList().ToDictionary( k => k.ForeignId.Value, v => v );
+
             personLookup = qryAllPersons.AsNoTracking().Where( a => a.ForeignId.HasValue )
                 .ToList().ToDictionary( k => k.ForeignId.Value, v => v );
 
@@ -90,8 +91,14 @@ namespace Rock.Rest.Controllers
                 {
                     family = new Group();
                     family.GroupTypeId = familyGroupTypeId;
-                    family.Name = personImport.LastName;
-                    //family.CampusId = personImport.Campus.
+                    family.Name = string.IsNullOrEmpty( personImport.FamilyName ) ? personImport.LastName : personImport.FamilyName;
+
+                    if ( family.Name.IsNullOrWhiteSpace() )
+                    {
+                        family.Name = "Family";
+                    }
+
+                    family.CampusId = personImport.CampusId;
 
                     family.ForeignId = personImport.FamilyForeignId;
                     familiesLookup.Add( personImport.FamilyForeignId.Value, family );
@@ -169,6 +176,24 @@ namespace Rock.Rest.Controllers
             sbStats.AppendFormat( "[{1}ms] BulkInsert {0} family(Group) records\n", familiesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
+            // lookup GroupId from Group.ForeignId
+            var familyIdLookup = groupService.Queryable().AsNoTracking().Where( a => a.GroupTypeId == familyGroupTypeId && a.ForeignId.HasValue )
+                .ToList().ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            var personToInsertLookup = personsToInsert.ToDictionary( k => k.ForeignId.Value, v => v );
+            // now that we have GroupId for each family, set the GivingGroupId for personImport's that don't give individually
+            foreach ( var personImport in personImports )
+            {
+                if ( !personImport.GivingIndividually && personImport.FamilyForeignId.HasValue )
+                {
+                    var personToInsert = personToInsertLookup.GetValueOrNull( personImport.PersonForeignId );
+                    if ( personToInsert != null )
+                    {
+                        personToInsert.GivingGroupId = familyIdLookup[personImport.FamilyForeignId.Value];
+                    }
+                }
+            }
+
             try
             {
                 rockContext.BulkInsert( personsToInsert, useSqlBulkCopy );
@@ -229,6 +254,9 @@ namespace Rock.Rest.Controllers
                                                 HasGroupMemberRecord = gm != null
                                             };
 
+            // narrow it down to just person records that we inserted
+            personsIdsForPersonImport = personsIdsForPersonImport.Where( a => insertedPersonForeignIds.Contains( a.PersonImport.PersonForeignId ) );
+
             // Make the GroupMember records for all the imported person (unless they are already have a groupmember record for the family)
             var groupMemberRecordsToInsertQry = from ppi in personsIdsForPersonImport
                                                 where !ppi.HasGroupMemberRecord
@@ -255,8 +283,8 @@ namespace Rock.Rest.Controllers
 
             var locationCreatedDateTimeStart = RockDateTime.Now;
 
-            //NOTE: TODO To test the "Foriegn Key Issue" , do the foreach this way: foreach ( var familyRecord in personsIdsForPersonImport.GroupBy( a => a.FamilyId ) )
-            foreach ( var familyRecord in personsIdsForPersonImport.Where( a => insertedPersonForeignIds.Contains( a.PersonImport.PersonForeignId ) ).GroupBy( a => a.FamilyId ) )
+            //NOTE: TODO To test the "Foriegn Key Issue" , don't narrow it down to just person records that we inserted
+            foreach ( var familyRecord in personsIdsForPersonImport.GroupBy( a => a.FamilyId ) )
             {
                 // get the distinct addresses for each family in our import
                 var familyAddresses = familyRecord.Where( a => a.PersonImport?.Addresses != null ).SelectMany( a => a.PersonImport.Addresses ).DistinctBy( a => new { a.Street1, a.Street2, a.City, a.County, a.State, a.Country, a.PostalCode } );
@@ -375,6 +403,22 @@ namespace Rock.Rest.Controllers
 
             stopwatchTotal.Stop();
             sbStats.AppendFormat( "\n\nTotal: [{0}ms] \n", stopwatchTotal.Elapsed.TotalMilliseconds );
+
+            // TODO: Person Photo
+            var personsWithPhoto = personImports.Where( a => !string.IsNullOrEmpty( a.PersonPhotoUrl ) ).ToList();
+            foreach ( var personImport in personsWithPhoto )
+            {
+                try
+                {
+                    HttpWebRequest imageRequest = (HttpWebRequest)HttpWebRequest.Create( personImport.PersonPhotoUrl );
+                    HttpWebResponse imageResponse = (HttpWebResponse)imageRequest.GetResponse();
+                    var imageStream = imageResponse.GetResponseStream();
+                }
+                catch ( Exception ex )
+                {
+                    Debug.WriteLine( ex.Message );
+                }
+            }
 
             // TODO: Rebuild all indexes on the effected tables to fix bogus "Foriegn Key violation" issue
             var responseText = sbStats.ToString();

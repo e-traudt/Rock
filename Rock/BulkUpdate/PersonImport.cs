@@ -59,7 +59,7 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The name of the family.
         /// </value>
-        public string FamilyName { get; internal set; }
+        public string FamilyName { get; set; }
 
         /// <summary>
         /// Gets the family image URL.
@@ -67,7 +67,7 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The family image URL.
         /// </value>
-        public string FamilyImageUrl { get; internal set; }
+        public string FamilyImageUrl { get; set; }
 
         #endregion Family Fields
 
@@ -297,7 +297,7 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The person photo URL.
         /// </value>
-        public string PersonPhotoUrl { get; internal set; }
+        public string PersonPhotoUrl { get; set; }
 
         #endregion Person Fields that map directly to Rock.Model.Person
 
@@ -346,7 +346,7 @@ namespace Rock.BulkUpdate
         /// The modified date time.
         /// </value>
         public DateTime? ModifiedDateTime { get; set; }
-        public string Note { get; internal set; }
+        public string Note { get; set; }
 
         #endregion
     }
