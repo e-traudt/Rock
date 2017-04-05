@@ -42,10 +42,10 @@
         public string Extension { get; set; }
 
         /// <summary>
-        /// Gets the Phone Number's Number Type <see cref="Rock.Model.DefinedValue"/> Id.
+        /// Gets the Phone Number's Number Type Id.
         /// </summary>
         /// <value>
-        /// A <see cref="System.Int32"/> representing the Number Type <see cref="Rock.Model.DefinedValue"/> Id. If unknown, this value will be null.
+        /// A <see cref="System.Int32"/> representing the Number Type Id. If unknown, this value will be null.
         /// </value>
         public int? NumberTypeValueId { get; set; }
 

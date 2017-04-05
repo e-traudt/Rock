@@ -74,18 +74,18 @@ namespace Rock.BulkUpdate
         #region Person Fields that map directly to Rock.Model.Person
 
         /// <summary>
-        /// Gets or sets the Id of the Person Record Type <see cref="Rock.Model.DefinedValue" /> representing what type of Person Record this is.
+        /// Gets or sets the Id of the Person Record Type representing what type of Person Record this is.
         /// </summary>
         /// <value>
-        /// A <see cref="System.Int32"/> representing the Id of the <see cref="Rock.Model.DefinedValue"/> identifying the person record type. If no value is selected this can be null.
+        /// A <see cref="System.Int32"/> representing the Id of the identifying the person record type. If no value is selected this can be null.
         /// </value>
         public int? RecordTypeValueId { get; set; }
 
         /// <summary>
-        /// Gets or sets the Id of the Record Status <see cref="Rock.Model.DefinedValue"/> representing the status of this entity
+        /// Gets or sets the Id of the Record Status representing the status of this entity
         /// </summary>
         /// <value>
-        /// A <see cref="System.Int32"/> representing the Id of the Record Status <see cref="Rock.Model.DefinedValue"/> representing the status of this entity.
+        /// A <see cref="System.Int32"/> representing the Id of the Record Status representing the status of this entity.
         /// </value>
         public int? RecordStatusValueId { get; set; }
 
@@ -98,15 +98,15 @@ namespace Rock.BulkUpdate
         public DateTime? RecordStatusLastModifiedDateTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the Id of the Record Status Reason <see cref="Rock.Model.DefinedValue"/> representing the reason why a person record status would have a set status.
+        /// Gets or sets the Id of the Record Status Reason representing the reason why a person record status would have a set status.
         /// </summary>
         /// <value>
-        /// A <see cref="System.Int32"/> representing the Id of the Record Status Reason <see cref="Rock.Model.DefinedValue"/> representing the reason why a person entity would have a set status.
+        /// A <see cref="System.Int32"/> representing the Id of the Record Status Reason representing the reason why a person entity would have a set status.
         /// </value>
         public int? RecordStatusReasonValueId { get; set; }
 
         /// <summary>
-        /// Gets or sets the Id of the Defined Value <see cref="Rock.Model.DefinedValue"/> representing the connection status of the Person.
+        /// Gets or sets the Id of the Defined Value representing the connection status of the Person.
         /// </summary>
         /// <value>
         /// A <see cref="System.Int32"/> representing the connection status of the Person.
@@ -114,7 +114,7 @@ namespace Rock.BulkUpdate
         public int? ConnectionStatusValueId { get; set; }
 
         /// <summary>
-        /// Gets or sets the Id of the Defined Value <see cref="Rock.Model.DefinedValue"/> representing the reason a record needs to be reviewed.
+        /// Gets or sets the Id of the Defined Value representing the reason a record needs to be reviewed.
         /// </summary>
         /// <value>
         /// A <see cref="System.Int32"/> representing the reason a record needs to be reviewed.
@@ -130,10 +130,10 @@ namespace Rock.BulkUpdate
         public bool IsDeceased { get; set; }
 
         /// <summary>
-        /// Gets or sets Id of the (Salutation) Tile <see cref="Rock.Model.DefinedValue"/> that is associated with the Person
+        /// Gets or sets Id of the (Salutation) Tile that is associated with the Person
         /// </summary>
         /// <value>
-        /// An <see cref="System.Int32"/> representing the Title <see cref="Rock.Model.DefinedValue"/> that is associated with the Person.
+        /// An <see cref="System.Int32"/> representing the Title that is associated with the Person.
         /// </value>
         public int? TitleValueId { get; set; }
 
@@ -173,10 +173,10 @@ namespace Rock.BulkUpdate
         public string LastName { get; set; }
 
         /// <summary>
-        /// Gets or sets the Id of the Person's name Suffix <see cref="Rock.Model.DefinedValue"/>.
+        /// Gets or sets the Id of the Person's name Suffix.
         /// </summary>
         /// <value>
-        /// A <see cref="System.Int32"/> representing the Id of the Person's name Suffix <see cref="Rock.Model.DefinedValue"/>. If the Person
+        /// A <see cref="System.Int32"/> representing the Id of the Person's name Suffix. If the Person
         /// does not have a suffix as part of their name this value will be null.
         /// </value>
         /// <remarks>
@@ -213,16 +213,16 @@ namespace Rock.BulkUpdate
         /// Gets or sets the gender of the Person. This property is required.
         /// </summary>
         /// <value>
-        /// A <see cref="Rock.Model.Gender"/> enum value representing the Person's gender.  Valid values are <c>Gender.Unknown</c> if the Person's gender is unknown,
+        /// An enum value representing the Person's gender.  Valid values are <c>Gender.Unknown</c> if the Person's gender is unknown,
         /// <c>Gender.Male</c> if the Person's gender is Male, <c>Gender.Female</c> if the Person's gender is Female.
         /// </value>
         public int Gender { get; set; }
 
         /// <summary>
-        /// Gets or sets Id of the Marital Status <see cref="Rock.Model.DefinedValue"/> representing the Person's martial status.
+        /// Gets or sets Id of the Marital Status representing the Person's martial status.
         /// </summary>
         /// <value>
-        /// A <see cref="System.Int32"/> representing the Id of the Marital Status <see cref="Rock.Model.DefinedValue"/> representing the Person's martial status.  This value is nullable.
+        /// A <see cref="System.Int32"/> representing the Id of the Marital Status representing the Person's martial status.  This value is nullable.
         /// </value>
         public int? MaritalStatusValueId { get; set; }
 
@@ -346,6 +346,13 @@ namespace Rock.BulkUpdate
         /// The modified date time.
         /// </value>
         public DateTime? ModifiedDateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the note.
+        /// </summary>
+        /// <value>
+        /// The note.
+        /// </value>
         public string Note { get; set; }
 
         #endregion

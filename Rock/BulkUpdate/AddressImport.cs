@@ -41,11 +41,11 @@
         public int GroupLocationTypeValueId { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag indicating if the <see cref="Rock.Model.Location"/> referenced by this GroupLocation is the mailing address/location for the <see cref="Rock.Model.Group"/>.  
+        /// Gets or sets a flag indicating if the referenced by this GroupLocation is the mailing address/location for the group.  
         /// This field is only supported in the UI for family groups
         /// </summary>
         /// <value>
-        /// A <see cref="System.Boolean"/> value that is <c>true</c> if this is the mailing address/location for this <see cref="Rock.Model.Group"/>.
+        /// A <see cref="System.Boolean"/> value that is <c>true</c> if this is the mailing address/location for this group.
         /// </value>
         public bool IsMailingLocation { get; set; }
 
