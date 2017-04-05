@@ -65,6 +65,7 @@ namespace Rock.Rest.Controllers
             stopwatch.Stop();
             sbStats.AppendFormat( "[{2}ms] Get {0} family and {1} person lookups\n", familiesLookup.Count, personLookup.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
+            string defaultPhoneCountryCode = PhoneNumber.DefaultCountryCode();
 
             foreach ( var personImport in personImports )
             {
@@ -211,7 +212,7 @@ namespace Rock.Rest.Controllers
 
             rockContext.BulkInsert( personAliasesToInsert, useSqlBulkCopy );
             stopwatch.Stop();
-            sbStats.AppendFormat( "[{1}ms] BulkInsert{0} PersonAliases\n", personAliasesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
+            sbStats.AppendFormat( "[{1}ms] BulkInsert {0} PersonAliases\n", personAliasesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
             // get the person Ids along with the PersonImport and GroupMember record
@@ -314,8 +315,63 @@ namespace Rock.Rest.Controllers
             sbStats.AppendFormat( "[{1}ms] BulkInsert {0} GroupLocation records\n", groupLocationsToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
-            // TODO: PhoneNumbers
-            // TODO: Attributes
+            // PhoneNumbers
+            List<PhoneNumber> phoneNumbersToImport = new List<PhoneNumber>();
+
+            foreach ( var personsIds in personsIdsForPersonImport )
+            {
+                foreach ( var phoneNumberImport in personsIds.PersonImport.PhoneNumbers )
+                {
+                    var phoneNumberToImport = new PhoneNumber();
+
+                    phoneNumberToImport.PersonId = personsIds.PersonId;
+                    phoneNumberToImport.NumberTypeValueId = phoneNumberImport.NumberTypeValueId;
+                    phoneNumberToImport.CountryCode = defaultPhoneCountryCode;
+                    phoneNumberToImport.Number = PhoneNumber.CleanNumber( phoneNumberImport.Number );
+                    phoneNumberToImport.NumberFormatted = PhoneNumber.FormattedNumber( phoneNumberToImport.CountryCode, phoneNumberToImport.Number );
+                    phoneNumberToImport.Extension = phoneNumberImport.Extension;
+                    phoneNumberToImport.IsMessagingEnabled = phoneNumberImport.IsMessagingEnabled;
+                    phoneNumberToImport.IsUnlisted = phoneNumberImport.IsUnlisted;
+
+                    phoneNumbersToImport.Add( phoneNumberToImport );
+                }
+            }
+
+            stopwatch.Stop();
+            sbStats.AppendFormat( "[{1}ms] Prepare {0} PhoneNumber records\n", phoneNumbersToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
+            stopwatch.Restart();
+
+            rockContext.BulkInsert( phoneNumbersToImport );
+
+            stopwatch.Stop();
+            sbStats.AppendFormat( "[{1}ms] BulkInsert {0} PhoneNumber records\n", phoneNumbersToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
+            stopwatch.Restart();
+
+            // Attribute Values
+            var attributeValuesToInsert = new List<AttributeValue>();
+            foreach ( var personsIds in personsIdsForPersonImport )
+            {
+                foreach ( var attributeValueImport in personsIds.PersonImport.AttributeValues )
+                {
+                    var attributeValue = new AttributeValue();
+
+                    attributeValue.EntityId = personsIds.PersonId;
+                    attributeValue.AttributeId = attributeValueImport.AttributeId;
+                    attributeValue.Value = attributeValueImport.Value;
+
+                    attributeValuesToInsert.Add( attributeValue );
+                }
+            }
+
+            stopwatch.Stop();
+            sbStats.AppendFormat( "[{1}ms] Prepare {0} AttributeValue records\n", attributeValuesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
+            stopwatch.Restart();
+
+            rockContext.BulkInsert( attributeValuesToInsert );
+
+            stopwatch.Stop();
+            sbStats.AppendFormat( "[{1}ms] BulkInsert {0} AttributeValue records\n", attributeValuesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
+            stopwatch.Restart();
 
             stopwatchTotal.Stop();
             sbStats.AppendFormat( "\n\nTotal: [{0}ms] \n", stopwatchTotal.Elapsed.TotalMilliseconds );
