@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Web.Http;
+using Rock;
 using Rock.Data;
 using Rock.Model;
 using Rock.Web.Cache;
@@ -307,6 +308,10 @@ namespace Rock.Rest.Controllers
                     location.Country = address.Country;
                     location.PostalCode = address.PostalCode;
                     location.CreatedDateTime = locationCreatedDateTimeStart;
+                    if ( address.Latitude.HasValue && address.Longitude.HasValue )
+                    {
+                        location.SetLocationPointFromLatLong( address.Latitude.Value, address.Longitude.Value );
+                    }
 
                     // give the Location a Guid, and store a reference to which Location is associated with the GroupLocation record. Then we'll match them up later and do the bulk insert
                     location.Guid = Guid.NewGuid();
@@ -320,8 +325,15 @@ namespace Rock.Rest.Controllers
             stopwatch.Stop();
             sbStats.AppendFormat( "[{1}ms] Prepare {0} Location/GroupLocation records for BulkInsert\n", locationsToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
+            var locationsToImportWithGeoSpatial = locationsToImport.Where( a => a.GeoPoint != null ).ToList();
+            using ( var locationRockContext = new RockContext() )
+            {
+                // rockContext.BulkInsert doesn't support GeoSpatial, so we have to insert these the regular way
+                locationRockContext.BulkInsert( locationsToImportWithGeoSpatial, false );
+            }
 
-            rockContext.BulkInsert( locationsToImport, useSqlBulkCopy );
+            var locationsToBulkInsert = locationsToImport.Where( a => a.GeoPoint == null ).ToList();
+            rockContext.BulkInsert( locationsToBulkInsert );
 
             stopwatch.Stop();
             sbStats.AppendFormat( "[{1}ms] BulkInsert {0} Location records\n", locationsToImport.Count, stopwatch.Elapsed.TotalMilliseconds );
