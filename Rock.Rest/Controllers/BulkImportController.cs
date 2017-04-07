@@ -14,18 +14,17 @@ using Rock.Web.Cache;
 
 namespace Rock.Rest.Controllers
 {
-    public class PersonImportController : ApiControllerBase
+    public class BulkImportController : ApiControllerBase
     {
-        [System.Web.Http.Route( "api/PersonImport" )]
+        [System.Web.Http.Route("api/BulkImport/PersonImport")]
         [HttpPost]
         // [RequireHttps]
         //  [Authenticate, Secured]
-        public System.Net.Http.HttpResponseMessage Post( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
+        public System.Net.Http.HttpResponseMessage PersonImport( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
         {
             try
             {
-                var content = this.Request.Content;
-                return BulkImport( personImports );
+                return BulkPersonImport( personImports );
             }
             catch ( Exception ex )
             {
@@ -38,7 +37,7 @@ namespace Rock.Rest.Controllers
         /// </summary>
         /// <param name="personImports">The person imports.</param>
         /// <returns></returns>
-        private HttpResponseMessage BulkImport( List<BulkUpdate.PersonImport> personImports )
+        private HttpResponseMessage BulkPersonImport( List<BulkUpdate.PersonImport> personImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -329,7 +328,9 @@ namespace Rock.Rest.Controllers
             using ( var locationRockContext = new RockContext() )
             {
                 // rockContext.BulkInsert doesn't support GeoSpatial, so we have to insert these the regular way
-                locationRockContext.BulkInsert( locationsToImportWithGeoSpatial, false );
+                //rockContext.Database.ExecuteSqlCommand("ALTER INDEX [IX_GeoPoint] ON [dbo].[Location] DISABLE");
+                locationRockContext.BulkInsert( locationsToImportWithGeoSpatial, true );
+                //rockContext.Database.ExecuteSqlCommand("ALTER INDEX [IX_GeoPoint] ON [dbo].[Location] REBUILD");
             }
 
             var locationsToBulkInsert = locationsToImport.Where( a => a.GeoPoint == null ).ToList();
@@ -413,11 +414,10 @@ namespace Rock.Rest.Controllers
             sbStats.AppendFormat( "[{1}ms] BulkInsert {0} AttributeValue records\n", attributeValuesToInsert.Count, stopwatch.Elapsed.TotalMilliseconds );
             stopwatch.Restart();
 
-            stopwatchTotal.Stop();
-            sbStats.AppendFormat( "\n\nTotal: [{0}ms] \n", stopwatchTotal.Elapsed.TotalMilliseconds );
-
             // TODO: Person Photo
+            /*
             var personsWithPhoto = personImports.Where( a => !string.IsNullOrEmpty( a.PersonPhotoUrl ) ).ToList();
+            int photoExceptionCount = 0;
             foreach ( var personImport in personsWithPhoto )
             {
                 try
@@ -429,12 +429,22 @@ namespace Rock.Rest.Controllers
                 catch ( Exception ex )
                 {
                     Debug.WriteLine( ex.Message );
+                    photoExceptionCount++;
                 }
             }
 
+            stopwatch.Stop();
+            sbStats.Append( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] UpdatePersonPhotos {personsWithPhoto.Count} personsWithPhoto records, {photoExceptionCount} exceptions \n");
+            stopwatch.Restart();
+            */
+
+            stopwatchTotal.Stop();
+            sbStats.AppendFormat("\n\nTotal: [{0}ms] \n", stopwatchTotal.Elapsed.TotalMilliseconds);
+
             // TODO: Rebuild all indexes on the effected tables to fix bogus "Foriegn Key violation" issue
             var responseText = sbStats.ToString();
-            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+            return ControllerContext.Request.CreateResponse<string>(HttpStatusCode.Created, responseText);
+
         }
     }
 }

@@ -4,33 +4,39 @@
     /// 
     /// </summary>
     [System.Diagnostics.DebuggerDisplay( "{Street}" )]
-    public class AddressImport
+    public class LocationImport
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AddressImport"/> class.
+        /// Gets or sets the location foreign identifier.
         /// </summary>
-        public AddressImport()
-        {
-        }
+        /// <value>
+        /// The location foreign identifier.
+        /// </value>
+        public int LocationForeignId { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AddressImport" /> class.
+        /// Gets or sets the parent location foreign identifier.
         /// </summary>
-        /// <param name="groupLocationTypeValueId">The group location type value identifier. (Home, Work, etc)</param>
-        /// <param name="street">The street.</param>
-        /// <param name="city">The city.</param>
-        /// <param name="state">The state.</param>
-        /// <param name="postalCode">The postal code.</param>
-        /// <param name="country">The country.</param>
-        public AddressImport( int groupLocationTypeValueId, string street, string city, string state, string postalCode, string country = null ) : this()
-        {
-            this.GroupLocationTypeValueId = groupLocationTypeValueId;
-            this.Street1 = street;
-            this.City = city;
-            this.State = state;
-            this.PostalCode = postalCode;
-            this.Country = country;
-        }
+        /// <value>
+        /// The parent location foreign identifier.
+        /// </value>
+        public int? ParentLocationForeignId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is active.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is active; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsActive { get; set; }
 
         /// <summary>
         /// Gets or sets the location type value identifier.
@@ -38,28 +44,7 @@
         /// <value>
         /// The location type value identifier.
         /// </value>
-        public int GroupLocationTypeValueId { get; set; }
-
-        /// <summary>
-        /// Gets or sets a flag indicating if the referenced by this GroupLocation is the mailing address/location for the group.  
-        /// This field is only supported in the UI for family groups
-        /// </summary>
-        /// <value>
-        /// A <see cref="System.Boolean"/> value that is <c>true</c> if this is the mailing address/location for this group.
-        /// </value>
-        public bool IsMailingLocation { get; set; }
-
-        /// <summary>
-        /// Gets or sets a flag indicating if this is the mappable location for this 
-        /// NOTE: Rock requires that exactly one of the Addresses of a Family is the mapped location, so BulkUpdate will do as follows
-        /// 1) If exactly one of the AddressImport records is IsMappedLocation=true, that address will be stored in Rock as IsMappedLocation=true
-        /// 2) If more than one AddressImport records is IsMappedLocation=true, the "first" IsMappedLocation one be stored in Rock as IsMappedLocation=true
-        /// 3) If none of AddressImport records is IsMappedLocation=true, the "first" one be stored in Rock as IsMappedLocation=true
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is location; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsMappedLocation { get; set; }
+        public int LocationTypeValueId { get; set; }
 
         /// <summary>
         /// Gets or sets the first line of the Location's Street/Mailing Address.
@@ -122,21 +107,5 @@
         /// Street/Mailing Address, this value will be null.
         /// </value>
         public string PostalCode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the latitude.
-        /// </summary>
-        /// <value>
-        /// The latitude.
-        /// </value>
-        public double? Latitude { get; set; }
-
-        /// <summary>
-        /// Gets or sets the longitude.
-        /// </summary>
-        /// <value>
-        /// The longitude.
-        /// </value>
-        public double? Longitude { get; set; }
     }
 }

@@ -317,7 +317,7 @@ namespace Rock.BulkUpdate
         /// <value>
         /// The addresses.
         /// </value>
-        public ICollection<AddressImport> Addresses { get; set; }
+        public ICollection<PersonAddressImport> Addresses { get; set; }
 
         /// <summary>
         /// Gets or sets the attribute values.
