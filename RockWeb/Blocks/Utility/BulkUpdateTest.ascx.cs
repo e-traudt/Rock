@@ -96,7 +96,11 @@ namespace RockWeb.Blocks.Utility
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Person] where [ForeignId] is not null" );
-            
+
+
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where GroupId in (select Id from [Group] where [ForeignId] is not null)" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
+
 
             // Delete Location (and cascade delete GroupLocation) records
             rockContext.Database.ExecuteSqlCommand( @"
@@ -112,6 +116,13 @@ WHERE Id IN (
 				)
 		)" );
 
+
+            // delete other locations
+            rockContext.Database.ExecuteSqlCommand( @"
+DELETE
+FROM [Location]
+WHERE [ForeignId] IS NOT NULL
+		" );
 
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
 

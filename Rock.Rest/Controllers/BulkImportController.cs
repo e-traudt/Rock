@@ -6,8 +6,35 @@ using System.Web.Http;
 
 namespace Rock.Rest.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Rock.Rest.ApiControllerBase" />
     public class BulkImportController : ApiControllerBase
     {
+        [System.Web.Http.Route( "api/BulkImport/GroupImport" )]
+        [HttpPost]
+        // [RequireHttps]
+        //  [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage GroupImport( [FromBody]List<Rock.BulkUpdate.GroupImport> groupImports )
+        {
+            try
+            {
+                var responseText = BulkUpdate.BulkInsertHelper.BulkGroupImport( groupImports );
+                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+            }
+            catch ( Exception ex )
+            {
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
+        /// Persons the import.
+        /// </summary>
+        /// <param name="personImports">The person imports.</param>
+        /// <returns></returns>
         [System.Web.Http.Route("api/BulkImport/PersonImport")]
         [HttpPost]
         // [RequireHttps]
@@ -17,6 +44,28 @@ namespace Rock.Rest.Controllers
             try
             {
                 var responseText = BulkUpdate.BulkInsertHelper.BulkPersonImport( personImports );
+                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+            }
+            catch ( Exception ex )
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Locations the import.
+        /// </summary>
+        /// <param name="locationImports">The location imports.</param>
+        /// <returns></returns>
+        [System.Web.Http.Route( "api/BulkImport/LocationImport" )]
+        [HttpPost]
+        // [RequireHttps]
+        //  [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage LocationImport( [FromBody]List<Rock.BulkUpdate.LocationImport> locationImports )
+        {
+            try
+            {
+                var responseText = BulkUpdate.BulkInsertHelper.BulkLocationImport( locationImports );
                 return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
             }
             catch ( Exception ex )

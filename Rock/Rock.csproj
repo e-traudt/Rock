@@ -422,6 +422,8 @@
     <Compile Include="BulkUpdate\AttendanceImport.cs" />
     <Compile Include="BulkUpdate\AttributeValueImport.cs" />
     <Compile Include="BulkUpdate\BulkInsertHelper.cs" />
+    <Compile Include="BulkUpdate\GroupImport.cs" />
+    <Compile Include="BulkUpdate\GroupMemberImport.cs" />
     <Compile Include="BulkUpdate\LocationImport.cs" />
     <Compile Include="BulkUpdate\PersonAddressImport.cs" />
     <Compile Include="BulkUpdate\PersonImport.cs" />

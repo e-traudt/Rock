@@ -14,6 +14,135 @@ namespace Rock.BulkUpdate
     public static class BulkInsertHelper
     {
         /// <summary>
+        /// Bulks the group import.
+        /// </summary>
+        /// <param name="groupImports">The group imports.</param>
+        /// <returns></returns>
+        public static string BulkGroupImport( List<BulkUpdate.GroupImport> groupImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+
+            var qryGroupsWithForeignIds = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+
+            var groupsAlreadyExistForeignIdHash = new HashSet<int>( qryGroupsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
+
+            List<Group> groupsToImport = new List<Group>();
+            var newGroupImports = groupImports.Where( a => !groupsAlreadyExistForeignIdHash.Contains( a.GroupForeignId ) ).ToList();
+
+            //int groupTypeIdGeneral = GroupTypeCache.Read(Rock.SystemGuid.GroupType.G)
+
+            foreach ( var groupImport in newGroupImports )
+            {
+                var group = new Group();
+                group.ForeignId = groupImport.GroupForeignId;
+              //  group.GroupTypeId = groupImport.GroupTypeId;
+
+                groupsToImport.Add( group );
+            }
+
+            rockContext.BulkInsert( groupsToImport );
+
+            // TODO: GroupMembers and Create any missing roles on the GroupType
+
+
+            // Get the Group records for the groups that we imported so that we can populate the ParentGroups
+            var groupLookup = qryGroupsWithForeignIds.ToList().ToDictionary( k => k.ForeignId.Value, v => v );
+            var groupsUpdated = false;
+            foreach ( var groupImport in newGroupImports.Where( a => a.ParentGroupForeignId.HasValue ) )
+            {
+                var group = groupLookup.GetValueOrNull( groupImport.ParentGroupForeignId.Value );
+                if ( group != null )
+                {
+                    var parentGroup = groupLookup.GetValueOrNull( groupImport.ParentGroupForeignId.Value );
+                    if ( parentGroup != null && group.ParentGroupId != parentGroup.Id )
+                    {
+                        group.ParentGroupId = parentGroup.Id;
+                        groupsUpdated = true;
+                    }
+                }
+            }
+
+            if ( groupsUpdated )
+            {
+                rockContext.SaveChanges();
+            }
+
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {newGroupImports.Count} GroupImports";
+
+            return responseText;
+        }
+
+        /// <summary>
+        /// Bulks the location import.
+        /// </summary>
+        /// <param name="locationImports">The location imports.</param>
+        /// <returns></returns>
+        public static string BulkLocationImport( List<BulkUpdate.LocationImport> locationImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+
+            var qryLocationsWithForeignIds = new LocationService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+
+            var locationsAlreadyExistForeignIdHash = new HashSet<int>( qryLocationsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
+
+            List<Location> locationsToImport = new List<Location>();
+            var newLocationImports = locationImports.Where( a => !locationsAlreadyExistForeignIdHash.Contains( a.LocationForeignId ) ).ToList();
+
+            foreach ( var locationImport in newLocationImports )
+            {
+                var location = new Location();
+                location.ForeignId = locationImport.LocationForeignId;
+                location.LocationTypeValueId = locationImport.LocationTypeValueId;
+
+                location.Street1 = locationImport.Street1.Truncate( 50 );
+                location.Street2 = locationImport.Street2.Truncate( 50 );
+                location.City = locationImport.City;
+                location.County = locationImport.County;
+                location.State = locationImport.State;
+                location.Country = locationImport.Country;
+                location.PostalCode = locationImport.PostalCode;
+
+                location.Name = locationImport.Name.Truncate( 100 );
+                location.IsActive = locationImport.IsActive;
+                locationsToImport.Add( location );
+            }
+
+            rockContext.BulkInsert( locationsToImport );
+
+            // Get the Location records for the locations that we imported so that we can populate the ParentLocations
+            var locationLookup = qryLocationsWithForeignIds.ToList().ToDictionary( k => k.ForeignId.Value, v => v );
+            var locationsUpdated = false;
+            foreach ( var locationImport in newLocationImports.Where( a => a.ParentLocationForeignId.HasValue ) )
+            {
+                var location = locationLookup.GetValueOrNull( locationImport.LocationForeignId );
+                if ( location != null )
+                {
+                    var parentLocation = locationLookup.GetValueOrNull( locationImport.ParentLocationForeignId.Value );
+                    if ( parentLocation != null && location.ParentLocationId != parentLocation.Id )
+                    {
+                        location.ParentLocationId = parentLocation.Id;
+                        locationsUpdated = true;
+                    }
+                }
+            }
+
+            if ( locationsUpdated )
+            {
+                rockContext.SaveChanges();
+            }
+
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {newLocationImports.Count} LocationImports";
+
+            return responseText;
+        }
+
+        /// <summary>
         /// Bulks the import.
         /// </summary>
         /// <param name="personImports">The person imports.</param>
@@ -308,10 +437,7 @@ namespace Rock.BulkUpdate
             var locationsToImportWithGeoSpatial = locationsToImport.Where( a => a.GeoPoint != null ).ToList();
             using ( var locationRockContext = new RockContext() )
             {
-                // rockContext.BulkInsert doesn't support GeoSpatial, so we have to insert these the regular way
-                //rockContext.Database.ExecuteSqlCommand("ALTER INDEX [IX_GeoPoint] ON [dbo].[Location] DISABLE");
-                locationRockContext.BulkInsert( locationsToImportWithGeoSpatial, true );
-                //rockContext.Database.ExecuteSqlCommand("ALTER INDEX [IX_GeoPoint] ON [dbo].[Location] REBUILD");
+                locationRockContext.BulkInsert( locationsToImportWithGeoSpatial );
             }
 
             var locationsToBulkInsert = locationsToImport.Where( a => a.GeoPoint == null ).ToList();

@@ -3,7 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay( "{Street}" )]
+    [System.Diagnostics.DebuggerDisplay( "{Street1}" )]
     public class LocationImport
     {
         /// <summary>
@@ -44,7 +44,7 @@
         /// <value>
         /// The location type value identifier.
         /// </value>
-        public int LocationTypeValueId { get; set; }
+        public int? LocationTypeValueId { get; set; }
 
         /// <summary>
         /// Gets or sets the first line of the Location's Street/Mailing Address.
