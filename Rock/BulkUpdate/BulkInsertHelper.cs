@@ -13,6 +13,11 @@ namespace Rock.BulkUpdate
 {
     public static class BulkInsertHelper
     {
+        /// <summary>
+        /// Bulks the attendance import.
+        /// </summary>
+        /// <param name="attendanceImports">The attendance imports.</param>
+        /// <returns></returns>
         public static string BulkAttendanceImport( List<BulkUpdate.AttendanceImport> attendanceImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
@@ -52,7 +57,7 @@ namespace Rock.BulkUpdate
                 attendance.CampusId = attendanceImport.CampusId;
                 attendance.StartDateTime = attendanceImport.StartDateTime;
                 attendance.EndDateTime = attendanceImport.EndDateTime;
-                
+
                 if ( attendanceImport.GroupForeignId.HasValue )
                 {
                     attendance.GroupId = groupIdLookup.GetValueOrNull( attendanceImport.GroupForeignId.Value );
@@ -67,9 +72,9 @@ namespace Rock.BulkUpdate
                 {
                     attendance.ScheduleId = scheduleIdLookup.GetValueOrNull( attendanceImport.ScheduleForeignId.Value );
                 }
-                
+
                 attendance.PersonAliasId = personAliasIdLookup.GetValueOrNull( attendanceImport.PersonForeignId );
-                
+
                 attendance.Note = attendanceImport.Note;
 
 
@@ -92,6 +97,289 @@ namespace Rock.BulkUpdate
             return responseText;
         }
 
+        /// <summary>
+        /// Bulks the financial account import.
+        /// </summary>
+        /// <param name="financialAccountImports">The financial account imports.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public static string BulkFinancialAccountImport( List<FinancialAccountImport> financialAccountImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+
+            var qryFinancialAccountsWithForeignIds = new FinancialAccountService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+
+            var financialAccountAlreadyExistForeignIdHash = new HashSet<int>( qryFinancialAccountsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
+
+            List<FinancialAccount> financialAccountsToImport = new List<FinancialAccount>();
+            var newFinancialAccountImports = financialAccountImports.Where( a => !financialAccountAlreadyExistForeignIdHash.Contains( a.FinancialAccountForeignId ) ).ToList();
+
+            foreach ( var financialAccountImport in newFinancialAccountImports )
+            {
+                var financialAccount = new FinancialAccount();
+                financialAccount.ForeignId = financialAccountImport.FinancialAccountForeignId;
+                if ( financialAccountImport.Name.Length > 50 )
+                {
+                    financialAccount.Name = financialAccountImport.Name.Truncate( 50 );
+                    financialAccount.Description = financialAccountImport.Name;
+                }
+                else
+                {
+                    financialAccount.Name = financialAccountImport.Name;
+                }
+
+                financialAccount.CampusId = financialAccountImport.CampusId;
+                financialAccount.IsTaxDeductible = financialAccountImport.IsTaxDeductible;
+
+                financialAccountsToImport.Add( financialAccount );
+            }
+
+            rockContext.BulkInsert( financialAccountsToImport );
+
+            var financialAccountsUpdated = false;
+            var financialAccountImportsWithParentFinancialAccount = newFinancialAccountImports.Where( a => a.ParentFinancialAccountForeignId.HasValue ).ToList();
+            var financialAccountLookup = qryFinancialAccountsWithForeignIds.ToDictionary( k => k.ForeignId.Value, v => v );
+            foreach ( var financialAccountImport in financialAccountImportsWithParentFinancialAccount )
+            {
+                var financialAccount = financialAccountLookup.GetValueOrNull( financialAccountImport.FinancialAccountForeignId );
+                if ( financialAccount != null )
+                {
+                    var parentFinancialAccount = financialAccountLookup.GetValueOrNull( financialAccountImport.ParentFinancialAccountForeignId.Value );
+                    if ( parentFinancialAccount != null && financialAccount.ParentAccountId != parentFinancialAccount.Id )
+                    {
+                        financialAccount.ParentAccountId = parentFinancialAccount.Id;
+                        financialAccountsUpdated = true;
+                    }
+                    else
+                    {
+                        throw new Exception( $"ERROR: Unable to lookup ParentFinancialAccount {financialAccountImport.ParentFinancialAccountForeignId} for FinancialAccount {financialAccountImport.Name}:{financialAccountImport.FinancialAccountForeignId} " );
+                    }
+                }
+                else
+                {
+                    throw new Exception( "Unable to lookup FinancialAccount with ParentFinancialAccount" );
+                }
+            }
+
+            if ( financialAccountsUpdated )
+            {
+                rockContext.SaveChanges( true );
+            }
+
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {financialAccountsToImport.Count} FinancialAccountImports";
+
+            return responseText;
+        }
+
+        /// <summary>
+        /// Bulks the financial batch import.
+        /// </summary>
+        /// <param name="financialBatchImports">The financial batch imports.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public static string BulkFinancialBatchImport( List<FinancialBatchImport> financialBatchImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+
+            var qryFinancialBatchsWithForeignIds = new FinancialBatchService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+
+            var financialBatchAlreadyExistForeignIdHash = new HashSet<int>( qryFinancialBatchsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
+
+            List<FinancialBatch> financialBatchsToImport = new List<FinancialBatch>();
+            var newFinancialBatchImports = financialBatchImports.Where( a => !financialBatchAlreadyExistForeignIdHash.Contains( a.FinancialBatchForeignId ) ).ToList();
+
+            // Get the primary alias id lookup for each person foreign id
+            var personAliasIdLookup = new PersonAliasService( rockContext ).Queryable().Where( a => a.Person.ForeignId.HasValue && a.PersonId == a.AliasPersonId )
+                .Select( a => new { PersonAliasId = a.Id, PersonForeignId = a.Person.ForeignId } ).ToDictionary( k => k.PersonForeignId.Value, v => v.PersonAliasId );
+
+            foreach ( var financialBatchImport in newFinancialBatchImports )
+            {
+                var financialBatch = new FinancialBatch();
+                financialBatch.ForeignId = financialBatchImport.FinancialBatchForeignId;
+                if ( financialBatchImport.Name.Length > 50 )
+                {
+                    financialBatch.Name = financialBatchImport.Name.Truncate( 50 );
+                }
+                else
+                {
+                    financialBatch.Name = financialBatchImport.Name;
+                }
+
+                financialBatch.CampusId = financialBatchImport.CampusId;
+                financialBatch.ControlAmount = financialBatchImport.ControlAmount;
+
+                financialBatch.CreatedDateTime = financialBatchImport.CreatedDateTime;
+                financialBatch.BatchEndDateTime = financialBatchImport.EndDate;
+
+                financialBatch.ModifiedDateTime = financialBatchImport.ModifiedDateTime;
+                financialBatch.BatchStartDateTime = financialBatchImport.StartDate;
+
+                switch ( financialBatchImport.Status )
+                {
+                    case FinancialBatchImport.BatchStatus.Closed:
+                        financialBatch.Status = BatchStatus.Closed;
+                        break;
+                    case FinancialBatchImport.BatchStatus.Open:
+                        financialBatch.Status = BatchStatus.Open;
+                        break;
+                    case FinancialBatchImport.BatchStatus.Pending:
+                        financialBatch.Status = BatchStatus.Pending;
+                        break;
+                }
+
+                if ( financialBatchImport.CreatedByPersonForeignId.HasValue )
+                {
+                    financialBatch.CreatedByPersonAliasId = personAliasIdLookup.GetValueOrNull( financialBatchImport.CreatedByPersonForeignId.Value );
+                }
+
+                if ( financialBatchImport.ModifiedByPersonForeignId.HasValue )
+                {
+                    financialBatch.ModifiedByPersonAliasId = personAliasIdLookup.GetValueOrNull( financialBatchImport.ModifiedByPersonForeignId.Value );
+                }
+
+                financialBatchsToImport.Add( financialBatch );
+            }
+
+            rockContext.BulkInsert( financialBatchsToImport );
+
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {financialBatchsToImport.Count} FinancialBatchImports";
+
+            return responseText;
+        }
+
+        /// <summary>
+        /// Bulks the financial transaction import.
+        /// </summary>
+        /// <param name="financialTransactionImports">The financial transaction imports.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public static string BulkFinancialTransactionImport( List<FinancialTransactionImport> financialTransactionImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+
+            var qryFinancialTransactionsWithForeignIds = new FinancialTransactionService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+
+            var financialTransactionAlreadyExistForeignIdHash = new HashSet<int>( qryFinancialTransactionsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
+
+
+            var newFinancialTransactionImports = financialTransactionImports.Where( a => !financialTransactionAlreadyExistForeignIdHash.Contains( a.FinancialTransactionForeignId ) ).ToList();
+
+            // Get the primary alias id lookup for each person foreign id
+            var personAliasIdLookup = new PersonAliasService( rockContext ).Queryable().Where( a => a.Person.ForeignId.HasValue && a.PersonId == a.AliasPersonId )
+                .Select( a => new { PersonAliasId = a.Id, PersonForeignId = a.Person.ForeignId } ).ToDictionary( k => k.PersonForeignId.Value, v => v.PersonAliasId );
+
+            var batchIdLookup = new FinancialBatchService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            var accountIdLookup = new FinancialAccountService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            // Insert FinancialPaymentDetail for all the transactions first
+            List<FinancialPaymentDetail> financialPaymentDetailToInsert = new List<FinancialPaymentDetail>( newFinancialTransactionImports.Count );
+            foreach ( var financialTransactionImport in newFinancialTransactionImports )
+            {
+                var financialPaymentDetail = new FinancialPaymentDetail();
+                financialPaymentDetail.CurrencyTypeValueId = financialTransactionImport.CurrencyTypeValueId;
+                financialPaymentDetail.ForeignId = financialTransactionImport.FinancialTransactionForeignId;
+                financialPaymentDetailToInsert.Add( financialPaymentDetail );
+            }
+
+            rockContext.BulkInsert( financialPaymentDetailToInsert );
+
+            var financialPaymentDetailLookup = new FinancialPaymentDetailService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            // Prepare and Insert FinancialTransactions
+            List<FinancialTransaction> financialTransactionsToImport = new List<FinancialTransaction>();
+            foreach ( var financialTransactionImport in newFinancialTransactionImports )
+            {
+                var financialTransaction = new FinancialTransaction();
+                financialTransaction.ForeignId = financialTransactionImport.FinancialTransactionForeignId;
+
+                if ( financialTransactionImport.AuthorizedPersonForeignId.HasValue )
+                {
+                    financialTransaction.AuthorizedPersonAliasId = personAliasIdLookup.GetValueOrNull( financialTransactionImport.AuthorizedPersonForeignId.Value );
+                }
+
+                financialTransaction.BatchId = batchIdLookup.GetValueOrNull( financialTransactionImport.BatchForeignId );
+                financialTransaction.FinancialPaymentDetailId = financialPaymentDetailLookup.GetValueOrNull( financialTransactionImport.FinancialTransactionForeignId );
+
+                financialTransaction.Summary = financialTransactionImport.Summary;
+                financialTransaction.TransactionCode = financialTransactionImport.TransactionCode;
+                financialTransaction.TransactionDateTime = financialTransactionImport.TransactionDate;
+                financialTransaction.SourceTypeValueId = financialTransactionImport.TransactionSourceValueId;
+                financialTransaction.TransactionTypeValueId = financialTransactionImport.TransactionTypeValueId;
+                financialTransaction.CreatedDateTime = financialTransactionImport.CreatedDateTime;
+                financialTransaction.ModifiedDateTime = financialTransactionImport.ModifiedDateTime;
+
+                if ( financialTransactionImport.CreatedByPersonForeignId.HasValue )
+                {
+                    financialTransaction.CreatedByPersonAliasId = personAliasIdLookup.GetValueOrNull( financialTransactionImport.CreatedByPersonForeignId.Value );
+                }
+
+                if ( financialTransactionImport.ModifiedByPersonForeignId.HasValue )
+                {
+                    financialTransaction.ModifiedByPersonAliasId = personAliasIdLookup.GetValueOrNull( financialTransactionImport.ModifiedByPersonForeignId.Value );
+                }
+
+                financialTransactionsToImport.Add( financialTransaction );
+            }
+
+            rockContext.BulkInsert( financialTransactionsToImport );
+
+            var financialTransactionIdLookup = new FinancialTransactionService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } )
+                .ToList().ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            var financialAccountIdLookup = new FinancialAccountService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } )
+                .ToList().ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+
+            // Prepare and Insert the FinancialTransactionDetail records
+            List<FinancialTransactionDetail> financialTransactionDetailsToImport = new List<FinancialTransactionDetail>();
+            foreach ( var financialTransactionImport in newFinancialTransactionImports )
+            {
+                foreach ( var financialTransactionDetailImport in financialTransactionImport.FinancialTransactionDetailImports )
+                {
+                    var financialTransactionDetail = new FinancialTransactionDetail();
+                    financialTransactionDetail.TransactionId = financialTransactionIdLookup[financialTransactionImport.FinancialTransactionForeignId];
+                    financialTransactionDetail.ForeignId = financialTransactionDetailImport.FinancialTransactionDetailForeignId;
+                    financialTransactionDetail.Amount = financialTransactionDetailImport.Amount;
+                    financialTransactionDetail.AccountId = financialAccountIdLookup[financialTransactionDetailImport.FinancialAccountForeignId.Value];
+                    financialTransactionDetail.Summary = financialTransactionDetailImport.Summary;
+                    financialTransactionDetail.CreatedDateTime = financialTransactionDetailImport.CreatedDateTime;
+                    financialTransactionDetail.ModifiedDateTime = financialTransactionDetailImport.ModifiedDateTime;
+
+                    if ( financialTransactionDetailImport.CreatedByPersonForeignId.HasValue )
+                    {
+                        financialTransactionDetail.CreatedByPersonAliasId = personAliasIdLookup.GetValueOrNull( financialTransactionDetailImport.CreatedByPersonForeignId.Value );
+                    }
+
+                    if ( financialTransactionDetailImport.ModifiedByPersonForeignId.HasValue )
+                    {
+                        financialTransactionDetail.ModifiedByPersonAliasId = personAliasIdLookup.GetValueOrNull( financialTransactionDetailImport.ModifiedByPersonForeignId.Value );
+                    }
+
+                    financialTransactionDetailsToImport.Add( financialTransactionDetail );
+                }
+            }
+
+            rockContext.BulkInsert( financialTransactionDetailsToImport );
+
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {financialTransactionsToImport.Count} FinancialTransactionImports";
+
+            return responseText;
+        }
 
         /// <summary>
         /// Bulks the group import.

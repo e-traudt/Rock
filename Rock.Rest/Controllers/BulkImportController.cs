@@ -13,102 +13,101 @@ namespace Rock.Rest.Controllers
     /// <seealso cref="Rock.Rest.ApiControllerBase" />
     public class BulkImportController : ApiControllerBase
     {
+        /// <summary>
+        /// Bulk Import of Attendance
+        /// </summary>
+        /// <param name="attendanceImports">The attendance imports.</param>
+        /// <returns></returns>
         [System.Web.Http.Route( "api/BulkImport/AttendanceImport" )]
         [HttpPost]
-        // [RequireHttps]
-        //  [Authenticate, Secured]
-        public System.Net.Http.HttpResponseMessage GroupImport( [FromBody]List<Rock.BulkUpdate.AttendanceImport> attendanceImports )
+        [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage AttendanceImport( [FromBody]List<Rock.BulkUpdate.AttendanceImport> attendanceImports )
         {
-            try
-            {
-                var responseText = BulkUpdate.BulkInsertHelper.BulkAttendanceImport( attendanceImports );
-                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
-            }
-            catch ( Exception ex )
-            {
-                throw ex;
-            }
+            var responseText = BulkUpdate.BulkInsertHelper.BulkAttendanceImport( attendanceImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
-
+        /// <summary>
+        /// Bulk Import of Groups
+        /// </summary>
+        /// <param name="groupImports">The group imports.</param>
+        /// <returns></returns>
         [System.Web.Http.Route( "api/BulkImport/GroupImport" )]
         [HttpPost]
-        // [RequireHttps]
-        //  [Authenticate, Secured]
+        [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage GroupImport( [FromBody]List<Rock.BulkUpdate.GroupImport> groupImports )
         {
-            try
-            {
-                var responseText = BulkUpdate.BulkInsertHelper.BulkGroupImport( groupImports );
-                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
-            }
-            catch ( Exception ex )
-            {
-                throw ex;
-            }
+            var responseText = BulkUpdate.BulkInsertHelper.BulkGroupImport( groupImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
-
-        /// <summary>
-        /// Persons the import.
-        /// </summary>
-        /// <param name="personImports">The person imports.</param>
-        /// <returns></returns>
-        [System.Web.Http.Route("api/BulkImport/PersonImport")]
+        [System.Web.Http.Route( "api/BulkImport/FinancialAccountImport" )]
         [HttpPost]
-        // [RequireHttps]
-        //  [Authenticate, Secured]
-        public System.Net.Http.HttpResponseMessage PersonImport( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
+        [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage FinancialAccountImport( [FromBody]List<Rock.BulkUpdate.FinancialAccountImport> financialAccountImports )
         {
-            try
-            {
-                var responseText = BulkUpdate.BulkInsertHelper.BulkPersonImport( personImports );
-                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
-            }
-            catch ( Exception ex )
-            {
-                throw ex;
-            }
+            var responseText = BulkUpdate.BulkInsertHelper.BulkFinancialAccountImport( financialAccountImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+        }
+
+        [System.Web.Http.Route( "api/BulkImport/FinancialBatchImport" )]
+        [HttpPost]
+        [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage FinancialBatchImport( [FromBody]List<Rock.BulkUpdate.FinancialBatchImport> financialBatchImports )
+        {
+            var responseText = BulkUpdate.BulkInsertHelper.BulkFinancialBatchImport( financialBatchImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+        }
+
+        [System.Web.Http.Route( "api/BulkImport/FinancialTransactionImport" )]
+        [HttpPost]
+        [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage FinancialTransactionImport( [FromBody]List<Rock.BulkUpdate.FinancialTransactionImport> financialTransactionImports )
+        {
+            var responseText = BulkUpdate.BulkInsertHelper.BulkFinancialTransactionImport( financialTransactionImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
         /// <summary>
-        /// Locations the import.
+        /// Bulk Import of Locations
         /// </summary>
         /// <param name="locationImports">The location imports.</param>
         /// <returns></returns>
         [System.Web.Http.Route( "api/BulkImport/LocationImport" )]
         [HttpPost]
-        // [RequireHttps]
-        //  [Authenticate, Secured]
+        [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage LocationImport( [FromBody]List<Rock.BulkUpdate.LocationImport> locationImports )
         {
-            try
-            {
-                var responseText = BulkUpdate.BulkInsertHelper.BulkLocationImport( locationImports );
-                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
-            }
-            catch ( Exception ex )
-            {
-                throw ex;
-            }
+            var responseText = BulkUpdate.BulkInsertHelper.BulkLocationImport( locationImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
         /// <summary>
+        /// Bulk Import of Person records
+        /// </summary>
+        /// <param name="personImports">The person imports.</param>
+        /// <returns></returns>
+        [System.Web.Http.Route( "api/BulkImport/PersonImport" )]
+        [HttpPost]
+        [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage PersonImport( [FromBody]List<Rock.BulkUpdate.PersonImport> personImports )
+        {
+            var responseText = BulkUpdate.BulkInsertHelper.BulkPersonImport( personImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+        }
+
+        /// <summary>
+        /// Bulk Import of Schedules
+        /// </summary>
+        /// <param name="scheduleImports">The schedule imports.</param>
+        /// <returns></returns>
         [System.Web.Http.Route( "api/BulkImport/ScheduleImport" )]
         [HttpPost]
-        //[RequireHttps]
-        //[Authenticate, Secured]
+        [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage ScheduleImport( [FromBody]List<Rock.BulkUpdate.ScheduleImport> scheduleImports )
         {
-            try
-            {
-                var responseText = BulkUpdate.BulkInsertHelper.BulkScheduleImport( scheduleImports );
-                return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
-            }
-            catch ( Exception ex )
-            {
-                throw ex;
-            }
+            var responseText = BulkUpdate.BulkInsertHelper.BulkScheduleImport( scheduleImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
     }
 }

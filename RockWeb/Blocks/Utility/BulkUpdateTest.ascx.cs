@@ -92,6 +92,13 @@ namespace RockWeb.Blocks.Utility
         protected void btnCleanup_Click( object sender, EventArgs e )
         {
             var rockContext = new RockContext();
+            rockContext.Database.ExecuteSqlCommand( @"
+delete from FinancialTransactionDetail where ForeignId is not null
+delete from FinancialTransaction where ForeignId is not null
+delete from FinancialPaymentDetail where ForeignId is not null
+delete from FinancialBatch where ForeignId is not null
+delete from FinancialAccount where ForeignId is not null" );
+
             rockContext.Database.ExecuteSqlCommand( "truncate table [Attendance]" );
 
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonViewed] where TargetPersonAliasId in (SELECT ID FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null))" );
