@@ -92,15 +92,16 @@ namespace RockWeb.Blocks.Utility
         protected void btnCleanup_Click( object sender, EventArgs e )
         {
             var rockContext = new RockContext();
+            rockContext.Database.ExecuteSqlCommand( "truncate table [Attendance]" );
+
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonViewed] where TargetPersonAliasId in (SELECT ID FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null))" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Person] where [ForeignId] is not null" );
 
-
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where GroupId in (select Id from [Group] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
-
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Schedule] where [ForeignId] is not null" );
 
             // Delete Location (and cascade delete GroupLocation) records
             rockContext.Database.ExecuteSqlCommand( @"
@@ -125,8 +126,7 @@ WHERE [ForeignId] IS NOT NULL
 		" );
 
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
-
-            rockContext.Database.ExecuteSqlCommand( "DELETE from [AttributeValue] where AttributeId in (select Id from Attribute where EntityTypeId = 15) and EntityId not in (select Id from Person)" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupType] where [ForeignId] is not null" );
 
             nbResults.Text = "Cleanup complete";
         }

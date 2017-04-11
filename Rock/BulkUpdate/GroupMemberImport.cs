@@ -6,14 +6,6 @@
     public class GroupMemberImport
     {
         /// <summary>
-        /// Gets or sets the group member foreign identifier.
-        /// </summary>
-        /// <value>
-        /// The group member foreign identifier.
-        /// </value>
-        public int GroupMemberForeignId { get; set; }
-
-        /// <summary>
         /// Gets or sets the person identifier.
         /// </summary>
         /// <value>

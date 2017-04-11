@@ -41,12 +41,11 @@ namespace Rock.BulkUpdate
 
         /// <summary>
         /// Gets or sets the group type identifier.
-        /// Set this to NULL to use Rock's "General" group type
         /// </summary>
         /// <value>
         /// The group type identifier.
         /// </value>
-        public int? GroupTypeId { get; set; }
+        public int GroupTypeId { get; set; }
 
         /// <summary>
         /// Gets or sets the campus identifier.

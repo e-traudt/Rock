@@ -13,6 +13,86 @@ namespace Rock.BulkUpdate
 {
     public static class BulkInsertHelper
     {
+        public static string BulkAttendanceImport( List<BulkUpdate.AttendanceImport> attendanceImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+            StringBuilder sbStats = new StringBuilder();
+
+            var groupIdLookup = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            var locationIdLookup = new LocationService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            var scheduleIdLookup = new ScheduleService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
+            // Get the primary alias id lookup for each person foreign id
+            var personAliasIdLookup = new PersonAliasService( rockContext ).Queryable().Where( a => a.Person.ForeignId.HasValue && a.PersonId == a.AliasPersonId )
+                .Select( a => new { PersonAliasId = a.Id, PersonForeignId = a.Person.ForeignId } ).ToDictionary( k => k.PersonForeignId.Value, v => v.PersonAliasId );
+
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Prepare Lookups for Attendance Insert" );
+            stopwatch.Restart();
+
+            var attendancesToInsert = new List<Attendance>( attendanceImports.Count );
+            foreach ( var attendanceImport in attendanceImports )
+            {
+                var attendance = new Attendance();
+
+                // NOTE: attendanceImport doesn't have to have an AttendanceForeignId and probably won't have one
+                if ( attendanceImport.AttendanceForeignId.HasValue )
+                {
+                    attendance.ForeignId = attendanceImport.AttendanceForeignId;
+                }
+
+                attendance.CampusId = attendanceImport.CampusId;
+                attendance.StartDateTime = attendanceImport.StartDateTime;
+                attendance.EndDateTime = attendanceImport.EndDateTime;
+                
+                if ( attendanceImport.GroupForeignId.HasValue )
+                {
+                    attendance.GroupId = groupIdLookup.GetValueOrNull( attendanceImport.GroupForeignId.Value );
+                }
+
+                if ( attendanceImport.LocationForeignId.HasValue )
+                {
+                    attendance.LocationId = locationIdLookup.GetValueOrNull( attendanceImport.LocationForeignId.Value );
+                }
+
+                if ( attendanceImport.ScheduleForeignId.HasValue )
+                {
+                    attendance.ScheduleId = scheduleIdLookup.GetValueOrNull( attendanceImport.ScheduleForeignId.Value );
+                }
+                
+                attendance.PersonAliasId = personAliasIdLookup.GetValueOrNull( attendanceImport.PersonForeignId );
+                
+                attendance.Note = attendanceImport.Note;
+
+
+                attendancesToInsert.Add( attendance );
+            }
+
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Prepare Attendance Insert List for {attendanceImports.Count} Attendance Imports" );
+            stopwatch.Restart();
+
+            var groupIds = attendancesToInsert.Select( a => a.GroupId ).Distinct().ToList();
+            var allGroupIds = new GroupService( rockContext ).Queryable().Select( a => a.Id ).ToList();
+            var missing = groupIds.Where( a => !a.HasValue || !allGroupIds.Contains( a.Value ) );
+
+            rockContext.BulkInsert( attendancesToInsert );
+
+            sbStats.AppendLine( $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {attendanceImports.Count} AttendanceImports" );
+            var responseText = sbStats.ToString();
+
+            return responseText;
+        }
+
+
         /// <summary>
         /// Bulks the group import.
         /// </summary>
@@ -21,38 +101,124 @@ namespace Rock.BulkUpdate
         public static string BulkGroupImport( List<BulkUpdate.GroupImport> groupImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             RockContext rockContext = new RockContext();
+            StringBuilder sbStats = new StringBuilder();
 
             var qryGroupsWithForeignIds = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
 
             var groupsAlreadyExistForeignIdHash = new HashSet<int>( qryGroupsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
 
-            List<Group> groupsToImport = new List<Group>();
             var newGroupImports = groupImports.Where( a => !groupsAlreadyExistForeignIdHash.Contains( a.GroupForeignId ) ).ToList();
 
-            //int groupTypeIdGeneral = GroupTypeCache.Read(Rock.SystemGuid.GroupType.G)
+            var importedGroupTypeRoleNames = groupImports.GroupBy( a => a.GroupTypeId ).Select( a => new
+            {
+                GroupTypeId = a.Key,
+                RoleNames = a.SelectMany( x => x.GroupMemberImports ).Select( x => x.RoleName ).Distinct().ToList()
+            } );
+
+            // Create any missing roles on the GroupType
+            var groupTypeRolesToInsert = new List<GroupTypeRole>();
+
+            foreach ( var importedGroupTypeRoleName in importedGroupTypeRoleNames )
+            {
+                var groupTypeCache = GroupTypeCache.Read( importedGroupTypeRoleName.GroupTypeId, rockContext );
+                foreach ( var roleName in importedGroupTypeRoleName.RoleNames )
+                {
+                    if ( !groupTypeCache.Roles.Any( a => a.Name.Equals( roleName, StringComparison.OrdinalIgnoreCase ) ) )
+                    {
+                        var groupTypeRole = new GroupTypeRole();
+                        groupTypeRole.GroupTypeId = groupTypeCache.Id;
+                        groupTypeRole.Name = roleName.Truncate( 100 );
+                        groupTypeRolesToInsert.Add( groupTypeRole );
+                    }
+                }
+            }
+
+            var updatedGroupTypes = groupTypeRolesToInsert.Select( a => a.GroupTypeId.Value ).Distinct().ToList();
+            updatedGroupTypes.ForEach( id => GroupTypeCache.Flush( id ) );
+
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Updated {groupTypeRolesToInsert.Count} GroupType Roles" );
+            stopwatch.Restart();
+
+            if ( groupTypeRolesToInsert.Any() )
+            {
+                rockContext.BulkInsert( groupTypeRolesToInsert );
+            }
+
+            List<Group> groupsToInsert = new List<Group>( newGroupImports.Count );
 
             foreach ( var groupImport in newGroupImports )
             {
                 var group = new Group();
                 group.ForeignId = groupImport.GroupForeignId;
-              //  group.GroupTypeId = groupImport.GroupTypeId;
+                group.GroupTypeId = groupImport.GroupTypeId;
+                if ( groupImport.Name.Length > 100 )
+                {
+                    group.Name = groupImport.Name.Truncate( 100 );
+                    group.Description = groupImport.Name;
+                }
+                else
+                {
+                    group.Name = groupImport.Name;
+                }
 
-                groupsToImport.Add( group );
+                group.Order = groupImport.Order;
+                group.CampusId = groupImport.CampusId;
+
+
+                groupsToInsert.Add( group );
             }
 
-            rockContext.BulkInsert( groupsToImport );
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Prepare {groupsToInsert.Count} Groups" );
+            stopwatch.Restart();
 
-            // TODO: GroupMembers and Create any missing roles on the GroupType
+            rockContext.BulkInsert( groupsToInsert );
 
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Insert {groupsToInsert.Count} Groups" );
+            stopwatch.Restart();
 
-            // Get the Group records for the groups that we imported so that we can populate the ParentGroups
-            var groupLookup = qryGroupsWithForeignIds.ToList().ToDictionary( k => k.ForeignId.Value, v => v );
-            var groupsUpdated = false;
-            foreach ( var groupImport in newGroupImports.Where( a => a.ParentGroupForeignId.HasValue ) )
+            // Get lookups for Group and Person so that we can populate the ParentGroups and GroupMembers
+            var groupIDLookup = qryGroupsWithForeignIds.Select( a => new { a.Id, a.ForeignId } ).ToList().ToDictionary( k => k.ForeignId.Value, v => v );
+            var personIdLookup = new PersonService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, ForeignId = a.ForeignId.Value } ).ToDictionary( k => k.ForeignId, v => v.Id );
+
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Prepare Lookups for Group Members " );
+            stopwatch.Restart();
+
+            // populate GroupMembers from the new groups that we added
+            List<GroupMember> groupMembersToInsert = new List<GroupMember>();
+            var groupMemberImports = newGroupImports.SelectMany( a => a.GroupMemberImports ).ToList();
+            foreach ( var groupWithMembers in newGroupImports.Where( a => a.GroupMemberImports.Any() ) )
             {
-                var group = groupLookup.GetValueOrNull( groupImport.ParentGroupForeignId.Value );
+                var groupTypeRoleLookup = GroupTypeCache.Read( groupWithMembers.GroupTypeId ).Roles.ToDictionary( k => k.Name, v => v.Id );
+                foreach ( var groupMemberImport in groupWithMembers.GroupMemberImports )
+                {
+                    var groupMember = new GroupMember();
+                    groupMember.GroupId = groupIDLookup[groupWithMembers.GroupForeignId].Id;
+                    groupMember.GroupRoleId = groupTypeRoleLookup[groupMemberImport.RoleName];
+                    groupMember.PersonId = personIdLookup[groupMemberImport.PersonForeignId];
+                    groupMembersToInsert.Add( groupMember );
+                }
+            }
+
+            rockContext.BulkInsert( groupMembersToInsert );
+
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Insert {groupMembersToInsert.Count} Group Members " );
+            stopwatch.Restart();
+
+            var groupsUpdated = false;
+            var groupImportsWithParentGroup = newGroupImports.Where( a => a.ParentGroupForeignId.HasValue ).ToList();
+            var groupLookup = qryGroupsWithForeignIds.ToDictionary( k => k.ForeignId.Value, v => v );
+            foreach ( var groupImport in groupImportsWithParentGroup )
+            {
+                var group = groupLookup.GetValueOrNull( groupImport.GroupForeignId );
                 if ( group != null )
                 {
                     var parentGroup = groupLookup.GetValueOrNull( groupImport.ParentGroupForeignId.Value );
@@ -61,16 +227,30 @@ namespace Rock.BulkUpdate
                         group.ParentGroupId = parentGroup.Id;
                         groupsUpdated = true;
                     }
+                    else
+                    {
+                        sbStats.AppendLine( $"ERROR: Unable to lookup ParentGroup {groupImport.ParentGroupForeignId} for Group {groupImport.Name}:{groupImport.GroupForeignId} " );
+                    }
+                }
+                else
+                {
+                    throw new Exception( "Unable to lookup Group with ParentGroup" );
                 }
             }
 
             if ( groupsUpdated )
             {
-                rockContext.SaveChanges();
+                rockContext.SaveChanges( true );
             }
 
+            stopwatch.Stop();
+            sbStats.AppendLine( $"[{stopwatch.Elapsed.TotalMilliseconds}ms] Update {groupImportsWithParentGroup.Count} Group's Parent Group " );
+            stopwatch.Restart();
+
             stopwatchTotal.Stop();
-            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {newGroupImports.Count} GroupImports";
+
+            sbStats.AppendLine( $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {newGroupImports.Count} GroupImports and {groupMembersToInsert.Count} GroupMemberImports" );
+            var responseText = sbStats.ToString();
 
             return responseText;
         }
@@ -550,6 +730,49 @@ namespace Rock.BulkUpdate
 
             // TODO: Rebuild all indexes on the effected tables to fix bogus "Foriegn Key violation" issue
             var responseText = sbStats.ToString();
+
+            return responseText;
+        }
+
+        /// <summary>
+        /// Bulks the schedule import.
+        /// </summary>
+        /// <param name="scheduleImports">The schedule imports.</param>
+        /// <returns></returns>
+        public static string BulkScheduleImport( List<BulkUpdate.ScheduleImport> scheduleImports )
+        {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
+            RockContext rockContext = new RockContext();
+
+            var qrySchedulesWithForeignIds = new ScheduleService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+
+            var scheduleAlreadyExistForeignIdHash = new HashSet<int>( qrySchedulesWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
+
+            List<Schedule> schedulesToImport = new List<Schedule>();
+            var newScheduleImports = scheduleImports.Where( a => !scheduleAlreadyExistForeignIdHash.Contains( a.ScheduleForeignId ) ).ToList();
+
+            foreach ( var scheduleImport in newScheduleImports )
+            {
+                var schedule = new Schedule();
+                schedule.ForeignId = scheduleImport.ScheduleForeignId;
+                if ( scheduleImport.Name.Length > 50 )
+                {
+                    schedule.Name = scheduleImport.Name.Truncate( 50 );
+                    schedule.Description = scheduleImport.Name;
+                }
+                else
+                {
+                    schedule.Name = scheduleImport.Name;
+                }
+
+                schedulesToImport.Add( schedule );
+            }
+
+            rockContext.BulkInsert( schedulesToImport );
+
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Import {schedulesToImport.Count} ScheduleImports";
 
             return responseText;
         }

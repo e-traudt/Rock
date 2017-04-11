@@ -428,6 +428,7 @@
     <Compile Include="BulkUpdate\PersonAddressImport.cs" />
     <Compile Include="BulkUpdate\PersonImport.cs" />
     <Compile Include="BulkUpdate\PhoneNumberImport.cs" />
+    <Compile Include="BulkUpdate\ScheduleImport.cs" />
     <Compile Include="Chart\ChartGroupBy.cs" />
     <Compile Include="Chart\IChartData.cs" />
     <Compile Include="Chart\SummaryData.cs" />
