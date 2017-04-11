@@ -527,7 +527,7 @@ namespace Rock.Client.Enums
         ImmediatePostSave = 0x4,
     }
 
-    #pragma warning retore CS1591
+    #pragma warning restore CS1591
 }
 
 #pragma warning restore CS1591
