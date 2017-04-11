@@ -422,6 +422,10 @@
     <Compile Include="BulkUpdate\AttendanceImport.cs" />
     <Compile Include="BulkUpdate\AttributeValueImport.cs" />
     <Compile Include="BulkUpdate\BulkInsertHelper.cs" />
+    <Compile Include="BulkUpdate\FinancialAccountImport.cs" />
+    <Compile Include="BulkUpdate\FinancialBatchImport.cs" />
+    <Compile Include="BulkUpdate\FinancialTransactionDetailImport.cs" />
+    <Compile Include="BulkUpdate\FinancialTransactionImport.cs" />
     <Compile Include="BulkUpdate\GroupImport.cs" />
     <Compile Include="BulkUpdate\GroupMemberImport.cs" />
     <Compile Include="BulkUpdate\LocationImport.cs" />
