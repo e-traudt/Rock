@@ -1109,7 +1109,22 @@ order by [parentTable], [columnName]
             sb.AppendLine( "" );
             sb.AppendLine( "" );
 
-            sb.AppendFormat( "namespace Rock.Client" + Environment.NewLine, type.Namespace );
+            var extraNameSpace = string.Empty;
+            if (type.Namespace == "Rock.BulkUpdate.Model")
+            {
+                extraNameSpace = "BulkUpdate";
+            }
+
+            if ( !string.IsNullOrEmpty( extraNameSpace ) )
+            {
+                sb.AppendLine( $"namespace Rock.Client.{extraNameSpace}" );
+            }
+            else
+            {
+                sb.AppendLine( $"namespace Rock.Client" );
+            }
+
+
             sb.AppendLine( "{" );
 
             sb.AppendLine( "    /// <summary>" );
@@ -1170,15 +1185,6 @@ order by [parentTable], [columnName]
                     {
                         sb.AppendFormat( "        private {0} _{1} = {2};" + Environment.NewLine, this.PropertyTypeName( keyVal.Value.PropertyType ), keyVal.Key, defaultValueAttribute.Value );
                     }
-                    /*
-                     public bool IsEmailActive
-        {
-            get { return _isEmailActive; }
-            set { _isEmailActive = value; }
-        }
-        private bool _isEmailActive = true;
-                     
-                     */
                 }
                 else
                 {
@@ -1267,8 +1273,17 @@ order by [parentTable], [columnName]
             sb.AppendLine( "    }" );
             sb.AppendLine( "}" );
 
-            //var file = new FileInfo( Path.Combine( NamespaceFolder( rootFolder, type.Namespace ).FullName, "CodeGenerated", type.Name + "Dto.cs" ) );
-            var file = new FileInfo( Path.Combine( rootFolder, "CodeGenerated", type.Name + ".cs" ) );
+            string fileName;
+            if (!string.IsNullOrEmpty(extraNameSpace))
+            {
+                fileName = Path.Combine( rootFolder, "CodeGenerated", extraNameSpace, type.Name + ".cs" );
+            }
+            else
+            {
+                fileName = Path.Combine( rootFolder, "CodeGenerated", type.Name + ".cs" );
+            }
+
+            var file = new FileInfo( fileName );
             WriteFile( file, sb );
         }
 
