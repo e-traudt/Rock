@@ -23,8 +23,6 @@
 using System;
 using System.Collections.Generic;
 
-#pragma warning disable CS1591
-
 namespace Rock.Client.SystemGuid
 {
     #pragma warning disable CS1591
@@ -758,5 +756,3 @@ namespace Rock.Client.SystemGuid
 
     #pragma warning restore CS1591
 }
-
-#pragma warning restore CS1591
