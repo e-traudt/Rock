@@ -1,9 +1,10 @@
-﻿namespace Rock.BulkUpdate
+﻿namespace Rock.BulkUpdate.Model
 {
     /// <summary>
     /// 
     /// </summary>
     [System.Diagnostics.DebuggerDisplay( "{Street1}" )]
+    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
     public class LocationImport
     {
         /// <summary>

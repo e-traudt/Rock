@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace Rock.BulkUpdate
+namespace Rock.BulkUpdate.Model
 {
     /// <summary>
     /// 
     /// </summary>
     [System.Diagnostics.DebuggerDisplay( "{Value}" )]
+    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
     public class AttributeValueImport
     {
 

@@ -1,9 +1,10 @@
-﻿namespace Rock.BulkUpdate
+﻿namespace Rock.BulkUpdate.Model
 {
     /// <summary>
     /// 
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay( "{Number} Extension:{Extension}" )]
+    [System.Diagnostics.DebuggerDisplay( "{Number}" )]
+    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
     public class PhoneNumberImport
     {
         /// <summary>

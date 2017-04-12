@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rock.BulkUpdate
+namespace Rock.BulkUpdate.Model
 {
+    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
     public class FinancialAccountImport
     {
         /// <summary>

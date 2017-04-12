@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rock.BulkUpdate.Model;
 using Rock.Data;
 using Rock.Model;
 using Rock.Web.Cache;
@@ -21,7 +22,7 @@ namespace Rock.BulkUpdate
         /// </summary>
         /// <param name="attendanceImports">The attendance imports.</param>
         /// <returns></returns>
-        public static string BulkAttendanceImport( List<BulkUpdate.AttendanceImport> attendanceImports )
+        public static string BulkAttendanceImport( List<AttendanceImport> attendanceImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -385,7 +386,7 @@ namespace Rock.BulkUpdate
         /// </summary>
         /// <param name="groupImports">The group imports.</param>
         /// <returns></returns>
-        public static string BulkGroupImport( List<BulkUpdate.GroupImport> groupImports )
+        public static string BulkGroupImport( List<GroupImport> groupImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -546,7 +547,7 @@ namespace Rock.BulkUpdate
         /// </summary>
         /// <param name="locationImports">The location imports.</param>
         /// <returns></returns>
-        public static string BulkLocationImport( List<BulkUpdate.LocationImport> locationImports )
+        public static string BulkLocationImport( List<LocationImport> locationImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
 
@@ -613,7 +614,7 @@ namespace Rock.BulkUpdate
         /// </summary>
         /// <param name="personImports">The person imports.</param>
         /// <returns></returns>
-        public static string BulkPersonImport( List<BulkUpdate.PersonImport> personImports )
+        public static string BulkPersonImport( List<PersonImport> personImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -989,7 +990,7 @@ namespace Rock.BulkUpdate
         /// </summary>
         /// <param name="scheduleImports">The schedule imports.</param>
         /// <returns></returns>
-        public static string BulkScheduleImport( List<BulkUpdate.ScheduleImport> scheduleImports )
+        public static string BulkScheduleImport( List<ScheduleImport> scheduleImports )
         {
             Stopwatch stopwatchTotal = Stopwatch.StartNew();
 

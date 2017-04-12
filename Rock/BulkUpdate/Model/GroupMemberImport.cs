@@ -1,8 +1,9 @@
-﻿namespace Rock.BulkUpdate
+﻿namespace Rock.BulkUpdate.Model
 {
     /// <summary>
     /// 
     /// </summary>
+    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
     public class GroupMemberImport
     {
         /// <summary>
