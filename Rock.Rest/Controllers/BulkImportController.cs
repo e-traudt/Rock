@@ -23,7 +23,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage AttendanceImport( [FromBody]List<Rock.BulkImport.Model.AttendanceImport> attendanceImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkAttendanceImport( attendanceImports );
+            var responseText = BulkImport.BulkImportHelper.BulkAttendanceImport( attendanceImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -37,7 +37,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage GroupImport( [FromBody]List<Rock.BulkImport.Model.GroupImport> groupImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkGroupImport( groupImports );
+            var responseText = BulkImport.BulkImportHelper.BulkGroupImport( groupImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -46,7 +46,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage FinancialAccountImport( [FromBody]List<Rock.BulkImport.Model.FinancialAccountImport> financialAccountImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkFinancialAccountImport( financialAccountImports );
+            var responseText = BulkImport.BulkImportHelper.BulkFinancialAccountImport( financialAccountImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -55,7 +55,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage FinancialBatchImport( [FromBody]List<Rock.BulkImport.Model.FinancialBatchImport> financialBatchImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkFinancialBatchImport( financialBatchImports );
+            var responseText = BulkImport.BulkImportHelper.BulkFinancialBatchImport( financialBatchImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -64,7 +64,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage FinancialTransactionImport( [FromBody]List<Rock.BulkImport.Model.FinancialTransactionImport> financialTransactionImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkFinancialTransactionImport( financialTransactionImports );
+            var responseText = BulkImport.BulkImportHelper.BulkFinancialTransactionImport( financialTransactionImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -78,7 +78,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage LocationImport( [FromBody]List<Rock.BulkImport.Model.LocationImport> locationImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkLocationImport( locationImports );
+            var responseText = BulkImport.BulkImportHelper.BulkLocationImport( locationImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -92,7 +92,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage PersonImport( [FromBody]List<Rock.BulkImport.Model.PersonImport> personImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkPersonImport( personImports );
+            var responseText = BulkImport.BulkImportHelper.BulkPersonImport( personImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
@@ -106,7 +106,7 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         public System.Net.Http.HttpResponseMessage ScheduleImport( [FromBody]List<Rock.BulkImport.Model.ScheduleImport> scheduleImports )
         {
-            var responseText = BulkImport.BulkInsertHelper.BulkScheduleImport( scheduleImports );
+            var responseText = BulkImport.BulkImportHelper.BulkScheduleImport( scheduleImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
     }

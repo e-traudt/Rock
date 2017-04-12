@@ -15,7 +15,7 @@ namespace Rock.BulkImport
     /// <summary>
     /// 
     /// </summary>
-    public static class BulkInsertHelper
+    public static class BulkImportHelper
     {
         /// <summary>
         /// Bulks the attendance import.

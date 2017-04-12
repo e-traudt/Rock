@@ -421,7 +421,7 @@
     <Compile Include="Attribute\WorkflowTypeFieldAttribute.cs" />
     <Compile Include="BulkImport\Model\AttendanceImport.cs" />
     <Compile Include="BulkImport\Model\AttributeValueImport.cs" />
-    <Compile Include="BulkImport\BulkInsertHelper.cs" />
+    <Compile Include="BulkImport\BulkImportHelper.cs" />
     <Compile Include="BulkImport\Model\FinancialAccountImport.cs" />
     <Compile Include="BulkImport\Model\FinancialBatchImport.cs" />
     <Compile Include="BulkImport\Model\FinancialTransactionDetailImport.cs" />
