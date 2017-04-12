@@ -24,67 +24,63 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class LocationImportEntity
+    public partial class FinancialBatchImportEntity
     {
         /// <summary />
-        public string City { get; set; }
+        public int? CampusId { get; set; }
 
         /// <summary />
-        public string Country { get; set; }
+        public decimal ControlAmount { get; set; }
 
         /// <summary />
-        public string County { get; set; }
+        public int? CreatedByPersonForeignId { get; set; }
 
         /// <summary />
-        public bool IsActive { get; set; }
+        public DateTime? EndDate { get; set; }
 
         /// <summary />
-        public int LocationForeignId { get; set; }
+        public int FinancialBatchForeignId { get; set; }
 
         /// <summary />
-        public int? LocationTypeValueId { get; set; }
+        public int? ModifiedByPersonForeignId { get; set; }
 
         /// <summary />
         public string Name { get; set; }
 
         /// <summary />
-        public int? ParentLocationForeignId { get; set; }
+        public DateTime? StartDate { get; set; }
 
         /// <summary />
-        public string PostalCode { get; set; }
+        public int /* BatchStatus*/ Status { get; set; }
 
         /// <summary />
-        public string State { get; set; }
+        public DateTime? CreatedDateTime { get; set; }
 
         /// <summary />
-        public string Street1 { get; set; }
-
-        /// <summary />
-        public string Street2 { get; set; }
+        public DateTime? ModifiedDateTime { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source LocationImport object
+        /// Copies the base properties from a source FinancialBatchImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( LocationImport source )
+        public void CopyPropertiesFrom( FinancialBatchImport source )
         {
-            this.City = source.City;
-            this.Country = source.Country;
-            this.County = source.County;
-            this.IsActive = source.IsActive;
-            this.LocationForeignId = source.LocationForeignId;
-            this.LocationTypeValueId = source.LocationTypeValueId;
+            this.CampusId = source.CampusId;
+            this.ControlAmount = source.ControlAmount;
+            this.CreatedByPersonForeignId = source.CreatedByPersonForeignId;
+            this.EndDate = source.EndDate;
+            this.FinancialBatchForeignId = source.FinancialBatchForeignId;
+            this.ModifiedByPersonForeignId = source.ModifiedByPersonForeignId;
             this.Name = source.Name;
-            this.ParentLocationForeignId = source.ParentLocationForeignId;
-            this.PostalCode = source.PostalCode;
-            this.State = source.State;
-            this.Street1 = source.Street1;
-            this.Street2 = source.Street2;
+            this.StartDate = source.StartDate;
+            this.Status = source.Status;
+            this.CreatedDateTime = source.CreatedDateTime;
+            this.ModifiedDateTime = source.ModifiedDateTime;
 
         }
     }
@@ -92,7 +88,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class LocationImport : LocationImportEntity
+    public partial class FinancialBatchImport : FinancialBatchImportEntity
     {
     }
 }

@@ -1,31 +1,12 @@
-﻿namespace Rock.BulkUpdate.Model
+﻿namespace Rock.BulkImport.Model
 {
     /// <summary>
     /// 
     /// </summary>
     [System.Diagnostics.DebuggerDisplay( "{Number}" )]
-    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
+    [Rock.Data.RockClientInclude( "Model for Rock Bulk Insert APIs" )]
     public class PhoneNumberImport
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PhoneNumberImport"/> class.
-        /// </summary>
-        public PhoneNumberImport()
-        {
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PhoneNumberImport"/> class.
-        /// </summary>
-        /// <param name="number">The number.</param>
-        /// <param name="numberTypeValueId">The number type value identifier.</param>
-        public PhoneNumberImport( string number, int numberTypeValueId ) : this()
-        {
-            this.Number = number;
-            this.NumberTypeValueId = numberTypeValueId;
-        }
-
         /// <summary>
         /// Gets or sets the phone number. The number is stored without any string formatting. (i.e. (502) 555-1212 will be stored as 5025551212). This property is required.
         /// </summary>

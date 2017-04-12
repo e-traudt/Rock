@@ -24,30 +24,24 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class FinancialTransactionImportEntity
+    public partial class FinancialTransactionDetailImportEntity
     {
         /// <summary />
-        public int? AuthorizedPersonForeignId { get; set; }
-
-        /// <summary />
-        public int BatchForeignId { get; set; }
+        public decimal Amount { get; set; }
 
         /// <summary />
         public int? CreatedByPersonForeignId { get; set; }
 
         /// <summary />
-        public int CurrencyTypeValueId { get; set; }
+        public int? FinancialAccountForeignId { get; set; }
 
         /// <summary />
-        public List<FinancialTransactionDetailImport> FinancialTransactionDetailImports { get; set; }
-
-        /// <summary />
-        public int FinancialTransactionForeignId { get; set; }
+        public int FinancialTransactionDetailForeignId { get; set; }
 
         /// <summary />
         public int? ModifiedByPersonForeignId { get; set; }
@@ -56,41 +50,23 @@ namespace Rock.Client.BulkUpdate
         public string Summary { get; set; }
 
         /// <summary />
-        public string TransactionCode { get; set; }
-
-        /// <summary />
-        public DateTime? TransactionDate { get; set; }
-
-        /// <summary />
-        public int TransactionSourceValueId { get; set; }
-
-        /// <summary />
-        public int TransactionTypeValueId { get; set; }
-
-        /// <summary />
         public DateTime? CreatedDateTime { get; set; }
 
         /// <summary />
         public DateTime? ModifiedDateTime { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source FinancialTransactionImport object
+        /// Copies the base properties from a source FinancialTransactionDetailImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( FinancialTransactionImport source )
+        public void CopyPropertiesFrom( FinancialTransactionDetailImport source )
         {
-            this.AuthorizedPersonForeignId = source.AuthorizedPersonForeignId;
-            this.BatchForeignId = source.BatchForeignId;
+            this.Amount = source.Amount;
             this.CreatedByPersonForeignId = source.CreatedByPersonForeignId;
-            this.CurrencyTypeValueId = source.CurrencyTypeValueId;
-            this.FinancialTransactionDetailImports = source.FinancialTransactionDetailImports;
-            this.FinancialTransactionForeignId = source.FinancialTransactionForeignId;
+            this.FinancialAccountForeignId = source.FinancialAccountForeignId;
+            this.FinancialTransactionDetailForeignId = source.FinancialTransactionDetailForeignId;
             this.ModifiedByPersonForeignId = source.ModifiedByPersonForeignId;
             this.Summary = source.Summary;
-            this.TransactionCode = source.TransactionCode;
-            this.TransactionDate = source.TransactionDate;
-            this.TransactionSourceValueId = source.TransactionSourceValueId;
-            this.TransactionTypeValueId = source.TransactionTypeValueId;
             this.CreatedDateTime = source.CreatedDateTime;
             this.ModifiedDateTime = source.ModifiedDateTime;
 
@@ -100,7 +76,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class FinancialTransactionImport : FinancialTransactionImportEntity
+    public partial class FinancialTransactionDetailImport : FinancialTransactionDetailImportEntity
     {
     }
 }

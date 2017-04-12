@@ -24,27 +24,27 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class AttributeValueImportEntity
+    public partial class ScheduleImportEntity
     {
         /// <summary />
-        public int AttributeId { get; set; }
+        public string Name { get; set; }
 
         /// <summary />
-        public string Value { get; set; }
+        public int ScheduleForeignId { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source AttributeValueImport object
+        /// Copies the base properties from a source ScheduleImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( AttributeValueImport source )
+        public void CopyPropertiesFrom( ScheduleImport source )
         {
-            this.AttributeId = source.AttributeId;
-            this.Value = source.Value;
+            this.Name = source.Name;
+            this.ScheduleForeignId = source.ScheduleForeignId;
 
         }
     }
@@ -52,7 +52,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class AttributeValueImport : AttributeValueImportEntity
+    public partial class ScheduleImport : ScheduleImportEntity
     {
     }
 }

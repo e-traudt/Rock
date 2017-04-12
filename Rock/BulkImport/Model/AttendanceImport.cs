@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Rock.BulkUpdate.Model
+namespace Rock.BulkImport.Model
 {
     /// <summary>
     /// 
     /// </summary>
-    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
+    [Rock.Data.RockClientInclude( "Model for Rock Bulk Insert APIs" )]
     public class AttendanceImport
     {
         /// <summary>

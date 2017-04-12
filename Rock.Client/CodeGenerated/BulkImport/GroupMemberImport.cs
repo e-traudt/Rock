@@ -24,39 +24,27 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class FinancialAccountImportEntity
+    public partial class GroupMemberImportEntity
     {
         /// <summary />
-        public int CampusId { get; set; }
+        public int PersonForeignId { get; set; }
 
         /// <summary />
-        public int FinancialAccountForeignId { get; set; }
-
-        /// <summary />
-        public bool IsTaxDeductible { get; set; }
-
-        /// <summary />
-        public string Name { get; set; }
-
-        /// <summary />
-        public int? ParentFinancialAccountForeignId { get; set; }
+        public string RoleName { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source FinancialAccountImport object
+        /// Copies the base properties from a source GroupMemberImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( FinancialAccountImport source )
+        public void CopyPropertiesFrom( GroupMemberImport source )
         {
-            this.CampusId = source.CampusId;
-            this.FinancialAccountForeignId = source.FinancialAccountForeignId;
-            this.IsTaxDeductible = source.IsTaxDeductible;
-            this.Name = source.Name;
-            this.ParentFinancialAccountForeignId = source.ParentFinancialAccountForeignId;
+            this.PersonForeignId = source.PersonForeignId;
+            this.RoleName = source.RoleName;
 
         }
     }
@@ -64,7 +52,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class FinancialAccountImport : FinancialAccountImportEntity
+    public partial class GroupMemberImport : GroupMemberImportEntity
     {
     }
 }

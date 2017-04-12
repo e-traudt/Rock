@@ -24,27 +24,55 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class ScheduleImportEntity
+    public partial class AttendanceImportEntity
     {
         /// <summary />
-        public string Name { get; set; }
+        public int? AttendanceForeignId { get; set; }
 
         /// <summary />
-        public int ScheduleForeignId { get; set; }
+        public int? CampusId { get; set; }
+
+        /// <summary />
+        public DateTime? EndDateTime { get; set; }
+
+        /// <summary />
+        public int? GroupForeignId { get; set; }
+
+        /// <summary />
+        public int? LocationForeignId { get; set; }
+
+        /// <summary />
+        public string Note { get; set; }
+
+        /// <summary />
+        public int PersonForeignId { get; set; }
+
+        /// <summary />
+        public int? ScheduleForeignId { get; set; }
+
+        /// <summary />
+        public DateTime StartDateTime { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source ScheduleImport object
+        /// Copies the base properties from a source AttendanceImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( ScheduleImport source )
+        public void CopyPropertiesFrom( AttendanceImport source )
         {
-            this.Name = source.Name;
+            this.AttendanceForeignId = source.AttendanceForeignId;
+            this.CampusId = source.CampusId;
+            this.EndDateTime = source.EndDateTime;
+            this.GroupForeignId = source.GroupForeignId;
+            this.LocationForeignId = source.LocationForeignId;
+            this.Note = source.Note;
+            this.PersonForeignId = source.PersonForeignId;
             this.ScheduleForeignId = source.ScheduleForeignId;
+            this.StartDateTime = source.StartDateTime;
 
         }
     }
@@ -52,7 +80,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class ScheduleImport : ScheduleImportEntity
+    public partial class AttendanceImport : AttendanceImportEntity
     {
     }
 }

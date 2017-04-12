@@ -1,38 +1,12 @@
-﻿namespace Rock.BulkUpdate.Model
+﻿namespace Rock.BulkImport.Model
 {
     /// <summary>
     /// 
     /// </summary>
     [System.Diagnostics.DebuggerDisplay( "{Street1}" )]
-    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
+    [Rock.Data.RockClientInclude( "Model for Rock Bulk Insert APIs" )]
     public class PersonAddressImport
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PersonAddressImport"/> class.
-        /// </summary>
-        public PersonAddressImport()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PersonAddressImport" /> class.
-        /// </summary>
-        /// <param name="groupLocationTypeValueId">The group location type value identifier. (Home, Work, etc)</param>
-        /// <param name="street">The street.</param>
-        /// <param name="city">The city.</param>
-        /// <param name="state">The state.</param>
-        /// <param name="postalCode">The postal code.</param>
-        /// <param name="country">The country.</param>
-        public PersonAddressImport( int groupLocationTypeValueId, string street, string city, string state, string postalCode, string country = null ) : this()
-        {
-            this.GroupLocationTypeValueId = groupLocationTypeValueId;
-            this.Street1 = street;
-            this.City = city;
-            this.State = state;
-            this.PostalCode = postalCode;
-            this.Country = country;
-        }
-
         /// <summary>
         /// Gets or sets the location type value identifier.
         /// </summary>

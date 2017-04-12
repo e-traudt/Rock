@@ -1,63 +1,12 @@
-﻿using System;
-
-namespace Rock.BulkUpdate.Model
+﻿namespace Rock.BulkImport.Model
 {
     /// <summary>
     /// 
     /// </summary>
     [System.Diagnostics.DebuggerDisplay( "{Value}" )]
-    [Rock.Data.RockClientIncludeAttribute( "Model for Rock Bulk Insert APIs" )]
+    [Rock.Data.RockClientInclude( "Model for Rock Bulk Insert APIs" )]
     public class AttributeValueImport
     {
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
-        /// </summary>
-        public AttributeValueImport()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
-        /// </summary>
-        /// <param name="attributeId">The attribute identifier.</param>
-        /// <param name="value">The value.</param>
-        public AttributeValueImport( int attributeId, string value )
-        {
-            this.AttributeId = attributeId;
-            this.Value = value;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
-        /// </summary>
-        /// <param name="attributeId">The attribute identifier.</param>
-        /// <param name="value">The value.</param>
-        public AttributeValueImport( int attributeId, DateTime? value )
-            : this( attributeId, value != null ? value.Value.ToString( "o" ) : null )
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
-        /// </summary>
-        /// <param name="attributeId">The attribute identifier.</param>
-        /// <param name="value">if set to <c>true</c> [value].</param>
-        public AttributeValueImport( int attributeId, bool? value )
-            : this( attributeId, value != null ? value.Value.ToTrueFalse() : null )
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeValueImport"/> class.
-        /// </summary>
-        /// <param name="attributeId">The attribute identifier.</param>
-        /// <param name="value">The value.</param>
-        public AttributeValueImport( int attributeId, int? value )
-            : this( attributeId, value.ToString() )
-        {
-        }
-
         /// <summary>
         /// Gets or sets the attribute identifier.
         /// </summary>

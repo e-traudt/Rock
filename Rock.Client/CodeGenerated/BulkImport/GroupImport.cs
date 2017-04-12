@@ -24,55 +24,47 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class AttendanceImportEntity
+    public partial class GroupImportEntity
     {
-        /// <summary />
-        public int? AttendanceForeignId { get; set; }
-
         /// <summary />
         public int? CampusId { get; set; }
 
         /// <summary />
-        public DateTime? EndDateTime { get; set; }
+        public int GroupForeignId { get; set; }
 
         /// <summary />
-        public int? GroupForeignId { get; set; }
+        public List<GroupMemberImport> GroupMemberImports { get; set; }
 
         /// <summary />
-        public int? LocationForeignId { get; set; }
+        public int GroupTypeId { get; set; }
 
         /// <summary />
-        public string Note { get; set; }
+        public string Name { get; set; }
 
         /// <summary />
-        public int PersonForeignId { get; set; }
+        public int Order { get; set; }
 
         /// <summary />
-        public int? ScheduleForeignId { get; set; }
-
-        /// <summary />
-        public DateTime StartDateTime { get; set; }
+        public int? ParentGroupForeignId { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source AttendanceImport object
+        /// Copies the base properties from a source GroupImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( AttendanceImport source )
+        public void CopyPropertiesFrom( GroupImport source )
         {
-            this.AttendanceForeignId = source.AttendanceForeignId;
             this.CampusId = source.CampusId;
-            this.EndDateTime = source.EndDateTime;
             this.GroupForeignId = source.GroupForeignId;
-            this.LocationForeignId = source.LocationForeignId;
-            this.Note = source.Note;
-            this.PersonForeignId = source.PersonForeignId;
-            this.ScheduleForeignId = source.ScheduleForeignId;
-            this.StartDateTime = source.StartDateTime;
+            this.GroupMemberImports = source.GroupMemberImports;
+            this.GroupTypeId = source.GroupTypeId;
+            this.Name = source.Name;
+            this.Order = source.Order;
+            this.ParentGroupForeignId = source.ParentGroupForeignId;
 
         }
     }
@@ -80,7 +72,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class AttendanceImport : AttendanceImportEntity
+    public partial class GroupImport : GroupImportEntity
     {
     }
 }

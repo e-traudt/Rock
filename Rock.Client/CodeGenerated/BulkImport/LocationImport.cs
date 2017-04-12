@@ -24,47 +24,67 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class GroupImportEntity
+    public partial class LocationImportEntity
     {
         /// <summary />
-        public int? CampusId { get; set; }
+        public string City { get; set; }
 
         /// <summary />
-        public int GroupForeignId { get; set; }
+        public string Country { get; set; }
 
         /// <summary />
-        public List<GroupMemberImport> GroupMemberImports { get; set; }
+        public string County { get; set; }
 
         /// <summary />
-        public int GroupTypeId { get; set; }
+        public bool IsActive { get; set; }
+
+        /// <summary />
+        public int LocationForeignId { get; set; }
+
+        /// <summary />
+        public int? LocationTypeValueId { get; set; }
 
         /// <summary />
         public string Name { get; set; }
 
         /// <summary />
-        public int Order { get; set; }
+        public int? ParentLocationForeignId { get; set; }
 
         /// <summary />
-        public int? ParentGroupForeignId { get; set; }
+        public string PostalCode { get; set; }
+
+        /// <summary />
+        public string State { get; set; }
+
+        /// <summary />
+        public string Street1 { get; set; }
+
+        /// <summary />
+        public string Street2 { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source GroupImport object
+        /// Copies the base properties from a source LocationImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( GroupImport source )
+        public void CopyPropertiesFrom( LocationImport source )
         {
-            this.CampusId = source.CampusId;
-            this.GroupForeignId = source.GroupForeignId;
-            this.GroupMemberImports = source.GroupMemberImports;
-            this.GroupTypeId = source.GroupTypeId;
+            this.City = source.City;
+            this.Country = source.Country;
+            this.County = source.County;
+            this.IsActive = source.IsActive;
+            this.LocationForeignId = source.LocationForeignId;
+            this.LocationTypeValueId = source.LocationTypeValueId;
             this.Name = source.Name;
-            this.Order = source.Order;
-            this.ParentGroupForeignId = source.ParentGroupForeignId;
+            this.ParentLocationForeignId = source.ParentLocationForeignId;
+            this.PostalCode = source.PostalCode;
+            this.State = source.State;
+            this.Street1 = source.Street1;
+            this.Street2 = source.Street2;
 
         }
     }
@@ -72,7 +92,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class GroupImport : GroupImportEntity
+    public partial class LocationImport : LocationImportEntity
     {
     }
 }

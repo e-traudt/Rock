@@ -24,51 +24,39 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class FinancialTransactionDetailImportEntity
+    public partial class PhoneNumberImportEntity
     {
         /// <summary />
-        public decimal Amount { get; set; }
+        public string Extension { get; set; }
 
         /// <summary />
-        public int? CreatedByPersonForeignId { get; set; }
+        public bool IsMessagingEnabled { get; set; }
 
         /// <summary />
-        public int? FinancialAccountForeignId { get; set; }
+        public bool IsUnlisted { get; set; }
 
         /// <summary />
-        public int FinancialTransactionDetailForeignId { get; set; }
+        public string Number { get; set; }
 
         /// <summary />
-        public int? ModifiedByPersonForeignId { get; set; }
-
-        /// <summary />
-        public string Summary { get; set; }
-
-        /// <summary />
-        public DateTime? CreatedDateTime { get; set; }
-
-        /// <summary />
-        public DateTime? ModifiedDateTime { get; set; }
+        public int? NumberTypeValueId { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source FinancialTransactionDetailImport object
+        /// Copies the base properties from a source PhoneNumberImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( FinancialTransactionDetailImport source )
+        public void CopyPropertiesFrom( PhoneNumberImport source )
         {
-            this.Amount = source.Amount;
-            this.CreatedByPersonForeignId = source.CreatedByPersonForeignId;
-            this.FinancialAccountForeignId = source.FinancialAccountForeignId;
-            this.FinancialTransactionDetailForeignId = source.FinancialTransactionDetailForeignId;
-            this.ModifiedByPersonForeignId = source.ModifiedByPersonForeignId;
-            this.Summary = source.Summary;
-            this.CreatedDateTime = source.CreatedDateTime;
-            this.ModifiedDateTime = source.ModifiedDateTime;
+            this.Extension = source.Extension;
+            this.IsMessagingEnabled = source.IsMessagingEnabled;
+            this.IsUnlisted = source.IsUnlisted;
+            this.Number = source.Number;
+            this.NumberTypeValueId = source.NumberTypeValueId;
 
         }
     }
@@ -76,7 +64,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class FinancialTransactionDetailImport : FinancialTransactionDetailImportEntity
+    public partial class PhoneNumberImport : PhoneNumberImportEntity
     {
     }
 }

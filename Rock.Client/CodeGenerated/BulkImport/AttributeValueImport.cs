@@ -24,39 +24,27 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Rock.Client.BulkUpdate
+namespace Rock.Client.BulkImport
 {
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class PhoneNumberImportEntity
+    public partial class AttributeValueImportEntity
     {
         /// <summary />
-        public string Extension { get; set; }
+        public int AttributeId { get; set; }
 
         /// <summary />
-        public bool IsMessagingEnabled { get; set; }
-
-        /// <summary />
-        public bool IsUnlisted { get; set; }
-
-        /// <summary />
-        public string Number { get; set; }
-
-        /// <summary />
-        public int? NumberTypeValueId { get; set; }
+        public string Value { get; set; }
 
         /// <summary>
-        /// Copies the base properties from a source PhoneNumberImport object
+        /// Copies the base properties from a source AttributeValueImport object
         /// </summary>
         /// <param name="source">The source.</param>
-        public void CopyPropertiesFrom( PhoneNumberImport source )
+        public void CopyPropertiesFrom( AttributeValueImport source )
         {
-            this.Extension = source.Extension;
-            this.IsMessagingEnabled = source.IsMessagingEnabled;
-            this.IsUnlisted = source.IsUnlisted;
-            this.Number = source.Number;
-            this.NumberTypeValueId = source.NumberTypeValueId;
+            this.AttributeId = source.AttributeId;
+            this.Value = source.Value;
 
         }
     }
@@ -64,7 +52,7 @@ namespace Rock.Client.BulkUpdate
     /// <summary>
     /// Model for Rock Bulk Insert APIs
     /// </summary>
-    public partial class PhoneNumberImport : PhoneNumberImportEntity
+    public partial class AttributeValueImport : AttributeValueImportEntity
     {
     }
 }

@@ -5,12 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Rock.BulkUpdate.Model;
+using Rock.BulkImport.Model;
 using Rock.Data;
 using Rock.Model;
 using Rock.Web.Cache;
 
-namespace Rock.BulkUpdate
+namespace Rock.BulkImport
 {
     /// <summary>
     /// 
