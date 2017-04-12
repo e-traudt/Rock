@@ -1110,9 +1110,10 @@ order by [parentTable], [columnName]
             sb.AppendLine( "" );
 
             var extraNameSpace = string.Empty;
-            if (type.Namespace == "Rock.BulkUpdate.Model")
+            var namespaceMatch = Regex.Match( type.Namespace, @"Rock\.(.*)\.Model" );
+            if ( namespaceMatch.Success && namespaceMatch.Groups.Count == 2 )
             {
-                extraNameSpace = "BulkUpdate";
+                extraNameSpace = namespaceMatch.Groups[1].Value;
             }
 
             if ( !string.IsNullOrEmpty( extraNameSpace ) )
