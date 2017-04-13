@@ -25,10 +25,10 @@ namespace RockWeb.Blocks.Utility
     /// <summary>
     /// 
     /// </summary>
-    [DisplayName( "BulkUpdateTest" )]
+    [DisplayName( "Bulk Import Cleanup" )]
     [Category( "Utility" )]
-    [Description( "" )]
-    public partial class BulkUpdateTest : Rock.Web.UI.RockBlock
+    [Description( "Helps cleanup a database if a Bulk Import failed or needs to be re-imported" )]
+    public partial class BulkImportCleanup : Rock.Web.UI.RockBlock
     {
         #region
 
@@ -85,11 +85,41 @@ namespace RockWeb.Blocks.Utility
         #endregion
 
         /// <summary>
-        /// Handles the Click event of the btnCleanup control.
+        /// Handles the Click event of the btnDeleteAttendance control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void btnCleanup_Click( object sender, EventArgs e )
+        protected void btnDeleteAttendance_Click( object sender, EventArgs e )
+        {
+            var rockContext = new RockContext();
+
+            rockContext.Database.ExecuteSqlCommand( "truncate table [Attendance]" );
+            nbResults.Text += "Cleanup Attendance complete<br />";
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnCleanupPerson control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void btnCleanupPerson_Click( object sender, EventArgs e )
+        {
+            var rockContext = new RockContext();
+
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonViewed] where TargetPersonAliasId in (SELECT ID FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null))" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Person] where [ForeignId] is not null" );
+
+            nbResults.Text += "Cleanup Person complete<br />";
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnCleanupFinancial control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void btnCleanupFinancial_Click( object sender, EventArgs e )
         {
             var rockContext = new RockContext();
             rockContext.Database.ExecuteSqlCommand( @"
@@ -99,13 +129,17 @@ delete from FinancialPaymentDetail where ForeignId is not null
 delete from FinancialBatch where ForeignId is not null
 delete from FinancialAccount where ForeignId is not null" );
 
-            rockContext.Database.ExecuteSqlCommand( "truncate table [Attendance]" );
+            nbResults.Text += "Cleanup Financial complete<br />";
+        }
 
-            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonViewed] where TargetPersonAliasId in (SELECT ID FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null))" );
-            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
-            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
-            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Person] where [ForeignId] is not null" );
-
+        /// <summary>
+        /// Handles the Click event of the btnCleanupEverythingElse control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void btnCleanupEverythingElse_Click( object sender, EventArgs e )
+        {
+            var rockContext = new RockContext();
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where GroupId in (select Id from [Group] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Schedule] where [ForeignId] is not null" );
@@ -132,10 +166,9 @@ FROM [Location]
 WHERE [ForeignId] IS NOT NULL
 		" );
 
-            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupType] where [ForeignId] is not null" );
 
-            nbResults.Text = "Cleanup complete";
+            nbResults.Text += "Cleanup Groups, Schedules, and Locations complete<br />";
         }
     }
 }
