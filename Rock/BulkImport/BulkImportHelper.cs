@@ -626,6 +626,7 @@ namespace Rock.BulkImport
 
             var familyGroupType = GroupTypeCache.GetFamilyGroupType();
             int familyGroupTypeId = familyGroupType.Id;
+            int familyChildRoleId = familyGroupType.Roles.First( a => a.Guid == Rock.SystemGuid.GroupRole.GROUPROLE_FAMILY_MEMBER_CHILD.AsGuid() ).Id;
 
             // int familyGroupTypeId, personRecordTypeValueId;
             Dictionary<int, Group> familiesLookup;
@@ -644,24 +645,26 @@ namespace Rock.BulkImport
             stopwatch.Restart();
             string defaultPhoneCountryCode = PhoneNumber.DefaultCountryCode();
 
+            int nextNewFamilyForeignId = familiesLookup.Any() ? familiesLookup.Max( a => a.Key ) : 0;
+            if ( personImports.Any() )
+            {
+                nextNewFamilyForeignId = Math.Max( nextNewFamilyForeignId, personImports.Where( a => a.FamilyForeignId.HasValue ).Max( a => a.FamilyForeignId.Value ));
+            }
+
             foreach ( var personImport in personImports )
             {
                 Group family = null;
 
-                if ( personImport.FamilyForeignId.HasValue )
+                if ( !personImport.FamilyForeignId.HasValue )
                 {
-                    if ( personImport.FamilyForeignId.HasValue )
-                    {
-                        if ( familiesLookup.ContainsKey( personImport.FamilyForeignId.Value ) )
-                        {
-                            family = familiesLookup[personImport.FamilyForeignId.Value];
-                        }
-                    }
+                    //  If personImport.FamilyForeignId is null, that means we need to create a new family
+                    personImport.FamilyForeignId = ++nextNewFamilyForeignId;
                 }
-                else
+                
+
+                if ( familiesLookup.ContainsKey( personImport.FamilyForeignId.Value ) )
                 {
-                    // TODO: If personImport.FamilyForeignId is null, that means we need to create a new family
-                    Debug.WriteLine( "// TODO: If personImport.FamilyForeignId is null, that means we need to create a new family " );
+                    family = familiesLookup[personImport.FamilyForeignId.Value];
                 }
 
                 if ( family == null )
@@ -762,7 +765,13 @@ namespace Rock.BulkImport
             // now that we have GroupId for each family, set the GivingGroupId for personImport's that don't give individually
             foreach ( var personImport in personImports )
             {
-                if ( !personImport.GivingIndividually && personImport.FamilyForeignId.HasValue )
+                if  ( !personImport.GivingIndividually.HasValue)
+                {
+                    // If GivingIndividually is NULL, based it on GroupRole (Adults give with Family, Kids give as individuals)
+                    personImport.GivingIndividually = personImport.GroupRoleId == familyChildRoleId;
+                }
+
+                if ( !personImport.GivingIndividually.Value && personImport.FamilyForeignId.HasValue )
                 {
                     var personToInsert = personToInsertLookup.GetValueOrNull( personImport.PersonForeignId );
                     if ( personToInsert != null )
@@ -1003,10 +1012,27 @@ namespace Rock.BulkImport
             List<Schedule> schedulesToInsert = new List<Schedule>();
             var newScheduleImports = scheduleImports.Where( a => !scheduleAlreadyExistForeignIdHash.Contains( a.ScheduleForeignId ) ).ToList();
 
+            int entityTypeIdSchedule = EntityTypeCache.GetId<Schedule>() ?? 0;
+            var categoryService = new CategoryService( rockContext );
+            string categoryName = "Imported Schedules";
+            var scheduleCategory = categoryService.Queryable().Where( a => a.EntityTypeId == entityTypeIdSchedule && a.Name == categoryName ).FirstOrDefault();
+            if (scheduleCategory == null)
+            {
+                scheduleCategory = new Category
+                {
+                    EntityTypeId = entityTypeIdSchedule,
+                    Name = categoryName
+                };
+
+                categoryService.Add( scheduleCategory );
+                rockContext.SaveChanges();
+            }
+
             foreach ( var scheduleImport in newScheduleImports )
             {
                 var schedule = new Schedule();
                 schedule.ForeignId = scheduleImport.ScheduleForeignId;
+                schedule.CategoryId = scheduleCategory.Id;
                 if ( scheduleImport.Name.Length > 50 )
                 {
                     schedule.Name = scheduleImport.Name.Truncate( 50 );

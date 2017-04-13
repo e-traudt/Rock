@@ -48,11 +48,12 @@ namespace Rock.BulkImport.Model
 
         /// <summary>
         /// Gets or sets a value indicating whether [giving individually] or giving as a family. This will be used to set the GivingGroupId,GivingId of the Person
+        /// If this is left Null, Rock will decide based on Family Role
         /// </summary>
         /// <value>
         ///   <c>true</c> if [giving individually]; otherwise, <c>false</c>.
         /// </value>
-        public bool GivingIndividually { get; set; }
+        public bool? GivingIndividually { get; set; }
 
         /// <summary>
         /// Gets the name of the family.

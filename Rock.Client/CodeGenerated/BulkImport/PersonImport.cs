@@ -80,7 +80,7 @@ namespace Rock.Client.BulkImport
         public int Gender { get; set; }
 
         /// <summary />
-        public bool GivingIndividually { get; set; }
+        public bool? GivingIndividually { get; set; }
 
         /// <summary />
         public string Grade { get; set; }
