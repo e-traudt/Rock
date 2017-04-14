@@ -68,9 +68,6 @@ namespace Rock.Client.BulkImport
         public int? FamilyForeignId { get; set; }
 
         /// <summary />
-        public string FamilyImageUrl { get; set; }
-
-        /// <summary />
         public string FamilyName { get; set; }
 
         /// <summary />
@@ -117,9 +114,6 @@ namespace Rock.Client.BulkImport
 
         /// <summary />
         public int PersonForeignId { get; set; }
-
-        /// <summary />
-        public string PersonPhotoUrl { get; set; }
 
         /// <summary />
         public ICollection<PhoneNumberImport> PhoneNumbers { get; set; }
@@ -169,7 +163,6 @@ namespace Rock.Client.BulkImport
             this.EmailNote = source.EmailNote;
             this.EmailPreference = source.EmailPreference;
             this.FamilyForeignId = source.FamilyForeignId;
-            this.FamilyImageUrl = source.FamilyImageUrl;
             this.FamilyName = source.FamilyName;
             this.FirstName = source.FirstName;
             this.Gender = source.Gender;
@@ -186,7 +179,6 @@ namespace Rock.Client.BulkImport
             this.NickName = source.NickName;
             this.Note = source.Note;
             this.PersonForeignId = source.PersonForeignId;
-            this.PersonPhotoUrl = source.PersonPhotoUrl;
             this.PhoneNumbers = source.PhoneNumbers;
             this.RecordStatusLastModifiedDateTime = source.RecordStatusLastModifiedDateTime;
             this.RecordStatusReasonValueId = source.RecordStatusReasonValueId;

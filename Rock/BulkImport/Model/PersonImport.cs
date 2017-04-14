@@ -63,14 +63,6 @@ namespace Rock.BulkImport.Model
         /// </value>
         public string FamilyName { get; set; }
 
-        /// <summary>
-        /// Gets the family image URL.
-        /// </summary>
-        /// <value>
-        /// The family image URL.
-        /// </value>
-        public string FamilyImageUrl { get; set; }
-
         #endregion Family Fields
 
         #region Person Fields that map directly to Rock.Model.Person
@@ -293,13 +285,7 @@ namespace Rock.BulkImport.Model
         /// </value>
         public string InactiveReasonNote { get; set; }
 
-        /// <summary>
-        /// Gets the person photo URL.
-        /// </summary>
-        /// <value>
-        /// The person photo URL.
-        /// </value>
-        public string PersonPhotoUrl { get; set; }
+        
 
         #endregion Person Fields that map directly to Rock.Model.Person
 

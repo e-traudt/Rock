@@ -628,16 +628,12 @@ namespace Rock.BulkImport
             int familyGroupTypeId = familyGroupType.Id;
             int familyChildRoleId = familyGroupType.Roles.First( a => a.Guid == Rock.SystemGuid.GroupRole.GROUPROLE_FAMILY_MEMBER_CHILD.AsGuid() ).Id;
 
-            // int familyGroupTypeId, personRecordTypeValueId;
-            Dictionary<int, Group> familiesLookup;
-            Dictionary<int, Person> personLookup;
-
             StringBuilder sbStats = new StringBuilder();
-            
-            familiesLookup = groupService.Queryable().AsNoTracking().Where( a => a.GroupTypeId == familyGroupTypeId && a.ForeignId.HasValue )
+
+            Dictionary<int, Group> familiesLookup = groupService.Queryable().AsNoTracking().Where( a => a.GroupTypeId == familyGroupTypeId && a.ForeignId.HasValue )
                 .ToList().ToDictionary( k => k.ForeignId.Value, v => v );
 
-            personLookup = qryAllPersons.AsNoTracking().Where( a => a.ForeignId.HasValue )
+            Dictionary<int, Person> personLookup = qryAllPersons.AsNoTracking().Where( a => a.ForeignId.HasValue )
                 .ToList().ToDictionary( k => k.ForeignId.Value, v => v );
 
             stopwatch.Stop();
@@ -992,6 +988,28 @@ namespace Rock.BulkImport
             var responseText = sbStats.ToString();
 
             return responseText;
+        }
+
+        /// <summary>
+        /// Bulks the photo import.
+        /// </summary>
+        /// <param name="photoImports">The photo imports.</param>
+        /// <returns></returns>
+        public static string BulkPhotoImport( List<PhotoImport> photoImports )
+        {
+            var rockContext = new RockContext();
+            var personIdLookup = new PersonService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, ForeignId = a.ForeignId.Value } ).ToDictionary( k => k.ForeignId, v => v.Id );
+
+            var familyIdLookup = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+                .Select( a => new { a.Id, ForeignId = a.ForeignId.Value } ).ToDictionary( k => k.ForeignId, v => v.Id );
+
+            var personPhotoImports = photoImports.Where( a => a.PhotoType == PhotoImport.PhotoImportType.Person ).ToList();
+
+
+            var familyPhotoImports = photoImports.Where( a => a.PhotoType == PhotoImport.PhotoImportType.Family ).ToList();
+
+            return "TODO";
         }
 
         /// <summary>

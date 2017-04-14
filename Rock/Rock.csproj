@@ -433,6 +433,7 @@
     <Compile Include="BulkImport\Model\PersonAddressImport.cs" />
     <Compile Include="BulkImport\Model\PersonImport.cs" />
     <Compile Include="BulkImport\Model\PhoneNumberImport.cs" />
+    <Compile Include="BulkImport\Model\PhotoImport.cs" />
     <Compile Include="BulkImport\Model\ScheduleImport.cs" />
     <Compile Include="Chart\ChartGroupBy.cs" />
     <Compile Include="Chart\IChartData.cs" />

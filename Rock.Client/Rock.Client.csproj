@@ -82,6 +82,7 @@
     <Compile Include="CodeGenerated\BulkImport\PersonAddressImport.cs" />
     <Compile Include="CodeGenerated\BulkImport\PersonImport.cs" />
     <Compile Include="CodeGenerated\BulkImport\PhoneNumberImport.cs" />
+    <Compile Include="CodeGenerated\BulkImport\PhotoImport.cs" />
     <Compile Include="CodeGenerated\BulkImport\ScheduleImport.cs" />
     <Compile Include="CodeGenerated\Campus.cs" />
     <Compile Include="CodeGenerated\Category.cs" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -95,6 +96,22 @@ namespace Rock.Rest.Controllers
             var responseText = BulkImport.BulkImportHelper.BulkPersonImport( personImports );
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
+
+        /// <summary>
+        /// Bulk Import of Family or Person Photo records
+        /// </summary>
+        /// <param name="personImports">The person imports.</param>
+        /// <returns></returns>
+        [System.Web.Http.Route( "api/BulkImport/PhotoImport" )]
+        [HttpPost]
+        [Authenticate, Secured]
+        public System.Net.Http.HttpResponseMessage PhotoImport( [FromBody]List<Rock.BulkImport.Model.PhotoImport> photoImports )
+        {
+            var responseText = BulkImport.BulkImportHelper.BulkPhotoImport( photoImports );
+            return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
+        }
+
+
 
         /// <summary>
         /// Bulk Import of Schedules
