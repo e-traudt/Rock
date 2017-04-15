@@ -111,8 +111,6 @@ namespace Rock.Rest.Controllers
             return ControllerContext.Request.CreateResponse<string>( HttpStatusCode.Created, responseText );
         }
 
-
-
         /// <summary>
         /// Bulk Import of Schedules
         /// </summary>

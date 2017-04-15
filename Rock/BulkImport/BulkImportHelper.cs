@@ -30,8 +30,11 @@ namespace Rock.BulkImport
             RockContext rockContext = new RockContext();
             StringBuilder sbStats = new StringBuilder();
 
-            var groupIdLookup = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
+            int groupTypeIdFamily = GroupTypeCache.GetFamilyGroupType().Id;
+
+            var groupIdLookup = new GroupService( rockContext ).Queryable().Where( a => a.GroupTypeId != groupTypeIdFamily && a.ForeignId.HasValue )
                 .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
+
 
             var locationIdLookup = new LocationService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
                 .Select( a => new { a.Id, a.ForeignId } ).ToDictionary( k => k.ForeignId.Value, v => v.Id );
@@ -394,11 +397,13 @@ namespace Rock.BulkImport
             RockContext rockContext = new RockContext();
             StringBuilder sbStats = new StringBuilder();
 
-            var qryGroupsWithForeignIds = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue );
+            var groupsAlreadyExistLookupQry = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue ).Select( a => new
+            {
+                GroupForeignId = a.ForeignId.Value,
+                GroupTypeId = a.GroupTypeId
+            } );
 
-            var groupsAlreadyExistForeignIdHash = new HashSet<int>( qryGroupsWithForeignIds.Select( a => a.ForeignId.Value ).ToList() );
-
-            var newGroupImports = groupImports.Where( a => !groupsAlreadyExistForeignIdHash.Contains( a.GroupForeignId ) ).ToList();
+            var newGroupImports = groupImports.Where( a => !groupsAlreadyExistLookupQry.ToList().Any( x => x.GroupForeignId== a.GroupForeignId && x.GroupTypeId == a.GroupTypeId ) ).ToList();
 
             var importedGroupTypeRoleNames = groupImports.GroupBy( a => a.GroupTypeId ).Select( a => new
             {
@@ -470,7 +475,15 @@ namespace Rock.BulkImport
             stopwatch.Restart();
 
             // Get lookups for Group and Person so that we can populate the ParentGroups and GroupMembers
-            var groupIDLookup = qryGroupsWithForeignIds.Select( a => new { a.Id, a.ForeignId } ).ToList().ToDictionary( k => k.ForeignId.Value, v => v );
+            var qryGroupTypeGroupLookup = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue ).Select( a => new
+            {
+                Group = a,
+                GroupForeignId = a.ForeignId.Value,
+                GroupTypeId = a.GroupTypeId
+            } );
+
+            Dictionary<int, Dictionary<int, Group>> groupTypeGroupLookup = qryGroupTypeGroupLookup.GroupBy( a => a.GroupTypeId ).ToDictionary( k => k.Key, v => v.ToDictionary( k1 => k1.GroupForeignId, v1 => v1.Group ) );
+
             var personIdLookup = new PersonService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
                 .Select( a => new { a.Id, ForeignId = a.ForeignId.Value } ).ToDictionary( k => k.ForeignId, v => v.Id );
 
@@ -487,7 +500,7 @@ namespace Rock.BulkImport
                 foreach ( var groupMemberImport in groupWithMembers.GroupMemberImports )
                 {
                     var groupMember = new GroupMember();
-                    groupMember.GroupId = groupIDLookup[groupWithMembers.GroupForeignId].Id;
+                    groupMember.GroupId = groupTypeGroupLookup[groupWithMembers.GroupTypeId][groupWithMembers.GroupForeignId].Id;
                     groupMember.GroupRoleId = groupTypeRoleLookup[groupMemberImport.RoleName];
                     groupMember.PersonId = personIdLookup[groupMemberImport.PersonForeignId];
                     groupMembersToInsert.Add( groupMember );
@@ -502,16 +515,33 @@ namespace Rock.BulkImport
 
             var groupsUpdated = false;
             var groupImportsWithParentGroup = newGroupImports.Where( a => a.ParentGroupForeignId.HasValue ).ToList();
-            var groupLookup = qryGroupsWithForeignIds.ToDictionary( k => k.ForeignId.Value, v => v );
+
+            int groupTypeIdFamily = GroupTypeCache.GetFamilyGroupType().Id;
+            var parentGroupLookup = qryGroupTypeGroupLookup.Where( a => a.GroupTypeId != groupTypeIdFamily ).Select( a => new
+            {
+                GroupId = a.Group.Id,
+                a.GroupForeignId
+            } ).ToDictionary( k => k.GroupForeignId, v => v.GroupId );
+
+
             foreach ( var groupImport in groupImportsWithParentGroup )
             {
-                var group = groupLookup.GetValueOrNull( groupImport.GroupForeignId );
+                Group group = null;
+
+                if ( groupTypeGroupLookup.ContainsKey(groupImport.GroupTypeId) )
+                {
+                    if ( groupTypeGroupLookup[groupImport.GroupTypeId].ContainsKey( groupImport.GroupForeignId ) )
+                    {
+                        group = groupTypeGroupLookup[groupImport.GroupTypeId][groupImport.GroupForeignId];
+                    }
+                }
+
                 if ( group != null )
                 {
-                    var parentGroup = groupLookup.GetValueOrNull( groupImport.ParentGroupForeignId.Value );
-                    if ( parentGroup != null && group.ParentGroupId != parentGroup.Id )
+                    var parentGroupId = parentGroupLookup.GetValueOrNull( groupImport.ParentGroupForeignId.Value );
+                    if ( parentGroupId.HasValue && group.ParentGroupId != parentGroupId )
                     {
-                        group.ParentGroupId = parentGroup.Id;
+                        group.ParentGroupId = parentGroupId;
                         groupsUpdated = true;
                     }
                     else
@@ -997,19 +1027,82 @@ namespace Rock.BulkImport
         /// <returns></returns>
         public static string BulkPhotoImport( List<PhotoImport> photoImports )
         {
+            Stopwatch stopwatchTotal = Stopwatch.StartNew();
+
             var rockContext = new RockContext();
-            var personIdLookup = new PersonService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
-                .Select( a => new { a.Id, ForeignId = a.ForeignId.Value } ).ToDictionary( k => k.ForeignId, v => v.Id );
 
-            var familyIdLookup = new GroupService( rockContext ).Queryable().Where( a => a.ForeignId.HasValue )
-                .Select( a => new { a.Id, ForeignId = a.ForeignId.Value } ).ToDictionary( k => k.ForeignId, v => v.Id );
+            List<BinaryFile> binaryFilesToInsert = new List<BinaryFile>();
+            Dictionary<PhotoImport.PhotoImportType, Dictionary<int, Guid>> photoTypeForeignIdBinaryFileGuidDictionary = new Dictionary<PhotoImport.PhotoImportType, Dictionary<int, Guid>>();
+            photoTypeForeignIdBinaryFileGuidDictionary.Add( PhotoImport.PhotoImportType.Person, new Dictionary<int, Guid>() );
+            photoTypeForeignIdBinaryFileGuidDictionary.Add( PhotoImport.PhotoImportType.Family, new Dictionary<int, Guid>() );
 
-            var personPhotoImports = photoImports.Where( a => a.PhotoType == PhotoImport.PhotoImportType.Person ).ToList();
+            HashSet<string> alreadyExists = new HashSet<string>( new BinaryFileService( rockContext ).Queryable().Where( a => a.ForeignKey != null && a.ForeignKey != "" ).Select( a => a.ForeignKey ).Distinct().ToList() );
+
+            List<BinaryFileData> binaryFileDatasToInsert = new List<BinaryFileData>();
+
+            var binaryFileType = new BinaryFileTypeService( rockContext ).Get( Rock.SystemGuid.BinaryFiletype.PERSON_IMAGE.AsGuid() );
+            foreach( var photoImport in photoImports )
+            {
+                var binaryFileToInsert = new BinaryFile()
+                {
+                    FileName = photoImport.FileName,
+                    MimeType = photoImport.MimeType,
+                    BinaryFileTypeId = binaryFileType.Id,
+                    Guid = Guid.NewGuid()
+                };
+
+                binaryFileToInsert.SetStorageEntityTypeId( binaryFileType.StorageEntityTypeId );
+
+                if ( photoImport.PhotoType == PhotoImport.PhotoImportType.Person )
+                {
+                    binaryFileToInsert.ForeignKey = $"PersonForeignId_{photoImport.ForeignId}";
+                }
+                else if ( photoImport.PhotoType == PhotoImport.PhotoImportType.Family  )
+                {
+                    binaryFileToInsert.ForeignKey = $"FamilyForeignId_{photoImport.ForeignId}";
+                }
+
+                if (!alreadyExists.Contains(binaryFileToInsert.ForeignKey))
+                {
+
+                    binaryFilesToInsert.Add( binaryFileToInsert );
+                    photoTypeForeignIdBinaryFileGuidDictionary[photoImport.PhotoType].Add( photoImport.ForeignId, binaryFileToInsert.Guid );
+                }
+            }
+
+            rockContext.BulkInsert( binaryFilesToInsert );
+
+            var binaryFileIdLookup = new BinaryFileService( rockContext ).Queryable().Select( a => new { a.Guid, a.Id } ).ToDictionary( k => k.Guid, v => v.Id );
+            foreach ( var photoImport in photoImports )
+            {
+                if ( photoTypeForeignIdBinaryFileGuidDictionary[photoImport.PhotoType].ContainsKey( photoImport.ForeignId ) )
+                {
+                    Guid binaryFileGuid = photoTypeForeignIdBinaryFileGuidDictionary[photoImport.PhotoType][photoImport.ForeignId];
+                    int binaryFileId = binaryFileIdLookup[binaryFileGuid];
+                    var binaryFileDataToInsert = new BinaryFileData()
+                    {
+                        Id = binaryFileId,
+                        Content = Convert.FromBase64String( photoImport.PhotoData )
+                    };
+
+                    binaryFileDatasToInsert.Add( binaryFileDataToInsert );
+                }
+            }
+
+            rockContext.BulkInsert( binaryFileDatasToInsert );
+
+            rockContext.Database.ExecuteSqlCommand( @"UPDATE p
+SET p.PhotoId = b.Id
+FROM Person p
+INNER JOIN BinaryFile b ON p.ForeignId = Replace(b.ForeignKey, 'PersonForeignId_', '')
+WHERE b.ForeignKey LIKE 'PersonForeignId_%'
+	AND p.PhotoId IS NULL" );
 
 
-            var familyPhotoImports = photoImports.Where( a => a.PhotoType == PhotoImport.PhotoImportType.Family ).ToList();
+            stopwatchTotal.Stop();
+            var responseText = $"[{stopwatchTotal.Elapsed.TotalMilliseconds}ms] Bulk Insert {binaryFilesToInsert.Count} Binary File records";
 
-            return "TODO";
+            return responseText;
         }
 
         /// <summary>

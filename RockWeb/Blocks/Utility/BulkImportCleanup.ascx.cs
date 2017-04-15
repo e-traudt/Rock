@@ -109,7 +109,14 @@ namespace RockWeb.Blocks.Utility
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonViewed] where TargetPersonAliasId in (SELECT ID FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null))" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [PersonAlias] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where [PersonId] in (SELECT ID FROM [Person] where [ForeignId] is not null)" );
+
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Person] where [ForeignId] is not null" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [BinaryFile] where [ForeignKey] like 'PersonForeignId_%'" );
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [BinaryFile] where [ForeignKey] like 'FamilyForeignId_%'" );
+            
+
+            // Delete Families have have no Members
+            rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where GroupTypeId = 10 and Id not in (select GroupId from GroupMember)" );
 
             nbResults.Text += "Cleanup Person complete<br />";
         }
@@ -141,6 +148,7 @@ delete from FinancialAccount where ForeignId is not null" );
         {
             var rockContext = new RockContext();
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [GroupMember] where GroupId in (select Id from [Group] where [ForeignId] is not null)" );
+            
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Group] where [ForeignId] is not null" );
             rockContext.Database.ExecuteSqlCommand( "DELETE FROM [Schedule] where [ForeignId] is not null" );
 
